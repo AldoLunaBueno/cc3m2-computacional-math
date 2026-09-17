@@ -1,0 +1,19 @@
+# Archivos auxiliares y de compilación de LaTeX
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.toc
+*.synctex.gz
+
+# Archivos temporales específicos de Beamer
+*.nav
+*.snm
+*.vrb
+
+# Archivos de salida (generados en cada compilación)
+*.pdf
+
+# Entornos y editores (opcional)
+.vscode/

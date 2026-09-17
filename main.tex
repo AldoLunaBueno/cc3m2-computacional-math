@@ -1,0 +1,54 @@
+\documentclass{beamer}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{xcolor}
+
+\usetheme{Warsaw}
+\usepackage{warsaw-mod}
+\usepackage{warsaw-dark}
+
+% Configuración de colores para el código
+\usepackage{listings}
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\scriptsize,
+    keywordstyle=\color{blue},
+    stringstyle=\color{green!50!black},
+    commentstyle=\color{gray},
+    showstringspaces=false,
+    frame=single,
+    extendedchars=true,
+    literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1 {ñ}{{\~n}}1 {Ñ}{{\~N}}1
+}
+
+% Cargar los metadatos de la presentación
+\input{sections/00_metadata}
+
+\begin{document}
+
+% Diapositiva de título
+\input{sections/00_presentation_slide}
+
+\begin{frame}{Contenido}
+    \tableofcontents
+\end{frame}
+
+% I. Bracketing
+\section{Bracketing}
+\input{sections/01_fibonacci_search}
+\input{sections/02_golden_section_search}
+\input{sections/03_quadratic_fit_search}
+\input{sections/04_shubert_piyavskii_method}
+\input{sections/05_bisection_method}
+
+% II. Local Descent
+\section{Local Descent}
+\input{sections/06_approximate_line_search}
+\input{sections/07_trust_region_methods}
+
+% Bibliografía
+\input{sections/00_bibliography}
+
+\end{document}

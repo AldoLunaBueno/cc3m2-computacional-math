@@ -1,0 +1,48 @@
+\subsection{Trust Region Methods}
+
+\begin{frame}{Trust Region Methods: Explicación Gráfica}
+    \begin{block}{Concepto principal}
+        [Almendrades: Explica cómo se ajusta un modelo cuadrático (la región) y cómo el radio se contrae o expande según la precisión del modelo].
+    \end{block}
+    \begin{itemize}
+        \item {[Idea gráfica 1]}
+        \item {[Idea gráfica 2]}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Trust Region Methods: Pseudocódigo}
+    \begin{algorithmic}[1]
+        \State \textbf{Input:} [Punto inicial, radio de confianza inicial $\Delta_0$]
+        \State [Resolución del subproblema]
+        \State [Cálculo del ratio $\rho$]
+        \State [Actualización del radio $\Delta$]
+        \State \textbf{Return} [Resultado]
+    \end{algorithmic}
+\end{frame}
+
+\begin{frame}{Trust Region Methods: Ejemplo Paso a Paso}
+    \begin{exampleblock}{Planteamiento del problema}
+        [Almendrades: Función y modelo local (gradiente y hessiano en el punto actual)].
+    \end{exampleblock}
+    \begin{itemize}
+        \item \textbf{Paso 1:} [Resolver subproblema dentro del límite $\Delta$]
+        \item \textbf{Paso 2:} [Aceptar o rechazar el paso]
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Trust Region Methods: Código}
+\begin{lstlisting}[language=Python]
+# [Almendrades: Reemplaza esto con tu código esquemático real]
+def trust_region_ejemplo():
+    pass
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Trust Region Methods: Análisis de Convergencia}
+    \begin{alertblock}{Tasa de Convergencia}
+        [Almendrades: Habla de la convergencia cuadrática local y la robustez frente a puntos de ensilladura].
+    \end{alertblock}
+    \begin{itemize}
+        \item {[Comparativa frente a Line Search tradicional]}.
+    \end{itemize}
+\end{frame}

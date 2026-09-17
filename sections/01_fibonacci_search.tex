@@ -1,0 +1,61 @@
+\subsection{Fibonacci Search}
+
+\begin{frame}{Fibonacci Search: Explicación Gráfica}
+    \begin{block}{Concepto principal}
+        [Gallo: Explica aquí en un párrafo breve la idea central del algoritmo y cómo reduce el intervalo de búsqueda usando la serie de Fibonacci].
+    \end{block}
+    \begin{itemize}
+        % SOLUCIÓN: Agrupar el contenido entre llaves {} para que 
+        % LaTeX no lo tome como el símbolo de la viñeta.
+        \item {[Idea gráfica 1, ej: Cómo se ven las proporciones de los puntos $c$ y $d$ en el segmento $a,b$].}
+        \item {[Idea gráfica 2, ej: Qué porción del intervalo se descarta visualmente en cada iteración].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Fibonacci Search: Pseudocódigo}
+    \begin{algorithmic}[1]
+        \State \textbf{Input:} {[Gallo: Pon aquí las entradas como la función $f$, el intervalo inicial, número de iteraciones]}
+        \State Inicializar variables (ej. $F_n$)
+        \While{[Condición de ejemplo]}
+            \State \textbf{Comentario:} {[Estructura base para que la llenes con la lógica real]}
+            \If{$f(c) < f(d)$}
+                \State {[Actualizar límites]}
+            \Else
+                \State {[Actualizar otros límites]}
+            \EndIf
+        \EndWhile
+        \State \textbf{Return} {[Punto óptimo]}
+    \end{algorithmic}
+\end{frame}
+
+\begin{frame}{Fibonacci Search: Ejemplo Paso a Paso}
+    \begin{exampleblock}{Planteamiento del problema}
+        [Gallo: Define aquí tu función de prueba, por ejemplo minimizar $f(x) = (x-2)^2$ en $[0, 5]$ con $n=4$].
+    \end{exampleblock}
+    \begin{itemize}
+        \item \textbf{Paso 1:} {[Escribe aquí los cálculos de la primera iteración].}
+        \item \textbf{Paso 2:} {[Explica qué subintervalo se descarta y por qué].}
+        \item \textbf{Paso 3:} {[Muestra el resultado final].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Fibonacci Search: Código}
+\begin{lstlisting}[language=Python]
+# [Gallo: Pega aquí tu implementacion real en Python]
+def fibonacci_search_ejemplo(f, a, b, n):
+    # Inicializar secuencia
+    # Bucle principal
+    # Retornar el valor optimo
+    pass
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Fibonacci Search: Análisis de Convergencia}
+    \begin{alertblock}{Tasa de Convergencia}
+        [Gallo: Coloca aquí si la convergencia es lineal, superlineal, etc., y el factor de reducción exacto].
+    \end{alertblock}
+    \begin{itemize}
+        \item {[Explicación de por qué se da esa tasa de convergencia].}
+        \item {[Ventajas o desventajas computacionales del algoritmo].}
+    \end{itemize}
+\end{frame}
