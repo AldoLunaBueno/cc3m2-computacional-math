@@ -1,47 +1,154 @@
 \subsection{Golden Section Search}
 
+% ---------------------------------------------------------------
+% 1. Explicación gráfica
+% ---------------------------------------------------------------
 \begin{frame}{Golden Section Search: Explicación Gráfica}
     \begin{block}{Concepto principal}
-        [Gallo: Explica aquí cómo la proporción áurea mantiene la simetría de reducción sin necesidad de conocer el número de iteraciones por adelantado].
+        \small
+        Como $F_n/F_{n-1}\to\varphi$, se reemplaza la razón variable de Fibonacci por la
+        \textbf{razón áurea fija} $\rho=\varphi-1\approx 0.618$. Al ser la misma en toda
+        iteración, la reducción es autosemejante: el punto interior que sobrevive queda
+        ya colocado en la posición áurea del nuevo intervalo y \textbf{se recicla}.
     \end{block}
-    \begin{itemize}
-        \item {[Idea gráfica 1]}
-        \item {[Idea gráfica 2]}
-    \end{itemize}
+
+    \begin{center}
+    \begin{tikzpicture}[x=0.82cm, y=1cm, font=\scriptsize]
+        % Intervalo I_k
+        \draw[CelesteBrillante, thick] (0,0) -- (8,0);
+        \foreach \x/\lb in {0/a, 3.056/c, 4.944/d, 8/b}{
+            \draw[CelesteBrillante, thick] (\x,-0.13) -- (\x,0.13);
+            \node[above, text=GrisTexto] at (\x,0.13) {$\lb$};
+        }
+        \node[right, text=GrisTexto] at (8.25,0) {$I_k$};
+        % Reutilización del punto c
+        \draw[NaranjaBase, dashed, thick, ->] (3.056,-0.25) -- (3.056,-1.05);
+        \node[right, text=NaranjaBase] at (3.3,-0.65) {$c$ se reutiliza};
+        % Nuevo intervalo tras f(c) < f(d)
+        \draw[CelesteBrillante, thick] (0,-1.3) -- (4.944,-1.3);
+        \foreach \x/\lb in {0/a, 1.888/c, 3.056/d, 4.944/b}{
+            \draw[CelesteBrillante, thick] (\x,-1.43) -- (\x,-1.17);
+            \node[below, text=GrisTexto] at (\x,-1.43) {$\lb$};
+        }
+        \node[right, text=GrisTexto] at (5.2,-1.3) {$I_{k+1}=I_k/\varphi$};
+    \end{tikzpicture}
+    \end{center}
+
+    \vspace{0.2em}
+    \footnotesize
+    Solo el nuevo $c$ requiere evaluar $f$; las razones $0.382$ y $0.618$ se repiten
+    idénticas en cada paso.
 \end{frame}
 
+% ---------------------------------------------------------------
+% 2. Pseudocódigo
+% ---------------------------------------------------------------
 \begin{frame}{Golden Section Search: Pseudocódigo}
+    \small
     \begin{algorithmic}[1]
-        \State \textbf{Input:} [Entradas]
-        \State [Logica del pseudocódigo aquí]
-        \State \textbf{Return} [Resultado]
+        \Require $f$ unimodal, intervalo $[a,b]$, número de evaluaciones $n>1$
+        \State $\rho \gets \varphi - 1 = (\sqrt{5}-1)/2 \approx 0.618$
+        \State $d \gets \rho\, b + (1-\rho)\, a$; \quad $y_d \gets f(d)$
+              \Comment{única evaluación previa}
+        \For{$i = 1$ \textbf{to} $n-1$}
+            \State $c \gets \rho\, a + (1-\rho)\, b$ \Comment{punto izquierdo}
+            \State $y_c \gets f(c)$
+            \If{$y_c < y_d$}
+                \State $(b,\, d,\, y_d) \gets (d,\, c,\, y_c)$ \Comment{el mínimo está del lado de $c$}
+            \Else
+                \State $(a,\, b) \gets (b,\, c)$ \Comment{se invierte la orientación}
+            \EndIf
+        \EndFor
+        \State \Return $[\min(a,b),\ \max(a,b)]$
     \end{algorithmic}
+    \vspace{0.4em}
+    {\footnotesize \textit{Nota:} $\rho$ ya no depende de $n$; el bucle puede detenerse
+     en cualquier momento o cambiarse por el criterio $|b-a|<\epsilon$.}
 \end{frame}
 
+% ---------------------------------------------------------------
+% 3. Ejemplo paso a paso
+% ---------------------------------------------------------------
 \begin{frame}{Golden Section Search: Ejemplo Paso a Paso}
-    \begin{exampleblock}{Planteamiento del problema}
-        [Gallo: Define aquí tu función de prueba para Golden Section].
+    \begin{exampleblock}{Planteamiento}
+        \small
+        La misma función que en Fibonacci: minimizar $f(x)=e^{x-2}-x$ en $[-2,6]$
+        con $n=5$ evaluaciones, para poder comparar ambos métodos.
     \end{exampleblock}
-    \begin{itemize}
-        \item \textbf{Iteración 1:} [Cálculo inicial]
-        \item \textbf{Iteración 2:} [Reciclaje de puntos]
-    \end{itemize}
+
+    \vspace{-0.2em}
+    \begin{center}
+    \scriptsize
+    \begin{tabular}{c c r c l r}
+        \toprule
+        \# & consulta & $f$ & comparación & nuevo $[a,b]$ & long. \\
+        \midrule
+        0 & $d=2.944$ & $-0.373$ & ---          & $[-2,\,6]$          & $8.000$ \\
+        1 & $c=1.056$ & $-0.667$ & $y_c<y_d$    & $[-2,\,2.944]$      & $4.944$ \\
+        2 & $c=-0.112$ & $+0.233$ & $y_c\ge y_d$ & $[-0.112,\,2.944]$ & $3.056$ \\
+        3 & $c=1.777$ & $-0.977$ & $y_c<y_d$    & $[1.056,\,2.944]$   & $1.889$ \\
+        4 & $c=2.223$ & $-0.973$ & $y_c\ge y_d$ & $[1.056,\,2.223]$   & $1.167$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \footnotesize
+    Cada longitud es la anterior dividida entre $\varphi$; la final es
+    $8/\varphi^{4}=1.167$, algo mayor que el $1.01$ de Fibonacci con el mismo
+    presupuesto, y también contiene a $x^{*}=2$.
 \end{frame}
 
+% ---------------------------------------------------------------
+% 4. Código
+% ---------------------------------------------------------------
 \begin{frame}[fragile]{Golden Section Search: Código}
 \begin{lstlisting}[language=Python]
-# [Gallo: Reemplaza esto con tu código real]
-def golden_section_search_ejemplo():
-    pass
+from math import sqrt
+PHI = (1 + sqrt(5)) / 2
+
+def golden_section_search(f, a, b, n):
+    rho = PHI - 1                  # 0.6180339887...
+    d = rho * b + (1 - rho) * a    # punto derecho
+    yd = f(d)
+    for _ in range(n - 1):
+        c = rho * a + (1 - rho) * b   # punto izquierdo
+        yc = f(c)
+        if yc < yd:
+            b, d, yd = d, c, yc   # el minimo esta junto a c
+        else:
+            a, b = b, c           # se invierte el intervalo
+    return (a, b) if a < b else (b, a)
+
+# Por tolerancia: n = ceil(log((b - a) / eps) / log(PHI))
+# golden_section_search(lambda x: exp(x-2) - x, -2, 6, 5)
+#   -> (1.0557, 2.2229)
 \end{lstlisting}
 \end{frame}
 
+% ---------------------------------------------------------------
+% 5. Análisis de convergencia
+% ---------------------------------------------------------------
 \begin{frame}{Golden Section Search: Análisis de Convergencia}
-    \begin{alertblock}{Tasa de Convergencia}
-        [Gallo: Habla sobre la constante 0.618... y el orden de convergencia].
+    \begin{alertblock}{Tasa de convergencia}
+        \small
+        Tras $n$ evaluaciones el intervalo mide
+        $\;|b_n-a_n| = (b-a)\,\varphi^{-(n-1)}$.
+        La razón de reducción es \textbf{constante e igual a} $1/\varphi\approx 0.618$:
+        convergencia \textbf{lineal} de orden $q=1$.
     \end{alertblock}
+
+    \footnotesize
     \begin{itemize}
-        \item {[Punto de análisis 1]}
-        \item {[Punto de análisis 2]}
+        \item \textbf{Iteraciones para una tolerancia $\epsilon$:}
+              $n=\left\lceil \ln\!\big((b-a)/\epsilon\big)/\ln\varphi \right\rceil$;
+              p.\,ej. reducir $[-2,6]$ a $10^{-4}$ requiere $n=24$.
+        \item \textbf{Frente a Fibonacci:} $\varphi^{\,n-1}$ contra $F_{n+1}$
+              ($6.85$ contra $8$ si $n=5$). Fibonacci es óptimo, pero su ventaja se
+              estabiliza en el factor constante
+              $F_{n+1}/\varphi^{\,n-1}\to\varphi^{2}/\sqrt{5}\approx 1.17$.
+        \item \textbf{Ventaja práctica:} $\rho$ es fijo, así que no hace falta conocer $n$
+              de antemano y se puede parar con un criterio sobre $|b-a|$.
+        \item \textbf{Limitación:} igual que Fibonacci, si $f$ no es unimodal el
+              intervalo final puede encerrar solo un mínimo local.
     \end{itemize}
 \end{frame}
