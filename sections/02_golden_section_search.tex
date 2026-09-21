@@ -3,7 +3,7 @@
 % ---------------------------------------------------------------
 % 1. Explicación gráfica
 % ---------------------------------------------------------------
-\begin{frame}{Golden Section Search: Explicación Gráfica}
+\begin{frame}{Golden Section Search: Explicación Gráfica (1/3)}
     \begin{block}{Concepto principal}
         \small
         Como $F_n/F_{n-1}\to\varphi$, se reemplaza la razón variable de Fibonacci por la
@@ -41,6 +41,116 @@
 \end{frame}
 
 % ---------------------------------------------------------------
+% 1b. Primera iteración sobre la curva (n = 5, intervalo [0,100])
+% ---------------------------------------------------------------
+\begin{frame}{Golden Section Search: Explicación Gráfica (2/3)}
+    \begin{center}
+    \begin{tikzpicture}[x=0.1cm, y=1cm, font=\footnotesize]
+        \useasboundingbox (-4,-3.75) rectangle (104,2.4);
+        % Función del ejemplo
+        \node[anchor=north west] at (-2,2.35)
+            {$f(x)=\sqrt{1+\left(\dfrac{x-45}{15}\right)^{2}}$,\quad $x\in[0,100]$};
+        % f(x) = sqrt(1+((x-45)/15)^2), restada su mínimo para apoyarla en y = 0
+        \draw[GrisTexto, thick, domain=0:100, samples=60, smooth, variable=\t]
+            plot ({\t}, {(sqrt(1+((\t-45)/15)^2)-1)*0.6});
+        \pgfmathsetmacro{\hc}{(sqrt(1+((38.1966-45)/15)^2)-1)*0.6}
+        \pgfmathsetmacro{\hd}{(sqrt(1+((61.8034-45)/15)^2)-1)*0.6}
+
+        % Paso 1: intervalo inicial [a,b]
+        \draw[CelesteBrillante, very thick] (0,-0.45) -- (100,-0.45);
+        \draw[CelesteBrillante, thick] (0,-0.55) -- (0,-0.35);
+        \draw[CelesteBrillante, thick] (100,-0.55) -- (100,-0.35);
+        \node[below] at (0,-0.55)   {$a=0$};
+        \node[below] at (100,-0.55) {$b=100$};
+
+        % Paso 2: puntos de consulta
+        \foreach \px/\lb/\vl in {38.1966/c/38.2, 61.8034/d/61.8}{
+            \draw[CelesteBrillante, thick] (\px,-0.55) -- (\px,-0.35);
+            \node[below] at (\px,-0.55) {$\lb=\vl$};
+        }
+        % Paso 3: se evalúa f en c y d
+        \foreach \px/\py in {38.1966/\hc, 61.8034/\hd}{
+            \draw[NaranjaBase, dashed] (\px,-0.35) -- (\px,\py);
+            \node[circle, fill=NaranjaBase, inner sep=1.6pt] at (\px,\py) {};
+        }
+        \node[anchor=north east, text=NaranjaBase] at (36.7,\hc-0.03) {$f(c)$};
+        \node[anchor=south east, text=NaranjaBase] at (60,\hd+0.03) {$f(d)$};
+        % Paso 4: se descarta [d,b]; c queda como nuevo punto d
+        \fill[RojoAlerta, opacity=0.25] (61.8034,-0.35) rectangle (100,1.75);
+        \draw[RojoAlerta, thick, dashed] (61.8034,-1.45) -- (100,-1.45);
+        \draw[CelesteBrillante, very thick] (0,-1.45) -- (61.8034,-1.45);
+        \draw[CelesteBrillante, thick] (0,-1.55) -- (0,-1.35);
+        \draw[CelesteBrillante, thick] (61.8034,-1.55) -- (61.8034,-1.35);
+        \node[circle, fill=VerdeNeon, inner sep=1.6pt] at (38.1966,-1.45) {};
+        \node[below, text=VerdeNeon] at (38.1966,-1.55) {$c$ se reutiliza};
+
+        % Panel de cálculos (dos columnas)
+        \node[anchor=north west, text width=4.8cm, align=left] at (-2,-2.2)
+            {$n=5,\quad \rho=\varphi-1=0.618$};
+        \node[anchor=north west, text width=4.8cm, align=left] at (-2,-2.7)
+            {$d=(1-\rho)\,a+\rho\, b=61.8$};
+        \node[anchor=north west, text width=4.8cm, align=left] at (-2,-3.2)
+            {$c=\rho\, a+(1-\rho)\, b=38.2$};
+        \node[anchor=north west, text width=4.8cm, align=left] at (52,-2.2)
+            {$f(c)=1.10 < f(d)=1.50$};
+        \node[anchor=north west, text width=4.8cm, align=left, text=RojoAlerta] at (52,-2.7)
+            {Se descarta $[d,b]$:\\[2pt] $I_2=61.8=0.618\,I_1$};
+    \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------
+% 1c. Evolución del intervalo (n = 5, intervalo [0,100])
+% ---------------------------------------------------------------
+% Una fila del diagrama: #1 altura | #2,#3 intervalo anterior | #4,#5 intervalo actual
+%                        #6,#7 puntos izquierdo y derecho | #8,#9 sus colores
+\newcommand{\gsrow}[9]{%
+    \draw[gray!45, thin] (0,#1) -- (100,#1);
+    \draw[RojoAlerta, thick, dashed] (#2,#1) -- (#4,#1);
+    \draw[RojoAlerta, thick, dashed] (#5,#1) -- (#3,#1);
+    \draw[CelesteBrillante, very thick] (#4,#1) -- (#5,#1);
+    \foreach \e in {#4,#5}{\draw[CelesteBrillante, thick] (\e,{#1-0.09}) -- (\e,{#1+0.09});}
+    \node[circle, fill=#8, inner sep=1.4pt] at (#6,#1) {};
+    \node[circle, fill=#9, inner sep=1.4pt] at (#7,#1) {};
+    \node[anchor=south east, inner sep=1pt] at (#6,{#1+0.06}) {$\pgfmathprintnumber[fixed,precision=1]{#6}$};
+    \node[anchor=south west, inner sep=1pt] at (#7,{#1+0.06}) {$\pgfmathprintnumber[fixed,precision=1]{#7}$};
+}
+
+\begin{frame}{Golden Section Search: Explicación Gráfica (3/3)}
+    \begin{center}
+    \begin{tikzpicture}[x=0.072cm, y=1cm, font=\scriptsize]
+        \useasboundingbox (-3,-5.55) rectangle (146,0.5);
+        \gsrow{0}{0}{100}{0}{100}{38.1966}{61.8034}{NaranjaBase}{NaranjaBase}
+        \node[right, align=left] at (104,0) {$I_1=100$\\ $\rho=0.618$};
+        \gsrow{-1}{0}{100}{0}{61.8034}{23.6068}{38.1966}{NaranjaBase}{VerdeNeon}
+        \node[right, align=left] at (104,-1) {$I_2=I_1/\varphi=61.8$\\ $\rho=0.618$};
+        \gsrow{-2}{0}{61.8034}{23.6068}{61.8034}{38.1966}{47.2136}{VerdeNeon}{NaranjaBase}
+        \node[right, align=left] at (104,-2) {$I_3=I_2/\varphi=38.2$\\ $\rho=0.618$};
+        \gsrow{-3}{23.6068}{61.8034}{38.1966}{61.8034}{47.2136}{52.7864}{VerdeNeon}{NaranjaBase}
+        \node[right, align=left] at (104,-3) {$I_4=I_3/\varphi=23.6$\\ $\rho=0.618$};
+        \draw[gray!45, thin] (0,-4) -- (100,-4);
+        \draw[RojoAlerta, thick, dashed] (52.7864,-4) -- (61.8034,-4);
+        \draw[CelesteBrillante, very thick] (38.1966,-4) -- (52.7864,-4);
+        \draw[CelesteBrillante, thick] (38.1966,-4.09) -- (38.1966,-3.91);
+        \draw[CelesteBrillante, thick] (52.7864,-4.09) -- (52.7864,-3.91);
+        \node[anchor=south east, inner sep=1pt] at (38.1966,-3.94) {$38.2$};
+        \node[anchor=south west, inner sep=1pt] at (52.7864,-3.94) {$52.8$};
+        \node[right] at (104,-4) {$I_5=I_4/\varphi=14.6$};
+        \node[below] at (75,-4.15) {$I_5=100\,\varphi^{-4}$};
+        % Leyenda
+        \draw[CelesteBrillante, very thick] (0,-5.2) -- (8,-5.2);
+        \node[right] at (10,-5.2) {intervalo activo};
+        \draw[RojoAlerta, thick, dashed] (44,-5.2) -- (52,-5.2);
+        \node[right] at (54,-5.2) {descartado};
+        \node[circle, fill=NaranjaBase, inner sep=1.4pt] at (82,-5.2) {};
+        \node[right] at (85,-5.2) {punto nuevo};
+        \node[circle, fill=VerdeNeon, inner sep=1.4pt] at (114,-5.2) {};
+        \node[right] at (117,-5.2) {reutilizado};
+    \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------
 % 2. Pseudocódigo
 % ---------------------------------------------------------------
 \begin{frame}{Golden Section Search: Pseudocódigo}
@@ -69,33 +179,70 @@
 % ---------------------------------------------------------------
 % 3. Ejemplo paso a paso
 % ---------------------------------------------------------------
-\begin{frame}{Golden Section Search: Ejemplo Paso a Paso}
+\begin{frame}{Golden Section Search: Ejemplo Paso a Paso (1/3)}
+    \scriptsize
     \begin{exampleblock}{Planteamiento}
-        \small
-        La misma función que en Fibonacci: minimizar $f(x)=e^{x-2}-x$ en $[-2,6]$
-        con $n=5$ evaluaciones, para poder comparar ambos métodos.
+        La misma función que en Fibonacci: minimizar
+        $f(x)=\sqrt{1+\left(\frac{x-45}{15}\right)^{2}}$ en $[a,b]=[0,100]$
+        con $n=5$ evaluaciones ($x^{*}=45$).
     \end{exampleblock}
 
-    \vspace{-0.2em}
-    \begin{center}
+    \begin{block}{Inicialización (líneas 1--2)}
+        $\rho=\varphi-1=0.6180,\qquad 1-\rho=0.3820$\\[2pt]
+        $d=\rho\, b+(1-\rho)\, a=0.618\cdot 100+0.382\cdot 0=61.8034$\\[2pt]
+        $y_d=f(61.8034)=1.5016$
+    \end{block}
+
+    \begin{block}{Iteración 1: $i=1$ (líneas 4--10)}
+        $c=\rho\, a+(1-\rho)\, b=0.618\cdot 0+0.382\cdot 100=38.1966$\\[2pt]
+        $y_c=f(38.1966)=1.0981$\\[2pt]
+        $y_c<y_d \;\Rightarrow\; (b,d,y_d)\gets(61.8034,\;38.1966,\;1.0981)$\\[2pt]
+        Estado: $a=0,\; b=61.8034,\; d=38.1966 \;\Rightarrow\; I=[0,\,61.8034]$
+    \end{block}
+\end{frame}
+
+\begin{frame}{Golden Section Search: Ejemplo Paso a Paso (2/3)}
     \scriptsize
-    \begin{tabular}{c c r c l r}
+    \begin{block}{Iteración 2: $i=2$}
+        $c=0.618\cdot 0+0.382\cdot 61.8034=23.6068$\\[2pt]
+        $y_c=f(23.6068)=1.7419$\\[2pt]
+        $y_c\ge y_d\;(1.7419\ge 1.0981) \;\Rightarrow\; (a,b)\gets(b,c)=(61.8034,\;23.6068)$\\[2pt]
+        Estado: $a=61.8034,\; b=23.6068,\; d=38.1966 \;\Rightarrow\; I=[23.6068,\,61.8034]$\\[2pt]
+        {\tiny Ahora $a>b$: el intervalo quedó volteado y se ordena recién al retornar (línea 12).}
+    \end{block}
+
+    \begin{block}{Iteración 3: $i=3$}
+        $c=0.618\cdot 61.8034+0.382\cdot 23.6068=38.1966+9.0170=47.2136$\\[2pt]
+        $y_c=f(47.2136)=1.0108$\\[2pt]
+        $y_c<y_d\;(1.0108< 1.0981) \;\Rightarrow\; (b,d,y_d)\gets(38.1966,\;47.2136,\;1.0108)$\\[2pt]
+        Estado: $a=61.8034,\; b=38.1966,\; d=47.2136 \;\Rightarrow\; I=[38.1966,\,61.8034]$
+    \end{block}
+\end{frame}
+
+\begin{frame}{Golden Section Search: Ejemplo Paso a Paso (3/3)}
+    \scriptsize
+    \begin{block}{Iteración 4: $i=4$}
+        $c=0.618\cdot 61.8034+0.382\cdot 38.1966=38.1966+14.5898=52.7864$\\[2pt]
+        $y_c=f(52.7864)=1.1267$\\[2pt]
+        $y_c\ge y_d\;(1.1267\ge 1.0108) \;\Rightarrow\; (a,b)\gets(b,c)=(38.1966,\;52.7864)$
+    \end{block}
+
+    \begin{exampleblock}{Resultado (línea 12)}
+        $[\min(a,b),\,\max(a,b)]=[38.1966,\;52.7864]$, de longitud $14.5898=100\,\varphi^{-4}$,
+        que contiene a $x^{*}=45$. Con el mismo $n=5$, Fibonacci deja $12.625$.
+    \end{exampleblock}
+
+    \begin{center}
+    \begin{tabular}{l c c c c c}
         \toprule
-        \# & consulta & $f$ & comparación & nuevo $[a,b]$ & long. \\
+        & inicio & tras it.\,1 & tras it.\,2 & tras it.\,3 & tras it.\,4 \\
         \midrule
-        0 & $d=2.944$ & $-0.373$ & ---          & $[-2,\,6]$          & $8.000$ \\
-        1 & $c=1.056$ & $-0.667$ & $y_c<y_d$    & $[-2,\,2.944]$      & $4.944$ \\
-        2 & $c=-0.112$ & $+0.233$ & $y_c\ge y_d$ & $[-0.112,\,2.944]$ & $3.056$ \\
-        3 & $c=1.777$ & $-0.977$ & $y_c<y_d$    & $[1.056,\,2.944]$   & $1.889$ \\
-        4 & $c=2.223$ & $-0.973$ & $y_c\ge y_d$ & $[1.056,\,2.223]$   & $1.167$ \\
+        $[a,b]$  & $[0,100]$ & $[0,61.80]$ & $[23.61,61.80]$ & $[38.20,61.80]$ & $[38.20,52.79]$ \\
+        longitud & $100$ & $61.80$ & $38.20$ & $23.61$ & $14.59$ \\
+        $I_k/I_1=\varphi^{-k}$ & $1$ & $0.618$ & $0.382$ & $0.236$ & $0.146$ \\
         \bottomrule
     \end{tabular}
     \end{center}
-
-    \footnotesize
-    Cada longitud es la anterior dividida entre $\varphi$; la final es
-    $8/\varphi^{4}=1.167$, algo mayor que el $1.01$ de Fibonacci con el mismo
-    presupuesto, y también contiene a $x^{*}=2$.
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -120,8 +267,9 @@ def golden_section_search(f, a, b, n):
     return (a, b) if a < b else (b, a)
 
 # Por tolerancia: n = ceil(log((b - a) / eps) / log(PHI))
-# golden_section_search(lambda x: exp(x-2) - x, -2, 6, 5)
-#   -> (1.0557, 2.2229)
+# f(x) = sqrt(1 + ((x-45)/15)**2)
+# golden_section_search(f, 0, 100, 5)
+#   -> (38.1966, 52.7864)
 \end{lstlisting}
 \end{frame}
 
@@ -141,7 +289,7 @@ def golden_section_search(f, a, b, n):
     \begin{itemize}
         \item \textbf{Iteraciones para una tolerancia $\epsilon$:}
               $n=\left\lceil \ln\!\big((b-a)/\epsilon\big)/\ln\varphi \right\rceil$;
-              p.\,ej. reducir $[-2,6]$ a $10^{-4}$ requiere $n=24$.
+              p.\,ej. reducir $[0,100]$ a $10^{-4}$ requiere $n=29$.
         \item \textbf{Frente a Fibonacci:} $\varphi^{\,n-1}$ contra $F_{n+1}$
               ($6.85$ contra $8$ si $n=5$). Fibonacci es óptimo, pero su ventaja se
               estabiliza en el factor constante
