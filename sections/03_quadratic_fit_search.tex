@@ -1,48 +1,200 @@
-\subsection{Quadratic Fit Search}
+\subsection{Búsqueda de Ajuste Cuadrático}
 
-\begin{frame}{Quadratic Fit Search: Explicación Gráfica}
+% ---------------------------------------------------------------
+% 1. Explicación conceptual
+% ---------------------------------------------------------------
+\begin{frame}{Ajuste Cuadrático: Explicación Conceptual}
     \begin{block}{Concepto principal}
-        [Luna: Explica cómo se usan 3 puntos para trazar una parábola y cómo el vértice de esta aproxima el mínimo].
+        \footnotesize
+        El método de Búsqueda de Ajuste Cuadrático aprovecha nuestra capacidad de resolver analíticamente el mínimo de una función cuadrática. Dado que la mayoría de los mínimos locales se asemejan a una parábola cuando nos acercamos lo suficiente, este método aproxima la función iterativamente.
     \end{block}
+
+    \scriptsize
     \begin{itemize}
-        \item {[Idea gráfica 1]}
-        \item {[Idea gráfica 2]}
+        \item \textbf{Inicialización:} Selecciona tres puntos que encierren el mínimo (\textit{bracketing points}) $a < b < c$.
+        \item \textbf{Ajuste:} Ajusta una función cuadrática $q(x)$ que pase exactamente por estos tres puntos.
+        \item \textbf{Optimización:} Calcula analíticamente el mínimo de esta parábola ($x^*$).
+        \item \textbf{Actualización:} Selecciona un nuevo conjunto de tres puntos evaluando la función original en $x^*$ y descartando el punto menos útil, repitiendo el proceso.
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Quadratic Fit Search: Pseudocódigo}
-    \begin{algorithmic}[1]
-        \State \textbf{Input:} [Entradas]
-        \State [Fórmula para hallar el vértice de la parábola]
-        \State [Lógica de reemplazo de puntos]
-        \State \textbf{Return} [Resultado]
-    \end{algorithmic}
+% ---------------------------------------------------------------
+% 2. Explicación Visual del Ajuste
+% ---------------------------------------------------------------
+\begin{frame}{Ajuste Cuadrático: Interpretación Geométrica}
+    \begin{block}{Interpolación Cuadrática}
+        \footnotesize
+        Para cualquier conjunto de tres puntos no colineales, existe una única parábola que los atraviesa. Utilizamos el vértice de esta parábola para adivinar dónde está el verdadero mínimo.
+    \end{block}
+
+   \begin{center}
+    \begin{tikzpicture}[x=1.1cm, y=1.1cm, font=\scriptsize]
+        % Ejes
+        \draw[->, GrisTexto, thick] (0,0) -- (9.5,0) node[right] {\(x\)};
+        \draw[->, GrisTexto, thick] (0,0) -- (0,3.5) node[above] {\(y\)};
+
+        % Curva f(x) (polinomio suave)
+        \draw[thick, white, domain=1:9, samples=100]
+            plot (\x, {0.1*(\x-4)^2 + 2 - 0.02*(\x-4)^3}) node[right] {\(f(x)\)};
+
+        % Aproximación cuadrática q(x) (parábola matemática real ajustada a los 3 puntos)
+        \draw[thick, NaranjaBase, dashed, domain=1.5:8.5, samples=100]
+            plot (\x, {0.04*\x*\x - 0.44*\x + 3.28}) node[right] {\(q(x)\)};
+
+        % Líneas guía (dashed) hasta los puntos (a, b, c) y el mínimo x*
+        \draw[dashed, GrisTexto] (2,0) -- (2, 2.56);
+        \draw[dashed, GrisTexto] (5,0) -- (5, 2.08);
+        \draw[dashed, GrisTexto] (8,0) -- (8, 2.32);
+        \draw[dashed, VerdeNeon] (5.5,0) -- (5.5, 2.07);
+
+        % Puntos de evaluación a, b, c
+        \filldraw[GrisTexto] (2, 2.56) circle (2pt);
+        \filldraw[GrisTexto] (5, 2.08) circle (2pt);
+        \filldraw[GrisTexto] (8, 2.32) circle (2pt);
+
+        % Mínimo de la parábola q(x)
+        \filldraw[VerdeNeon] (5.5, 2.07) circle (2pt);
+        
+        % Marca de diamante verde en el eje x
+        \filldraw[VerdeNeon] (5.5,0) ++(0,2.5pt) -- ++(2.5pt,-2.5pt) -- ++(-2.5pt,-2.5pt) -- ++(-2.5pt,2.5pt) -- cycle;
+    \end{tikzpicture}
+\end{center}
 \end{frame}
 
-\begin{frame}{Quadratic Fit Search: Ejemplo Paso a Paso}
-    \begin{exampleblock}{Planteamiento del problema}
-        [Luna: Define aquí tu función y los 3 puntos iniciales de prueba].
-    \end{exampleblock}
-    \begin{itemize}
-        \item \textbf{Paso 1:} [Cálculo del vértice]
-        \item \textbf{Paso 2:} [Actualización de los 3 puntos]
-    \end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]{Quadratic Fit Search: Código}
-\begin{lstlisting}[language=Python]
-# [Luna: Reemplaza esto con tu código real]
-def quadratic_fit_search_ejemplo():
-    pass
-\end{lstlisting}
-\end{frame}
-
-\begin{frame}{Quadratic Fit Search: Análisis de Convergencia}
-    \begin{alertblock}{Tasa de Convergencia}
-        [Luna: Menciona la convergencia superlineal de orden ~1.324].
+% ---------------------------------------------------------------
+% 3. Detalle Matemático
+% ---------------------------------------------------------------
+\begin{frame}{Ajuste Cuadrático: Detalle Matemático}
+    \begin{alertblock}{La Ecuación de Interpolación}
+        \scriptsize
+        Buscamos los coeficientes de $q(x) = p_1 + p_2x + p_3x^2$ que pasen por $(a, y_a)$, $(b, y_b)$ y $(c, y_c)$. 
+        Resolviendo mediante polinomios de Lagrange, obtenemos:
+        \begin{equation*}
+            q(x) = y_a\frac{(x-b)(x-c)}{(a-b)(a-c)} + y_b\frac{(x-a)(x-c)}{(b-a)(b-c)} + y_c\frac{(x-a)(x-b)}{(c-a)(c-b)}
+        \end{equation*}
     \end{alertblock}
+
+    \vspace{0.5em}
+    \footnotesize
+    Para encontrar el mínimo único de esta parábola, calculamos la derivada $q'(x) = 0$ y despejamos $x$. El nuevo punto analítico $x^*$ viene dado por:
+    
+    \begin{equation*}
+        x^* = \frac{1}{2} \frac{y_a(b^2-c^2) + y_b(c^2-a^2) + y_c(a^2-b^2)}{y_a(b-c) + y_b(c-a) + y_c(a-b)}
+    \end{equation*}
+
+    \scriptsize
     \begin{itemize}
-        \item {[Condiciones en las que falla (ej. puntos colineales)]}
-        \item {[Comparativa de eficiencia]}
+        \item Este método converge superlinealmente y suele ser más rápido que la \textit{Búsqueda de la Sección Dorada}.
+        \item Requiere validaciones para evitar inestabilidad numérica si los puntos están muy juntos (denominador cercano a cero).
     \end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------
+% 4. Iteración y Selección de Límites
+% ---------------------------------------------------------------
+\begin{frame}{Ajuste Cuadrático: Desarrollo de la iteración}
+    \begin{exampleblock}{Regla de Actualización}
+        \footnotesize
+        Una vez encontrado el mínimo analítico $x^*$, evaluamos $y_{x^*} = f(x^*)$. Ahora tenemos cuatro puntos evaluados. Debemos seleccionar tres que sigan encerando el mínimo para la siguiente iteración.
+    \end{exampleblock}
+
+    \begin{center}
+   \begin{tikzpicture}[x=1.1cm, y=1cm, font=\scriptsize]
+        % Eje x referencial
+        \draw[->, GrisTexto, thick] (1, 0.5) -- (9.5, 0.5);
+
+        % Curva f(x) trazada como una parábola suave con línea discontinua
+        \draw[thick, white, dashed, domain=1.5:9, samples=100]
+            plot (\x, {0.15*(\x-6)^2 + 1.2});
+
+        % Ticks y etiquetas en el eje X
+        \draw[thick, GrisTexto] (2, 0.6) -- (2, 0.4) node[below] {\(a\)};
+        \draw[thick, GrisTexto] (4.5, 0.6) -- (4.5, 0.4) node[below] {\(b\)};
+        \draw[thick, VerdeNeon] (6, 0.6) -- (6, 0.4) node[below] {\(x^*\)};
+        \draw[thick, GrisTexto] (8.5, 0.6) -- (8.5, 0.4) node[below] {\(c\)};
+
+        % Puntos evaluados matemáticamente sobre la curva
+        \filldraw[GrisTexto] (2, 3.6) circle (2.5pt) node[above, text=white] {\(y_a\)};
+        \filldraw[GrisTexto] (4.5, 1.5375) circle (2.5pt) node[above right, text=white] {\(y_b\)};
+        \filldraw[GrisTexto] (8.5, 2.1375) circle (2.5pt) node[above, text=white] {\(y_c\)};
+        
+        % Nuevo punto mínimo evaluado
+        \filldraw[VerdeNeon] (6, 1.2) circle (2.5pt) node[above right, text=VerdeNeon] {\(y_{x^*}\)};
+
+        % Flecha roja y texto de descarte
+        \draw[->, RojoAlerta, thick] (2.5, 2.8) -- (3.8, 1.8);
+        \node[RojoAlerta, align=center, font=\footnotesize] at (2.5, 1.3) {Como \(y_{x^*} < y_b\), \\ \(a\) es descartado.};
+
+        % Indicador visual del nuevo bracket [b, x*, c]
+        \draw[NaranjaBase, thick] (4.5, -0.4) -- (8.5, -0.4);
+        \draw[NaranjaBase, thick] (4.5, -0.3) -- (4.5, -0.5);
+        \draw[NaranjaBase, thick] (8.5, -0.3) -- (8.5, -0.5);
+        \node[NaranjaBase, font=\footnotesize] at (6.5, -0.8) {\textbf{Nuevo bracket} \([b, x^*, c]\)};
+    \end{tikzpicture}
+    \end{center}
+\end{frame}
+% ---------------------------------------------------------------
+% 5. Pseudocódigo
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Ajuste Cuadrático: Pseudocódigo}
+    \vspace{-1.2em}
+    \begingroup
+    \linespread{0.85}\selectfont
+    \setlength{\lineskip}{0pt}
+    \begin{algorithm}[H]
+    \scriptsize
+    \begin{algorithmic}[1]
+        \Require Función \(f\), límites iniciales \(a < b < c\), número de iteraciones \(n\)
+        \State \(y_a \gets f(a), \ y_b \gets f(b), \ y_c \gets f(c)\)
+        \For{\(i = 1\) \textbf{to} \(n-3\)}
+            \State \(num \gets y_a(b^2-c^2) + y_b(c^2-a^2) + y_c(a^2-b^2)\)
+            \State \(den \gets y_a(b-c) + y_b(c-a) + y_c(a-b)\)
+            \State \(x \gets 0.5 \cdot (num / den)\) \Comment{Mínimo de la cuadrática}
+            \State \(y_x \gets f(x)\)
+            \If{\(x > b\)}
+                \If{\(y_x > y_b\)}
+                    \State \(c \gets x, \ y_c \gets y_x\)
+                \Else
+                    \State \(a \gets b, \ y_a \gets y_b, \ b \gets x, \ y_b \gets y_x\)
+                \EndIf
+            \ElsIf{\(x < b\)}
+                \If{$y_x > y_b$}
+                    \State \(a \gets x, \ y_a \gets y_x\)
+                \Else
+                    \State \(c \gets b, \ y_c \gets y_b, \ b \gets x, \ y_b \gets y_x\)
+                \EndIf
+            \EndIf
+        \EndFor
+        \State \Return \((a, b, c)\)
+    \end{algorithmic}
+    \end{algorithm}
+    \endgroup
+\end{frame}
+
+% ---------------------------------------------------------------
+% 6. Análisis de Convergencia
+% ---------------------------------------------------------------
+\begin{frame}{Ajuste Cuadrático: Análisis de Convergencia}
+    \begin{block}{Convergencia y Eficiencia}
+        \footnotesize
+        Al aprovechar la resolución analítica, este método logra una \textbf{convergencia superlineal} y suele ser más rápido que la Búsqueda de la Sección Dorada.
+    \end{block}
+
+    \vspace{0.2cm}
+    \footnotesize
+    \textbf{¿Por qué es tan rápido cerca del óptimo?}
+    \scriptsize
+    \begin{itemize}
+        \item \textbf{Aproximación natural:} La mayoría de los mínimos locales se comportan casi exactamente como una parábola cuando se observan de cerca.
+        \item \textbf{Cálculo directo:} En lugar de reducir el espacio ciegamente, ajusta una cuadrática y evalúa directamente su mínimo analítico.
+    \end{itemize}
+
+    \begin{alertblock}{Inestabilidad Numérica}
+        \scriptsize
+        A pesar de su velocidad, requiere validaciones o mecanismos de seguridad (\textit{safeguards}).
+        \begin{itemize}
+            \item Si los puntos evaluados quedan muy cerca entre sí, el denominador en la fórmula de interpolación se acerca a cero.
+            \item Esto produce una grave inestabilidad numérica en el cálculo del siguiente punto que debe ser controlada por el algoritmo.
+        \end{itemize}
+    \end{alertblock}
 \end{frame}

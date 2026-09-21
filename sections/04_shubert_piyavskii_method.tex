@@ -1,46 +1,384 @@
-\subsection{Shubert-Piyavskii Method}
+\subsection{Método de Shubert-Piyavskii}
 
-\begin{frame}{Shubert-Piyavskii Method: Explicación Gráfica}
+% ---------------------------------------------------------------
+% 1. Explicación conceptual y Placeholder gráfico
+% ---------------------------------------------------------------
+\begin{frame}{Shubert-Piyavskii: Explicación Conceptual}
     \begin{block}{Concepto principal}
-        [Luna: Explica la construcción de la cota inferior utilizando la constante de Lipschitz en forma de "dientes de sierra" o conos].
+        \footnotesize
+        El método de Shubert-Piyavskii es un algoritmo de optimización global para funciones 
+        que cumplen con la condición de Lipschitz (su tasa de cambio está acotada por una constante $\ell$). 
+        A diferencia de los métodos de búsqueda local, este construye iterativamente una 
+        \textbf{función de límite inferior} que aproxima la función real desde abajo.
     \end{block}
+
+    \scriptsize
     \begin{itemize}
-        \item {[Idea gráfica 1]}
-        \item {[Idea gráfica 2]}
+        \item En cada paso, evalúa la función donde el límite inferior es \textbf{mínimo}.
+        \item Garantiza encontrar el óptimo global aislando regiones prometedoras.
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Shubert-Piyavskii Method: Pseudocódigo}
-    \begin{algorithmic}[1]
-        \State \textbf{Input:} [Entradas, no olvides la constante L]
-        \State [Lógica del pseudocódigo]
-        \State \textbf{Return} [Resultado]
-    \end{algorithmic}
+% ---------------------------------------------------------------
+% 2. Explicación Visual de la Constante de Lipschitz
+% ---------------------------------------------------------------
+\begin{frame}{Shubert-Piyavskii: La Constante de Lipschitz}
+    \begin{block}{Interpretación Geométrica}
+        \footnotesize
+        La condición \(|f(x) - f(y)| \le \ell|x - y|\) significa que la tasa de cambio de la función 
+        está acotada por \(\ell\).
+    \end{block}
+
+   \begin{center}
+    \begin{tikzpicture}[x=1.1cm, y=0.6cm, font=\scriptsize]
+        
+        % Sombreado de la región válida (Cono L=1) restringido a las abscisas x e y
+        \fill[VerdeNeon, opacity=0.15] (2,1) -- (4,3) -- (2,5) -- cycle;
+        \fill[VerdeNeon, opacity=0.15] (6,1) -- (4,3) -- (6,5) -- cycle;
+
+        % Ejes (Diferenciados de las abscisas "x" e "y")
+        \draw[thick, GrisTexto, -stealth] (0,0) -- (8.5,0) node[right] {};
+        \draw[thick, GrisTexto, -stealth] (0,0) -- (0,6.5) node[above] {};
+
+        % Abscisas "x" e "y" solicitadas
+        \draw[GrisTexto, thick] (2, 0.1) -- (2, -0.1) node[below, font=\small] {\(x\)};
+        \draw[GrisTexto, thick] (6, 0.1) -- (6, -0.1) node[below, font=\small] {\(y\)};
+        
+        % Líneas punteadas verticales desde x e y hasta arriba de las líneas verdes con sus etiquetas
+        \draw[GrisTexto, dashed] (2,0) -- (2,5.7);
+        \node[above, text=GrisTexto] at (2,5.7) {\(f(x)\)};
+
+        \draw[GrisTexto, dashed] (6,0) -- (6,5.7);
+        \node[above, text=GrisTexto] at (6,5.7) {\(f(y)\)};
+        
+        % Texto explicativo de la constante
+        \node[GrisTexto, font=\footnotesize\bfseries, fill=FondoOscuro, rounded corners, inner sep=3pt] at (4, 5.8) {\(\ell = 1\)};
+
+        % Trazado de las líneas intersectando en (4,3)
+        % Las líneas se dibujan de izquierda a derecha para que 'pos=0.85' quede a la derecha
+        
+        % m = 2 (Excede L, rojo punteado)
+        \draw[RojoAlerta, thick, dashed] (2.5,0) -- (5.5,6) 
+            node[sloped, above, pos=0.85, text=RojoAlerta] {\(m=2\)};
+
+        % m = 1 (Límite superior, verde)
+        \draw[VerdeNeon, thick] (1,0) -- (7,6) 
+            node[sloped, above, pos=0.85, text=VerdeNeon] {\(m=1\)};
+
+        % m = 1/2 (Válido, verde)
+        \draw[VerdeNeon, thick] (0.5,1.25) -- (7.5,4.75) 
+            node[sloped, above, pos=0.85, text=VerdeNeon] {\(m=1/2\)};
+
+        % m = 0 (Válido, verde)
+        \draw[VerdeNeon, thick] (0.5,3) -- (7.5,3) 
+            node[sloped, above, pos=0.85, text=VerdeNeon] {\(m=0\)};
+
+        % m = -1/2 (Válido, verde)
+        \draw[VerdeNeon, thick] (0.5,4.75) -- (7.5,1.25) 
+            node[sloped, above, pos=0.85, text=VerdeNeon] {\(m=-1/2\)};
+
+        % m = -1 (Límite inferior, verde)
+        \draw[VerdeNeon, thick] (1,6) -- (7,0) 
+            node[sloped, above, pos=0.85, text=VerdeNeon] {\(m=-1\)};
+
+        % m = -2 (Excede -L, rojo punteado)
+        \draw[RojoAlerta, thick, dashed] (2.5,6) -- (5.5,0) 
+            node[sloped, above, pos=0.85, text=RojoAlerta] {\(m=-2\)};
+
+        % Punto de intersección central
+        \filldraw[CelesteBrillante] (4,3) circle (2pt);
+
+    \end{tikzpicture}
+\end{center}
 \end{frame}
 
-\begin{frame}{Shubert-Piyavskii Method: Ejemplo Paso a Paso}
-    \begin{exampleblock}{Planteamiento del problema}
-        [Luna: Función de prueba y su constante de Lipschitz].
-    \end{exampleblock}
-    \begin{itemize}
-        \item \textbf{Iteración 1:} [Intersección de las rectas]
-        \item \textbf{Iteración 2:} [Actualización de la envolvente]
-    \end{itemize}
+% ---------------------------------------------------------------
+% 3. Construcción del cono inicial
+% ---------------------------------------------------------------
+\begin{frame}{Shubert-Piyavskii: Construcción Inicial}
+    \begin{block}{Construcción del cono}
+        \footnotesize
+        La base del método consiste en evaluar un punto inicial $x_0$. Dado que sabemos que la 
+        función no puede descender más rápido que la constante de Lipschitz $\ell$, trazamos dos líneas 
+        descendentes de pendiente $\pm \ell$ a partir del punto evaluado $(x_0, f(x_0))$.
+    \end{block}
+
+    \begin{center}
+    \begin{tikzpicture}[x=0.9cm, y=0.6cm, font=\scriptsize]
+        % Caja exterior (ejes)
+        \draw[thick, GrisTexto] (0,0) rectangle (10,5.5);
+        
+        % Ticks inferiores y etiquetas del eje X
+        \draw[GrisTexto] (5.0,0.1) -- (5.0,-0.1) node[below] {$x_{0}$};
+        
+        % Ticks superiores (referencia visual)
+        \draw[GrisTexto] (5.0,5.5) -- (5.0,5.4);
+        
+        % Etiqueta del eje Y
+        \node[GrisTexto, rotate=90] at (-0.3, 2.75) {$y$};
+        
+        % Leyenda en la parte superior (centrada y con colores)
+        \draw[white, thick] (2.5, 5.0) -- (3.2, 5.0) node[right, text=white] {$f(x)$};
+        \draw[NaranjaBase, thick] (5.5, 5.0) -- (6.2, 5.0) node[right, text=NaranjaBase] {límite inferior};
+        
+        % Función f(x) (Color blanco, ajustada para no cruzar el límite inferior)
+        \draw[white, thick] plot [smooth, tension=0.7] coordinates {
+            (1.0, 4.8) 
+            (3.0, 3.5) 
+            (5.0, 4.0) 
+            (7.0, 4.6) 
+            (9.0, 3.8)
+        };
+        
+        % Cono de Límite inferior (NaranjaBase, vértice exactamente en x=5)
+        \draw[NaranjaBase, thick] (1.0, 0.8) -- (5.0, 4.0) -- (9.0, 0.8);
+        
+        % Triángulo de pendiente (l) calculado sobre la recta izquierda
+        \draw[GrisTexto] (2.0, 1.6) -- (3.0, 1.6) node[midway, below] {$1$};
+        \draw[GrisTexto] (3.0, 1.6) -- (3.0, 2.4) node[midway, right] {$\ell$};
+        
+        % Punto evaluado x_0 centrado
+        \filldraw[CelesteBrillante] (5.0, 4.0) circle (1.5pt) 
+            node[above, font=\footnotesize] {$(x_0, f(x_0))$};
+
+    \end{tikzpicture}
+    \end{center}
+    
+    \footnotesize
+    Estas dos líneas forman un  \textbf{cono en V invertida} debajo del punto. 
+    La función real jamás cruzará por debajo del cono, nuestro primer límite inferior global.
 \end{frame}
 
-\begin{frame}[fragile]{Shubert-Piyavskii Method: Código}
-\begin{lstlisting}[language=Python]
-# [Luna: Reemplaza esto con tu código real]
-def shubert_piyavskii_ejemplo():
-    pass
-\end{lstlisting}
-\end{frame}
-
-\begin{frame}{Shubert-Piyavskii Method: Análisis de Convergencia}
-    \begin{alertblock}{Garantías globales}
-        [Luna: Explica por qué este método garantiza el óptimo global a diferencia de los otros].
+% ---------------------------------------------------------------
+% 4. Detalle matemático de las líneas
+% ---------------------------------------------------------------
+\begin{frame}{Shubert-Piyavskii: Detalle Matemático}
+    \begin{alertblock}{La Ecuación del Límite Inferior}
+        \small
+        Matemáticamente, la condición de Lipschitz establece que para cualquier par de puntos $x$ e $x_i$:
+        $|f(x) - f(x_i)| \le \ell |x - x_i|$
     \end{alertblock}
+
+    \footnotesize
+    Despejando para encontrar el límite inferior respecto a un punto ya evaluado $x_i$, obtenemos 
+    la ecuación de las líneas rectas del cono:
+    
+    \begin{equation*}
+        f(x) \ge f(x_i) - \ell|x - x_i|
+    \end{equation*}
+
+    \scriptsize
     \begin{itemize}
-        \item {[Problemas de coste computacional (maldición de la dimensionalidad)]}
+        \item Si $x > x_i$ (a la derecha), la ecuación de la recta es $y = f(x_i) - \ell(x - x_i)$ (pendiente $-\ell$).
+        \item Si $x < x_i$ (a la izquierda), la ecuación de la recta es $y = f(x_i) + \ell(x - x_i)$ (pendiente $+\ell$).
     \end{itemize}
+    
+    \vspace{0.5em}
+    \footnotesize
+    Con múltiples puntos evaluados, el límite inferior global $F(x)$ se define como el máximo de todos los conos superpuestos:
+    $F(x) = \max_i \{ f(x_i) - \ell|x - x_i| \}$
+\end{frame}
+
+% ---------------------------------------------------------------
+% 5. Explicación de Iteración (Visual)
+% ---------------------------------------------------------------
+\begin{frame}{Shubert-Piyavskii: Desarrollo de la iteración}
+    \begin{exampleblock}{Iteración}
+        \footnotesize
+        La intersección de múltiples conos invertidos de iteraciones pasadas forma un perfil aserrado (límite inferior). Se toma el vértice más bajo del perfil aserrado y se evalúa la función arriba para trazar el siguiente cono que levanta esta parte del perfil.
+    \end{exampleblock}
+
+   \begin{center}
+\begin{tikzpicture}[x=0.9cm, y=0.7cm, font=\scriptsize]
+    % Caja exterior (ejes)
+    \draw[thick, GrisTexto] (0,0) rectangle (10,5.5);
+    
+    % Ticks inferiores y etiquetas del eje X
+    \draw[GrisTexto] (1.0,0.1) -- (1.0,-0.1) node[below] {\(a = x^{(2)}\)};
+    \draw[GrisTexto] (4.6,0.1) -- (4.6,-0.1) node[below] {\(x^{(1)}\)};
+    \draw[GrisTexto] (7.0,0.1) -- (7.0,-0.1) node[below] {\(x^{(4)}\)};
+    \draw[GrisTexto] (9.0,0.1) -- (9.0,-0.1) node[below] {\(b = x^{(3)}\)};
+    \node[GrisTexto] at (5.0, -0.8) {\(x\)};
+    
+    % Ticks superiores (referencia visual)
+    \draw[GrisTexto] (1.0,5.5) -- (1.0,5.4);
+    \draw[GrisTexto] (4.6,5.5) -- (4.6,5.4);
+    \draw[GrisTexto] (7.0,5.5) -- (7.0,5.4);
+    \draw[GrisTexto] (9.0,5.5) -- (9.0,5.4);
+    
+    % Etiqueta del eje Y
+    \node[GrisTexto, rotate=90] at (-0.3, 2.75) {\(y\)};
+    
+    % Leyenda en la parte superior (actualizada al color naranja)
+    \draw[white, thick] (2.5, 5.0) -- (3.2, 5.0) node[right, text=white] {\(f(x)\)};
+    \draw[NaranjaBase, thin] (5.5, 5.0) -- (6.2, 5.0) node[right, text=NaranjaBase] {límite inferior};
+    
+    % Función f(x) (Color blanco, ajustada para NUNCA cruzar el límite inferior)
+    \draw[white, thick] plot [smooth, tension=0.5] coordinates {
+        (1.0, 4.8) 
+        (2.8, 3.2) 
+        (4.6, 4.2) 
+        (5.6, 4.8) 
+        (7.0, 2.8) 
+        (8.2, 2.6) 
+        (9.0, 3.6)
+    };
+    
+    % Límite inferior anterior (Dientes de sierra en NaranjaBase y línea delgada)
+    \draw[NaranjaBase, thin] (1.0, 4.8) -- (3.0, 1.8) -- (4.6, 4.2) -- (7.0, 0.6) -- (9.0, 3.6);
+    
+    % Proyección vertical desde el punto mínimo hacia la función (Punteada blanca)
+    \draw[-stealth, dashed, white, thick] (7.0, 0.7) -- (7.0, 2.65);
+    
+    % Punto inferior más bajo (Resaltado en NaranjaBase)
+    \filldraw[NaranjaBase] (7.0, 0.6) circle (1.5pt);
+    
+    % Nuevo cono evaluado en x^(4) (CelesteBrillante)
+    \draw[CelesteBrillante, thick] (6.27, 1.7) -- (7.0, 2.8) -- (7.73, 1.7);
+    
+    % Puntos evaluados reales f(x) (CelesteBrillante)
+    \filldraw[CelesteBrillante] (1.0, 4.8) circle (1.5pt); % x^(2)
+    \filldraw[CelesteBrillante] (4.6, 4.2) circle (1.5pt); % x^(1)
+    \filldraw[CelesteBrillante] (9.0, 3.6) circle (1.5pt); % x^(3)
+    \filldraw[CelesteBrillante] (7.0, 2.8) circle (1.5pt); % x^(4)
+\end{tikzpicture}
+\end{center}
+\end{frame}
+
+% ---------------------------------------------------------------
+% 6. Pseudocódigo
+% ---------------------------------------------------------------
+\begin{frame}{Shubert-Piyavskii: Pseudocódigo}
+    \scriptsize
+    \begin{algorithmic}[1]
+        \Require \(f\) Lipschitz con constante \(\ell > 0\), dominio \([a,b]\), tolerancia \(\epsilon\)
+        \State \(x_0 \gets (a+b)/2, \quad y_0 \gets f(x_0)\)
+        \State \(V \gets \{\text{intersección del cono en } x_0 \text{ con } x=a \text{ y } x=b\}\) \Comment{Vértices iniciales}
+        \While{\textbf{true}}
+            \State \((x^*, y^*) \gets \arg\min_{(x,y) \in V} y\) \Comment{Vértice inferior actual}
+            \State \(y_{\text{real}} \gets f(x^*)\)
+            \If{\(y_{\text{real}} - y^* < \epsilon\)} \Comment{Criterio de convergencia}
+                \State \Return \(x^*\)
+            \EndIf
+            \State \(V \gets V \setminus \{(x^*, y^*)\}\) \Comment{Remover punto evaluado}
+            \State \((x_L, y_L) \gets \text{intersección izquierda con el segmento previo}\)
+            \State \((x_R, y_R) \gets \text{intersección derecha con el segmento posterior}\)
+            \State \(V \gets V \cup \{(x_L, y_L), \, (x_R, y_R)\}\)
+        \EndWhile
+    \end{algorithmic}
+    \vspace{0.4em}
+    {\tiny \textit{Nota:} El método requiere conocer o sobreestimar adecuadamente la constante de Lipschitz \(\ell\).}
+\end{frame}
+
+\begin{frame}{Shubert-Piyavskii: Planteamiento}
+    \textbf{Problema:} Minimizar \(f(x) = (x - 0.5)^2\) en \([a, b] = [-1, 1]\).
+    
+    \vspace{0.3cm}
+    \textbf{1. Constante de Lipschitz (\(l\)):}
+    \begin{itemize}
+        \item Derivada: \(f'(x) = 2(x - 0.5)\).
+        \item Máximo valor absoluto de \(f'(x)\) en \([-1, 1]\) ocurre en \(x = -1\): 
+        \[ |f'(-1)| = |2(-1 - 0.5)| = 3 \quad \Rightarrow \quad l = 3 \]
+    \end{itemize}
+
+    \textbf{2. Fórmulas de intersección (Límite Inferior):}
+    \begin{itemize}
+        \item \textbf{Límites exteriores:}
+        \[ y_{\text{izq}} = y_0 - l(x_0 - a) \quad \text{y} \quad y_{\text{der}} = y_{\text{fin}} - l(b - x_{\text{fin}}) \]
+        \item \textbf{Puntos interiores} (entre nodos consecutivos \(A\) y \(B\)):
+        \[ t = \frac{(A_y - B_y) - l(A_x - B_x)}{2l}, P_x = A_x + t, \quad P_y = A_y - l \cdot t \]
+    \end{itemize}
+
+    \textbf{3. Inicialización:}
+    \(x_1 = \frac{-1 + 1}{2} = 0 \quad \Rightarrow \quad f(0) = 0.25\). Nodos iniciales: \(\{(0, 0.25)\}\).
+\end{frame}
+
+% 7. Paso a paso
+
+\begin{frame}{Shubert-Piyavskii: Paso a paso}
+\small
+En cada iteración calculamos los posibles mínimos de la envolvente diente de sierra (\(y_{\text{izq}}\), \(y_{\text{der}}\) y los \(P_y\) interiores). Seleccionamos el menor (\(y_{\min}\)) en la posición \(x_{\min}\), evaluamos \(f(x_{\min})\) y actualizamos los puntos de soporte.
+
+\vspace{0.25cm}
+\centering
+\renewcommand{\arraystretch}{1.25}
+\resizebox{\textwidth}{!}{% 
+\begin{tabular}{@{}c|l|cc|cc@{}}
+    \toprule
+    \textbf{Iter} & \textbf{Nodos Activos \((x, y)\)} & \textbf{Mín Estimado} & \(\bm{x_{\min}}\) & \(\bm{f(x_{\min})}\) & \(\bm{\Delta}\) \\
+    \midrule
+    \textbf{1} & \((0, 0.25)\) 
+    & \(y_{\text{izq}}, y_{\text{der}} = -2.75\) & \(-1.00\) & \(2.25\) & \(5.00\) \\
+    
+    \textbf{2} & \((-1, 2.25), (0, 0.25)\) 
+    & \(y_{\text{der}} = -2.75\) & \(1.00\) & \(0.25\) & \(3.00\) \\
+    
+    \textbf{3} & \((-1, 2.25), (0, 0.25), (1, 0.25)\) 
+    & \(P_{y2} = -1.25\) & \(0.50\) & \(0.00\) & \(1.25\) \\
+    
+    \textbf{4} & \scriptsize \((-1, 2.25), (0, 0.25), (0.5, 0), (1, 0.25)\) 
+    & \(P_{y3} = -0.75\) & \(0.75\) & \(0.06\) & \(0.81\) \\
+    \bottomrule
+\end{tabular}%  
+}
+
+\vspace{0.25cm}
+\raggedright
+\footnotesize
+\textbf{Detalle de la Iteración 3:} \\
+El mínimo estimado proviene de la intersección entre \((0, 0.25)\) y \((1, 0.25)\): \\
+\(t = \frac{(0.25 - 0.25) - 3(0 - 1)}{6} = 0.5\),  \(P_x = 0 + 0.5 = \mathbf{0.5}\), \(P_y = 0.25 - 3(0.5) = \mathbf{-1.25}\).
+\end{frame}
+
+\begin{frame}[fragile]{Shubert-Piyavskii: Implementación}
+    \begin{lstlisting}[basicstyle=\ttfamily\tiny]
+class Punto:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+def shubert_piyavskii(f, a, b, l, epsilon):
+    pts = [Punto((a + b) / 2.0, f((a + b) / 2.0))]
+    delta = float('inf')
+    while delta > epsilon:
+        best_i, best_x, best_y = 0, 0.0, float('inf')
+        y_left = pts[0].y - l * (pts[0].x - a)
+        if y_left < best_y: best_i, best_x, best_y = 0, a, y_left
+        y_right = pts[-1].y - l * (b - pts[-1].x)
+        if y_right < best_y: best_i, best_x, best_y = len(pts), b, y_right
+        for i in range(1, len(pts)):
+            A, B = pts[i-1], pts[i]
+            t = ((A.y - B.y) - l * (A.x - B.x)) / (2 * l)
+            P_x, P_y = A.x + t, A.y - l * t
+            if P_y < best_y: best_i, best_x, best_y = i, P_x, P_y
+        f_best_x = f(best_x)
+        pts.insert(best_i, Punto(best_x, f_best_x))
+        delta = f_best_x - best_y
+    mejor_punto = min(pts, key=lambda p: p.y)
+    return mejor_punto.x, mejor_punto.y
+    \end{lstlisting}
+\end{frame}
+
+% ---------------------------------------------------------------
+% 8. Análisis de Convergencia
+% ---------------------------------------------------------------
+\begin{frame}{Shubert-Piyavskii: Análisis de Convergencia}
+    \begin{block}{Garantía de Óptimo Global}
+        \footnotesize
+        Shubert-Piyavskii garantiza la convergencia al \textbf{mínimo global}.
+    \end{block}
+
+    \vspace{0.2cm}
+    \footnotesize
+    \textbf{¿Por qué es capaz de encontrar el mínimo global?}
+    \scriptsize
+    \begin{itemize}
+        \item \textbf{Límite Inferior:} La envolvente en forma de dientes de sierra es un límite inferior absoluto. Gracias a la constante de Lipschitz \(\ell\), sabemos que la función real \textit{nunca} descenderá por debajo.
+        \item \textbf{Eliminación de Regiones:} Al levantar el límite inferior iterativamente, el algoritmo descarta áreas del dominio donde es matemáticamente imposible que exista un valor menor al mínimo actual encontrado.
+        \item \textbf{Exploración del Peor:} Al seleccionar siempre el punto con el menor valor del límite inferior (\(y^*\)), el método ataca directamente la región de mayor ``incertidumbre'' o potencial, forzando a que la brecha \(\Delta = f(x^*) - y^*\) se reduzca.
+    \end{itemize}
+
+    \begin{alertblock}{Conclusión de Parada}
+        \scriptsize
+        Cuando la diferencia máxima entre el límite inferior y la función cae por debajo de \(\epsilon\) (\(f(x^*) - y^* < \epsilon\)), el método se detiene. En este punto \textbf{ningún otro punto en todo el dominio} puede tener un valor menor a \(f(x^*) - \epsilon\).
+    \end{alertblock}
 \end{frame}
