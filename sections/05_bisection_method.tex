@@ -1,46 +1,209 @@
 \subsection{Bisection Method}
 
+% ---------------------------------------------------------------
+% 1. Explicación gráfica
+% ---------------------------------------------------------------
 \begin{frame}{Bisection Method: Explicación Gráfica}
     \begin{block}{Concepto principal}
-        [Aguilar: Explica cómo en optimización usamos bisección para buscar la raíz de la primera derivada $f'(x)=0$].
+        \footnotesize
+        El método de bisección localiza una raíz de la derivada $f'(x)$.
+        En optimización se utiliza para encontrar un punto estacionario
+        $x^*$ tal que $f'(x^*)=0$. Se parte de un intervalo $[a,b]$
+        donde $f'(a)$ y $f'(b)$ tienen signos opuestos y, en cada
+        iteración, se conserva solo la mitad que sigue encerrando la raíz.
     \end{block}
+
+    \begin{center}
+    \begin{tikzpicture}[x=0.85cm, y=0.7cm, font=\scriptsize]
+
+        % Ejes
+        \draw[->, GrisTexto] (-0.4,0) -- (8.7,0)
+            node[right] {$x$};
+        \draw[->, GrisTexto] (0,-2.0) -- (0,2.2)
+            node[above] {$f'(x)$};
+
+        % Recta de la derivada
+        \draw[CelesteBrillante, thick]
+            (0,-1.5) -- (8,1.5);
+
+        % Raíz
+        \fill[NaranjaBase] (4,0) circle (2pt);
+        \node[above right, text=NaranjaBase] at (4,0)
+            {$x^*$};
+
+        % Marcas
+        \draw[CelesteBrillante, thick] (1,-0.15) -- (1,0.15);
+        \draw[CelesteBrillante, thick] (4,-0.15) -- (4,0.15);
+        \draw[CelesteBrillante, thick] (7,-0.15) -- (7,0.15);
+
+        \node[below, text=GrisTexto] at (1,-0.15) {$a$};
+        \node[below, text=GrisTexto] at (4,-0.15) {$x_m$};
+        \node[below, text=GrisTexto] at (7,-0.15) {$b$};
+
+        % Intervalo original
+        \draw[NaranjaBase, very thick] (1,-1.7) -- (7,-1.7);
+        \node[right, text=GrisTexto] at (7.15,-1.7)
+            {$[a,b]$};
+
+        % Nuevo intervalo
+        \draw[CelesteBrillante, very thick] (1,-2.25) -- (4,-2.25);
+        \node[right, text=GrisTexto] at (4.15,-2.25)
+            {nuevo intervalo};
+
+    \end{tikzpicture}
+    \end{center}
+
+    \scriptsize
     \begin{itemize}
-        \item {[Idea gráfica 1]}
-        \item {[Idea gráfica 2]}
+        \item El punto medio es
+        $x_m=(a+b)/2$.
+        \item Cada iteración reduce la longitud del intervalo
+        \textbf{exactamente a la mitad}.
     \end{itemize}
 \end{frame}
 
+
+% ---------------------------------------------------------------
+% 2. Pseudocódigo
+% ---------------------------------------------------------------
 \begin{frame}{Bisection Method: Pseudocódigo}
+    \scriptsize
     \begin{algorithmic}[1]
-        \State \textbf{Input:} [La derivada $f'$, límites $a$ y $b$]
-        \State [Lógica evaluando signos de la derivada]
-        \State \textbf{Return} [Resultado]
+        \Require derivada $f'$, intervalo $[a,b]$ que encierra una raíz,
+                 tolerancia $\epsilon$
+        \If{$a>b$}
+            \State $(a,b)\gets(b,a)$
+        \EndIf
+        \State $y_a\gets f'(a)$, \quad $y_b\gets f'(b)$
+        \State $s_a\gets\operatorname{sign}(y_a)$
+        \While{$b-a>\epsilon$}
+            \State $x\gets(a+b)/2$
+            \State $y\gets f'(x)$
+            \If{$y=0$}
+                \State $(a,b)\gets(x,x)$
+            \ElsIf{$\operatorname{sign}(y)=s_a$}
+                \State $a\gets x$
+            \Else
+                \State $b\gets x$
+            \EndIf
+        \EndWhile
+        \State \Return $[a,b]$
     \end{algorithmic}
+
+    \vspace{0.3em}
+    {\footnotesize
+    \textit{Condición inicial:}
+    $f'(a)f'(b)\le 0$, de modo que exista al menos una raíz
+    de $f'$ dentro del intervalo.}
 \end{frame}
 
+
+% ---------------------------------------------------------------
+% 3. Ejemplo paso a paso
+% ---------------------------------------------------------------
 \begin{frame}{Bisection Method: Ejemplo Paso a Paso}
-    \begin{exampleblock}{Planteamiento del problema}
-        [Aguilar: Función de prueba y cómo evaluamos su derivada].
+    \begin{exampleblock}{Planteamiento}
+        \small
+        Minimizar
+        \[
+            f(x)=\frac{x^2}{2}-x,
+            \qquad
+            f'(x)=x-1
+        \]
+        partiendo del intervalo $[a,b]=[0,8]$.
+        El mínimo exacto es $x^*=1$.
     \end{exampleblock}
-    \begin{itemize}
-        \item \textbf{Iteración 1:} [Evaluación en el punto medio]
-        \item \textbf{Iteración 2:} [Corte del intervalo]
-    \end{itemize}
+
+    \vspace{-0.3em}
+
+    \begin{center}
+    \scriptsize
+    \begin{tabular}{c c c c l}
+        \toprule
+        $k$ & intervalo $[a,b]$ & $x_m$ & $f'(x_m)$
+            & nuevo intervalo \\
+        \midrule
+        1 & $[0,8]$ & $4$ & $3>0$ & $[0,4]$ \\
+        2 & $[0,4]$ & $2$ & $1>0$ & $[0,2]$ \\
+        3 & $[0,2]$ & $1$ & $0$   & $[1,1]$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \footnotesize
+    Como $f'(0)=-1<0$, cuando $f'(x_m)>0$ se conserva la mitad
+    izquierda. En la tercera iteración se obtiene exactamente
+    $f'(1)=0$, por lo que $x^*=1$.
 \end{frame}
 
+
+% ---------------------------------------------------------------
+% 4. Código
+% ---------------------------------------------------------------
 \begin{frame}[fragile]{Bisection Method: Código}
-\begin{lstlisting}[language=Python]
-# [Aguilar: Reemplaza esto con tu código real]
-def bisection_ejemplo():
-    pass
+\begin{lstlisting}[language=Python,basicstyle=\ttfamily\tiny]
+def bisection(f_prime, a, b, eps):
+    if a > b:
+        a, b = b, a
+
+    ya, yb = f_prime(a), f_prime(b)
+
+    if ya == 0: return a, a
+    if yb == 0: return b, b
+
+    if ya * yb > 0:
+        raise ValueError(
+            "El intervalo no encierra una raiz"
+        )
+
+    sign_ya = 1 if ya > 0 else -1
+
+    while b - a > eps:
+        x = (a + b) / 2
+        y = f_prime(x)
+
+        if y == 0:
+            return x, x
+
+        if (1 if y > 0 else -1) == sign_ya:
+            a = x
+        else:
+            b = x
+
+    return a, b
 \end{lstlisting}
 \end{frame}
 
+
+% ---------------------------------------------------------------
+% 5. Análisis de convergencia
+% ---------------------------------------------------------------
 \begin{frame}{Bisection Method: Análisis de Convergencia}
-    \begin{alertblock}{Tasa de Convergencia}
-        [Aguilar: Habla sobre la reducción exacta a la mitad y convergencia lineal].
+    \begin{alertblock}{Tasa de convergencia}
+        \footnotesize
+        Si $L_0=b-a$ es la longitud inicial, después de $k$ iteraciones:
+        \[
+            L_k=\frac{L_0}{2^k}.
+        \]
+        La razón de reducción es constante e igual a $1/2$, por lo que
+        presenta \textbf{convergencia lineal} de orden $q=1$.
     \end{alertblock}
+
+    \scriptsize
     \begin{itemize}
-        \item {[Requisito estricto de derivabilidad de la función]}.
+        \item \textbf{Iteraciones:}
+        $k \ge
+        \left\lceil
+        \log_2\!\left(\frac{b-a}{\epsilon}\right)
+        \right\rceil$.
+
+        \item \textbf{Ventaja:} la reducción del intervalo está garantizada
+        en cada iteración.
+
+        \item \textbf{Requisito:} $f'$ debe ser continua y el intervalo inicial
+        debe presentar un cambio de signo.
+
+        \item \textbf{Limitación:} encontrar $f'(x)=0$ identifica un punto
+        estacionario; debe comprobarse que realmente sea un mínimo.
     \end{itemize}
 \end{frame}
