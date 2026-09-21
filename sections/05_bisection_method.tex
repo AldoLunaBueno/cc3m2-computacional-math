@@ -24,7 +24,7 @@
 
         % Recta de la derivada
         \draw[CelesteBrillante, thick]
-            (0,-1.5) -- (8,1.5);
+            (0,-1.6) -- (8,1.6);
 
         % Raíz
         \fill[NaranjaBase] (4,0) circle (2pt);
@@ -33,23 +33,29 @@
 
         % Marcas
         \draw[CelesteBrillante, thick] (1,-0.15) -- (1,0.15);
-        \draw[CelesteBrillante, thick] (4,-0.15) -- (4,0.15);
-        \draw[CelesteBrillante, thick] (7,-0.15) -- (7,0.15);
+        \draw[CelesteBrillante, thick] (5,-0.15) -- (5,0.15);
+        \draw[CelesteBrillante, thick] (8,-0.15) -- (8,0.15);
 
         \node[below, text=GrisTexto] at (1,-0.15) {$a$};
-        \node[below, text=GrisTexto] at (4,-0.15) {$x_m$};
-        \node[below, text=GrisTexto] at (7,-0.15) {$b$};
-
+        \node[below, text=GrisTexto] at (5,-0.15) {$x_m$};
+        \node[below, text=GrisTexto] at (8,-0.15) {$b$};
         % Intervalo original
-        \draw[NaranjaBase, very thick] (1,-1.7) -- (7,-1.7);
-        \node[right, text=GrisTexto] at (7.15,-1.7)
+        \draw[NaranjaBase, very thick] (1,-1.55) -- (8,-1.55);
+        \node[right, text=GrisTexto] at (8.15,-1.55)
             {$[a,b]$};
 
         % Nuevo intervalo
-        \draw[CelesteBrillante, very thick] (1,-2.25) -- (4,-2.25);
-        \node[right, text=GrisTexto] at (4.15,-2.25)
-            {nuevo intervalo};
+        \draw[VerdeNeon, very thick] (1,-2.1) -- (5,-2.1);
+        \node[right, text=GrisTexto] at (5.15,-2.1)
+            {$[a,x_m]$};
 
+
+        % Indicaciones de signo
+        \node[text=GrisTexto] at (1.2,-0.65)
+            {$f'(a)<0$};
+
+        \node[text=GrisTexto] at (5.4,0.75)
+            {$f'(x_m)>0$};
     \end{tikzpicture}
     \end{center}
 
@@ -57,8 +63,7 @@
     \begin{itemize}
         \item El punto medio es
         $x_m=(a+b)/2$.
-        \item Cada iteración reduce la longitud del intervalo
-        \textbf{exactamente a la mitad}.
+        \item Como $f'(a)$ y $f'(x_m)$ tienen signos opuestos, la raíz queda en $[a,x_m]$.
     \end{itemize}
 \end{frame}
 
