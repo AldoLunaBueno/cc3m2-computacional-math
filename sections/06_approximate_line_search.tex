@@ -1,46 +1,197 @@
 \subsection{Approximate Line Search}
 
+% ---------------------------------------------------------------
+% 1. Explicación gráfica
+% ---------------------------------------------------------------
 \begin{frame}{Approximate Line Search: Explicación Gráfica}
     \begin{block}{Concepto principal}
-        [Aguilar: Explica las condiciones de Wolfe o Armijo y cómo visualmente buscan un paso que no sea ni muy corto ni muy largo].
+        \scriptsize
+        En vez de buscar exactamente el mejor paso $\alpha$, se acepta uno
+        que produzca un descenso suficiente. La condición de Armijo exige
+        \[
+            f(x+\alpha d)
+            \le f(x)+\beta\alpha\nabla f(x)^T d,
+        \]
+        donde $d$ es una dirección de descenso y $\beta\in[0,1)$.
     \end{block}
+
+    \begin{center}
+    \begin{tikzpicture}[x=0.9cm, y=0.62cm, font=\scriptsize]
+
+        % Ejes
+        \draw[->, GrisTexto] (0,0) -- (7.2,0)
+            node[right] {$\alpha$};
+        \draw[->, GrisTexto] (0,0) -- (0,3.6)
+            node[above] {$f(x+\alpha d)$};
+
+        % Curva real
+        \draw[CelesteBrillante, thick, smooth]
+            plot coordinates {
+                (0,3.2)
+                (1,2.2)
+                (2,1.4)
+                (3,1.0)
+                (4,1.2)
+                (5,1.9)
+                (6,3.0)
+            };
+
+        % Cota de Armijo
+        \draw[NaranjaBase, dashed, thick]
+            (0,3.2) -- (6.2,1.5);
+
+        % Región aceptable
+        \draw[VerdeNeon, very thick]
+            (0.12,0.35) -- (4.45,0.35);
+
+        \node[text=GrisTexto] at (2.35,0.12)
+            {pasos que cumplen Armijo};
+
+        \node[text=NaranjaBase] at (5.2,2.15)
+            {cota de Armijo};
+
+        \node[text=CelesteBrillante] at (4.8,3.0)
+            {$f(x+\alpha d)$};
+
+    \end{tikzpicture}
+    \end{center}
+
+    \scriptsize
     \begin{itemize}
-        \item {[Idea gráfica 1]}
-        \item {[Idea gráfica 2]}
+        \item Un $\alpha$ demasiado grande puede no producir descenso suficiente.
+        \item Backtracking reduce el paso:
+        $\alpha \gets p\alpha$, con $p\in(0,1)$.
     \end{itemize}
 \end{frame}
 
+
+% ---------------------------------------------------------------
+% 2. Pseudocódigo
+% ---------------------------------------------------------------
 \begin{frame}{Approximate Line Search: Pseudocódigo}
+    \small
     \begin{algorithmic}[1]
-        \State \textbf{Input:} [Entradas y parámetros $c$ y $\rho$]
-        \State [Lógica de Backtracking]
-        \State \textbf{Return} [Tamaño de paso $\alpha$]
+        \Require función $f$, gradiente $\nabla f$, punto $x$,
+                 dirección de descenso $d$, paso inicial $\alpha$
+        \Require factor de reducción $p\in(0,1)$,
+                 parámetro $\beta\in[0,1)$
+        \State $y \gets f(x)$
+        \State $g \gets \nabla f(x)$
+        \While{$f(x+\alpha d) >
+        y+\beta\alpha(g^Td)$}
+            \State $\alpha \gets p\alpha$
+        \EndWhile
+        \State \Return $\alpha$
     \end{algorithmic}
+
+    \vspace{0.5em}
+    {\footnotesize
+    \textit{Idea:} se comienza con un paso grande y se retrocede
+    hasta encontrar uno que produzca una reducción suficiente.}
 \end{frame}
 
+
+% ---------------------------------------------------------------
+% 3. Ejemplo paso a paso
+% ---------------------------------------------------------------
 \begin{frame}{Approximate Line Search: Ejemplo Paso a Paso}
-    \begin{exampleblock}{Planteamiento del problema}
-        [Aguilar: Función de prueba multivariable y dirección de descenso elegida].
+    \begin{exampleblock}{Planteamiento}
+        \small
+        Sea
+        \[
+            f(x_1,x_2)=x_1^2+x_1x_2+x_2^2,
+        \]
+        con $x=[1,2]$, dirección $d=[-1,-1]$,
+        $\alpha_0=10$, $p=0.5$ y $\beta=10^{-4}$.
     \end{exampleblock}
-    \begin{itemize}
-        \item \textbf{Prueba $\alpha=1$:} [¿Cumple la condición de Armijo?]
-        \item \textbf{Backtracking:} [Reducción del paso]
-    \end{itemize}
+
+    \vspace{-0.2em}
+
+    \begin{center}
+    \scriptsize
+    \begin{tabular}{c c c c}
+        \toprule
+        intento & $\alpha$ & $f(x+\alpha d)$
+        & ¿cumple Armijo? \\
+        \midrule
+        1 & $10$  & $217$  & No \\
+        2 & $5$   & $37$   & No \\
+        3 & $2.5$ & $3.25$ & Sí \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \footnotesize
+    Como $\nabla f(1,2)=[4,5]$ y
+    $g^Td=-9$, la condición es
+    \[
+        f(x+\alpha d)
+        \le
+        7-9\beta\alpha.
+    \]
+
+    Para $\alpha=2.5$:
+    \[
+        3.25 \le 6.99775,
+    \]
+    por lo que el paso es aceptado.
 \end{frame}
 
+
+% ---------------------------------------------------------------
+% 4. Código
+% ---------------------------------------------------------------
 \begin{frame}[fragile]{Approximate Line Search: Código}
-\begin{lstlisting}[language=Python]
-# [Aguilar: Reemplaza esto con tu código real]
-def approx_line_search_ejemplo():
-    pass
+\begin{lstlisting}[language=Python,basicstyle=\ttfamily\tiny]
+def backtracking_line_search(
+    f, grad_f, x, d,
+    alpha, p=0.5, beta=1e-4
+):
+    y = f(x)
+    g = grad_f(x)
+
+    dot_gd = sum(
+        gi * di
+        for gi, di in zip(g, d)
+    )
+
+    while f([
+        xi + alpha * di
+        for xi, di in zip(x, d)
+    ]) > y + beta * alpha * dot_gd:
+        alpha *= p
+
+    return alpha
 \end{lstlisting}
 \end{frame}
 
+
+% ---------------------------------------------------------------
+% 5. Análisis de convergencia
+% ---------------------------------------------------------------
 \begin{frame}{Approximate Line Search: Análisis de Convergencia}
-    \begin{alertblock}{Eficiencia}
-        [Aguilar: Menciona por qué no buscar el mínimo exacto acelera el proceso global (ahorro de evaluaciones)].
+    \begin{alertblock}{Eficiencia y convergencia}
+        \footnotesize
+        La búsqueda aproximada evita el costo de encontrar el mínimo exacto
+        sobre la dirección $d$. En su lugar, acepta un paso que garantice
+        una reducción suficiente del valor de la función.
     \end{alertblock}
+
+    \scriptsize
     \begin{itemize}
-        \item {[Garantías de convergencia global (Teorema de Zoutendijk)]}.
+        \item \textbf{Costo:} el tamaño de paso se reduce geométricamente:
+        \[
+            \alpha_k=p^k\alpha_0.
+        \]
+
+        \item \textbf{Garantía:} si $d$ es una dirección de descenso,
+        un paso suficientemente pequeño satisface la condición de Armijo.
+
+        \item \textbf{Ventaja:} suele ser más eficiente realizar varias
+        iteraciones con pasos aproximados que hacer una búsqueda exacta.
+
+        \item \textbf{Convergencia:} bajo condiciones regulares sobre
+        $f$ y su gradiente, las condiciones de Wolfe permiten garantizar
+        convergencia hacia un mínimo local.
     \end{itemize}
 \end{frame}
