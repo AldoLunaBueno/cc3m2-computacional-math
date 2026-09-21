@@ -1,11 +1,15 @@
 \documentclass{beamer}
+
 \usepackage[spanish]{babel}
+\decimalpoint
+
 \usepackage{graphicx}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{xcolor}
 \usepackage{tikz}
 \usepackage{booktabs}
+\usepackage{bm}
 
 \usetheme{Warsaw}
 \usepackage{warsaw-mod}
@@ -24,6 +28,8 @@
     extendedchars=true,
     literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1 {ñ}{{\~n}}1 {Ñ}{{\~N}}1
 }
+
+\setbeamertemplate{navigation symbols}{}
 
 % Cargar los metadatos de la presentación
 \input{sections/00_metadata}
