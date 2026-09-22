@@ -3,7 +3,7 @@
 % ---------------------------------------------------------------
 % 1. Explicación gráfica
 % ---------------------------------------------------------------
-\begin{frame}{Fibonacci Search: Explicación Gráfica}
+\begin{frame}{Fibonacci Search: Explicación Gráfica (1/3)}
     \begin{block}{Concepto principal}
         \footnotesize
         Dada $f$ \textbf{unimodal} en $[a,b]$ y un presupuesto fijo de $n$ evaluaciones,
@@ -35,6 +35,116 @@
               \textbf{máxima reducción garantizada} sin usar derivadas.
         \item El punto que sobrevive se reutiliza: \textbf{1 evaluación nueva} por iteración.
     \end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------
+% 1b. Primera iteración sobre la curva (n = 5, intervalo [0,100])
+% ---------------------------------------------------------------
+\begin{frame}{Fibonacci Search: Explicación Gráfica (2/3)}
+    \begin{center}
+    \begin{tikzpicture}[x=0.1cm, y=1cm, font=\footnotesize]
+        \useasboundingbox (-4,-3.75) rectangle (104,2.4);
+        % Función del ejemplo
+        \node[anchor=north west] at (-2,2.35)
+            {$f(x)=\sqrt{1+\left(\dfrac{x-45}{15}\right)^{2}}$,\quad $x\in[0,100]$};
+        % f(x) = sqrt(1+((x-45)/15)^2), restada su mínimo para apoyarla en y = 0
+        \draw[GrisTexto, thick, domain=0:100, samples=60, smooth, variable=\t]
+            plot ({\t}, {(sqrt(1+((\t-45)/15)^2)-1)*0.6});
+        \pgfmathsetmacro{\hc}{(sqrt(1+((37.5-45)/15)^2)-1)*0.6}
+        \pgfmathsetmacro{\hd}{(sqrt(1+((62.5-45)/15)^2)-1)*0.6}
+
+        % Paso 1: intervalo inicial [a,b]
+        \draw[CelesteBrillante, very thick] (0,-0.45) -- (100,-0.45);
+        \draw[CelesteBrillante, thick] (0,-0.55) -- (0,-0.35);
+        \draw[CelesteBrillante, thick] (100,-0.55) -- (100,-0.35);
+        \node[below] at (0,-0.55)   {$a=0$};
+        \node[below] at (100,-0.55) {$b=100$};
+
+        % Paso 2: puntos de consulta
+        \foreach \px/\lb in {37.5/c, 62.5/d}{
+            \draw[CelesteBrillante, thick] (\px,-0.55) -- (\px,-0.35);
+            \node[below] at (\px,-0.55) {$\lb=\px$};
+        }
+        % Paso 3: se evalúa f en c y d
+        \foreach \px/\py in {37.5/\hc, 62.5/\hd}{
+            \draw[NaranjaBase, dashed] (\px,-0.35) -- (\px,\py);
+            \node[circle, fill=NaranjaBase, inner sep=1.6pt] at (\px,\py) {};
+        }
+        \node[anchor=north east, text=NaranjaBase] at (36,\hc-0.03) {$f(c)$};
+        \node[anchor=south east, text=NaranjaBase] at (61.5,\hd+0.03) {$f(d)$};
+        % Paso 4: se descarta [d,b]; c queda como nuevo punto d
+        \fill[RojoAlerta, opacity=0.25] (62.5,-0.35) rectangle (100,1.75);
+        \draw[RojoAlerta, thick, dashed] (62.5,-1.45) -- (100,-1.45);
+        \draw[CelesteBrillante, very thick] (0,-1.45) -- (62.5,-1.45);
+        \draw[CelesteBrillante, thick] (0,-1.55) -- (0,-1.35);
+        \draw[CelesteBrillante, thick] (62.5,-1.55) -- (62.5,-1.35);
+        \node[circle, fill=VerdeNeon, inner sep=1.6pt] at (37.5,-1.45) {};
+        \node[below, text=VerdeNeon] at (37.5,-1.55) {$c$ se reutiliza};
+
+        % Panel de cálculos (dos columnas)
+        \node[anchor=north west, text width=4.8cm, align=left] at (-2,-2.2)
+            {$n=5,\quad \rho=F_5/F_6=5/8$};
+        \node[anchor=north west, text width=4.8cm, align=left] at (-2,-2.7)
+            {$d=(1-\rho)\,a+\rho\, b=62.5$};
+        \node[anchor=north west, text width=4.8cm, align=left] at (-2,-3.2)
+            {$c=\rho\, a+(1-\rho)\, b=37.5$};
+        \node[anchor=north west, text width=4.8cm, align=left] at (52,-2.2)
+            {$f(c)=1.12 < f(d)=1.54$};
+        \node[anchor=north west, text width=4.8cm, align=left, text=RojoAlerta] at (52,-2.7)
+            {Se descarta $[d,b]$:\\[2pt] $I_2=62.5=\tfrac{5}{8}\,I_1$};
+    \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------
+% 1c. Evolución del intervalo (n = 5, intervalo [0,100])
+% ---------------------------------------------------------------
+% Una fila del diagrama: #1 altura | #2,#3 intervalo anterior | #4,#5 intervalo actual
+%                        #6,#7 puntos izquierdo y derecho | #8,#9 sus colores
+\newcommand{\fibrow}[9]{%
+    \draw[gray!45, thin] (0,#1) -- (100,#1);
+    \draw[RojoAlerta, thick, dashed] (#2,#1) -- (#4,#1);
+    \draw[RojoAlerta, thick, dashed] (#5,#1) -- (#3,#1);
+    \draw[CelesteBrillante, very thick] (#4,#1) -- (#5,#1);
+    \foreach \e in {#4,#5}{\draw[CelesteBrillante, thick] (\e,{#1-0.09}) -- (\e,{#1+0.09});}
+    \node[circle, fill=#8, inner sep=1.4pt] at (#6,#1) {};
+    \node[circle, fill=#9, inner sep=1.4pt] at (#7,#1) {};
+    \node[anchor=south east, inner sep=1pt] at (#6,{#1+0.06}) {$\pgfmathprintnumber[fixed,precision=1]{#6}$};
+    \node[anchor=south west, inner sep=1pt] at (#7,{#1+0.06}) {$\pgfmathprintnumber[fixed,precision=1]{#7}$};
+}
+
+\begin{frame}{Fibonacci Search: Explicación Gráfica (3/3)}
+    \begin{center}
+    \begin{tikzpicture}[x=0.072cm, y=1cm, font=\scriptsize]
+        \useasboundingbox (-3,-5.55) rectangle (146,0.5);
+        \fibrow{0}{0}{100}{0}{100}{37.5}{62.5}{NaranjaBase}{NaranjaBase}
+        \node[right, align=left] at (104,0) {$I_1=100=8u$\\ $\rho=5/8$};
+        \fibrow{-1}{0}{100}{0}{62.5}{25}{37.5}{NaranjaBase}{VerdeNeon}
+        \node[right, align=left] at (104,-1) {$I_2=62.5=5u$\\ $\rho=3/5$};
+        \fibrow{-2}{0}{62.5}{25}{62.5}{37.5}{50}{VerdeNeon}{NaranjaBase}
+        \node[right, align=left] at (104,-2) {$I_3=37.5=3u$\\ $\rho=2/3$};
+        \fibrow{-3}{25}{62.5}{37.5}{62.5}{50}{50.125}{VerdeNeon}{NaranjaBase}
+        \node[right, align=left] at (104,-3) {$I_4=25=2u$\\ $\rho=1/2$};
+        \draw[gray!45, thin] (0,-4) -- (100,-4);
+        \draw[RojoAlerta, thick, dashed] (50.125,-4) -- (62.5,-4);
+        \draw[CelesteBrillante, very thick] (37.5,-4) -- (50.125,-4);
+        \draw[CelesteBrillante, thick] (37.5,-4.09) -- (37.5,-3.91);
+        \draw[CelesteBrillante, thick] (50.125,-4.09) -- (50.125,-3.91);
+        \node[anchor=south east, inner sep=1pt] at (37.5,-3.94) {$37.5$};
+        \node[anchor=south west, inner sep=1pt] at (50.125,-3.94) {$50.1$};
+        \node[right] at (104,-4) {$I_5\approx 12.6\approx u$};
+        \node[below] at (75,-4.15) {$u=100/F_6=12.5$};
+        % Leyenda
+        \draw[CelesteBrillante, very thick] (0,-5.2) -- (8,-5.2);
+        \node[right] at (10,-5.2) {intervalo activo};
+        \draw[RojoAlerta, thick, dashed] (44,-5.2) -- (52,-5.2);
+        \node[right] at (54,-5.2) {descartado};
+        \node[circle, fill=NaranjaBase, inner sep=1.4pt] at (82,-5.2) {};
+        \node[right] at (85,-5.2) {punto nuevo};
+        \node[circle, fill=VerdeNeon, inner sep=1.4pt] at (114,-5.2) {};
+        \node[right] at (117,-5.2) {reutilizado};
+    \end{tikzpicture}
+    \end{center}
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -71,32 +181,69 @@
 % ---------------------------------------------------------------
 % 3. Ejemplo paso a paso
 % ---------------------------------------------------------------
-\begin{frame}{Fibonacci Search: Ejemplo Paso a Paso}
+\begin{frame}{Fibonacci Search: Ejemplo Paso a Paso (1/3)}
+    \scriptsize
     \begin{exampleblock}{Planteamiento}
-        \small
-        Minimizar $f(x)=e^{x-2}-x$ en $[a,b]=[-2,6]$ con $n=5$ evaluaciones
-        y $\epsilon=0.01$. El mínimo exacto es $x^{*}=2$ con $f(x^{*})=-1$.
+        Minimizar $f(x)=\sqrt{1+\left(\frac{x-45}{15}\right)^{2}}$ en $[a,b]=[0,100]$
+        con $n=5$ evaluaciones y $\epsilon=0.01$. El mínimo exacto es $x^{*}=45$.
     \end{exampleblock}
 
-    \vspace{-0.2em}
-    \begin{center}
+    \begin{block}{Inicialización (líneas 1--3)}
+        $\varphi=1.618,\quad s=-0.382,\quad \rho=F_5/F_6=5/8=0.625$\\[2pt]
+        $d=(1-\rho)\,a+\rho\, b=0.375\cdot 0+0.625\cdot 100=62.5$\\[2pt]
+        $y_d=f(62.5)=1.5366,\quad n\gets 4$
+    \end{block}
+
+    \begin{block}{Iteración 1: $n=4>1$ (líneas 5--15)}
+        $c=\rho\, a+(1-\rho)\, b=0.625\cdot 0+0.375\cdot 100=37.5,\quad \rho\gets F_4/F_5=3/5$\\[2pt]
+        $y_c=f(37.5)=1.1180,\quad n\gets 3$\\[2pt]
+        $y_c<y_d \;\Rightarrow\; (d,b,y_d)\gets(37.5,\;62.5,\;1.1180)$\\[2pt]
+        Estado: $a=0,\; b=62.5,\; d=37.5 \;\Rightarrow\; I=[0,\,62.5]$
+    \end{block}
+\end{frame}
+
+\begin{frame}{Fibonacci Search: Ejemplo Paso a Paso (2/3)}
     \scriptsize
-    \begin{tabular}{c c c r c l}
+    \begin{block}{Iteración 2: $n=3>1$}
+        $c=\rho\, a+(1-\rho)\, b=0.6\cdot 0+0.4\cdot 62.5=25,\quad \rho\gets F_3/F_4=2/3$\\[2pt]
+        $y_c=f(25)=1.6667,\quad n\gets 2$\\[2pt]
+        $y_c\ge y_d\;(1.6667\ge 1.1180) \;\Rightarrow\; (a,b)\gets(b,c)=(62.5,\;25)$\\[2pt]
+        Estado: $a=62.5,\; b=25,\; d=37.5 \;\Rightarrow\; I=[25,\,62.5]$\\[2pt]
+        {\tiny Ahora $a>b$: el intervalo quedó volteado y se ordena recién al retornar (línea 18).}
+    \end{block}
+
+    \begin{block}{Iteración 3: $n=2>1$}
+        $c=\tfrac{2}{3}\cdot 62.5+\tfrac{1}{3}\cdot 25=50,\quad \rho\gets F_2/F_3=1/2$\\[2pt]
+        $y_c=f(50)=1.0541,\quad n\gets 1$\\[2pt]
+        $y_c<y_d\;(1.0541< 1.1180) \;\Rightarrow\; (d,b,y_d)\gets(50,\;37.5,\;1.0541)$\\[2pt]
+        Estado: $a=62.5,\; b=37.5,\; d=50 \;\Rightarrow\; I=[37.5,\,62.5]$
+    \end{block}
+\end{frame}
+
+\begin{frame}{Fibonacci Search: Ejemplo Paso a Paso (3/3)}
+    \scriptsize
+    \begin{block}{Iteración 4: $n=1$, rama \textit{else} (línea 8)}
+        $c=\epsilon\, a+(1-\epsilon)\, d=0.01\cdot 62.5+0.99\cdot 50=50.125$\\[2pt]
+        $y_c=f(50.125)=1.0568,\quad n\gets 0$\\[2pt]
+        $y_c\ge y_d\;(1.0568\ge 1.0541) \;\Rightarrow\; (a,b)\gets(b,c)=(37.5,\;50.125)$
+    \end{block}
+
+    \begin{exampleblock}{Resultado (línea 18)}
+        $[\min(a,b),\,\max(a,b)]=[37.5,\;50.125]$, de longitud $12.625\approx 100/F_6=12.5$,
+        que contiene a $x^{*}=45$.
+    \end{exampleblock}
+
+    \begin{center}
+    \begin{tabular}{l c c c c c}
         \toprule
-        \# & $\rho=F_k/F_{k+1}$ & consulta & $f$ & comparación & nuevo $[a,b]$ \\
+        & inicio & tras it.\,1 & tras it.\,2 & tras it.\,3 & tras it.\,4 \\
         \midrule
-        1 & $5/8$ & $d=3$    & $-0.282$ & ---            & $[-2,\,6]$ \\
-        2 & $3/5$ & $c=1$    & $-0.632$ & $y_c<y_d$      & $[-2,\,3]$ \\
-        3 & $2/3$ & $c=0$    & $+0.135$ & $y_c\ge y_d$   & $[0,\,3]$ \\
-        4 & $1/2$ & $c=2$    & $-1.000$ & $y_c<y_d$      & $[1,\,3]$ \\
-        5 & $\epsilon$ & $c=2.01$ & $-0.9999$ & $y_c\ge y_d$ & $[1,\,2.01]$ \\
+        $[a,b]$  & $[0,100]$ & $[0,62.5]$ & $[25,62.5]$ & $[37.5,62.5]$ & $[37.5,50.125]$ \\
+        longitud & $100$ & $62.5$ & $37.5$ & $25$ & $12.625$ \\
+        múltiplo de $u=12.5$ & $8u$ & $5u$ & $3u$ & $2u$ & $\approx u$ \\
         \bottomrule
     \end{tabular}
     \end{center}
-
-    \footnotesize
-    El intervalo pasó de longitud $8$ a $1.01$: exactamente el factor
-    $F_{6}=8$ que el algoritmo garantiza con $n=5$ consultas, y contiene a $x^{*}=2$.
 \end{frame}
 
 % ---------------------------------------------------------------
@@ -123,7 +270,8 @@ def fibonacci_search(f, a, b, n, eps=0.01):
         else:
             a, b = b, c           # se invierte el intervalo
     return (a, b) if a < b else (b, a)
-# f(x) = exp(x-2) - x en [-2, 6], n = 5  ->  (1.0, 2.01)
+# f(x) = sqrt(1 + ((x-45)/15)**2)
+# fibonacci_search(f, 0, 100, 5) -> (37.5, 50.125)
 \end{lstlisting}
 \end{frame}
 
