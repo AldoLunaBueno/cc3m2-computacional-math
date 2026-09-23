@@ -317,7 +317,7 @@ En cada iteración calculamos los posibles mínimos de la envolvente diente de s
     & \(P_{y2} = -1.25\) & \(0.50\) & \(0.00\) & \(1.25\) \\
     
     \textbf{4} & \scriptsize \((-1, 2.25), (0, 0.25), (0.5, 0), (1, 0.25)\) 
-    & \(P_{y3} = -0.75\) & \(0.75\) & \(0.06\) & \(0.81\) \\
+    & \(P_{y2} = -0.625\) & \(0.2917\) & \(0.0434\) & \(0.6684\) \\
     \bottomrule
 \end{tabular}%  
 }
@@ -325,11 +325,227 @@ En cada iteración calculamos los posibles mínimos de la envolvente diente de s
 \vspace{0.25cm}
 \raggedright
 \footnotesize
-\textbf{Detalle de la Iteración 3:} \\
-El mínimo estimado proviene de la intersección entre \((0, 0.25)\) y \((1, 0.25)\): \\
-\(t = \frac{(0.25 - 0.25) - 3(0 - 1)}{6} = 0.5\),  \(P_x = 0 + 0.5 = \mathbf{0.5}\), \(P_y = 0.25 - 3(0.5) = \mathbf{-1.25}\).
+\textbf{Detalle de la Iteración 4:} \\
+El mínimo estimado proviene de la intersección entre \((0, 0.25)\) y \((0.5, 0)\): \\
+\(t = \frac{(0.25 - 0.0) - 3(0 - 0.5)}{6} = \frac{1.75}{6} \approx 0.2917\), \quad 
+\(P_x = 0 + 0.2917 = \mathbf{0.2917}\), \\
+\(P_y = 0.25 - 3(0.2917) = \mathbf{-0.6250}\), \quad 
+\(\Delta = f(0.2917) - (-0.6250) = 0.0434 + 0.6250 = \mathbf{0.6684}\).
 \end{frame}
 
+
+% ---------------------------------------------------------------
+% Shubert-Piyavskii: Iteración 1 (Corregido visualmente)
+% ---------------------------------------------------------------
+\begin{frame}{Shubert-Piyavskii: Iteración 1}
+    \vspace{-0.2cm}
+    \begin{exampleblock}{Estado Inicial e Iteración 1}
+        \footnotesize
+        Con el nodo central \((0, 0.25)\), los conos de pendiente \(L=3\) generan en las fronteras \(y_{\text{izq}} = y_{\text{der}} = -2.75\). Por orden de exploración, se evalúa la frontera izquierda \(x^{(1)} = -1.00\) con \(f(-1.0) = 2.25\), trazando el nuevo rayo descendente hacia el interior.
+    \end{exampleblock}
+
+    \vspace{-0.1cm}
+    \begin{center}
+    \begin{tikzpicture}[
+        x=3.8cm, y=0.7cm, font=\scriptsize,
+        declare function={
+            f(\x) = (\x - 0.5)^2;
+        }
+    ]
+        % Marco exterior ajustado a las dimensiones del slide
+        \draw[thick, GrisTexto] (-1.15, -3.1) rectangle (1.15, 2.7);
+
+        % Eje horizontal y = 0
+        \draw[GrisTexto, dashed, thin] (-1.15, 0) -- (1.15, 0);
+
+        % Marcas en el eje X (Dibujadas hacia AFUERA del marco)
+        \draw[GrisTexto] (-1.0, -3.1) -- (-1.0, -3.25) node[below, text=GrisTexto] {\(-1\)};
+        \draw[GrisTexto] (0.0, -3.1) -- (0.0, -3.25) node[below, text=GrisTexto] {\(0\)};
+        \draw[GrisTexto] (1.0, -3.1) -- (1.0, -3.25) node[below, text=GrisTexto] {\(1\)};
+
+        % Marcas en el eje Y (Dibujadas hacia AFUERA del marco)
+        \draw[GrisTexto] (-1.15, -2.75) -- (-1.25, -2.75) node[left, text=GrisTexto] {\(-2.75\)};
+        \draw[GrisTexto] (-1.15, 0.0) -- (-1.25, 0.0) node[left, text=GrisTexto] {\(0\)};
+        \draw[GrisTexto] (-1.15, 2.25) -- (-1.25, 2.25) node[left, text=GrisTexto] {\(2.25\)};
+
+        % Leyenda distribuida horizontalmente para evitar superposición
+        \draw[white, thick] (-1.0, 2.45) -- (-0.8, 2.45) node[right, text=white] {\(f(x) = (x-0.5)^2\)};
+        \draw[NaranjaBase, thick] (-0.2, 2.45) -- (0.0, 2.45) node[right, text=NaranjaBase] {Envolvente inicial};
+        \draw[CelesteBrillante, thick] (0.65, 2.45) -- (0.8, 2.45) node[right, text=CelesteBrillante] {Nuevo cono};
+
+        % Función objetivo f(x)
+        \draw[white, thick, domain=-1:1, samples=60, smooth] plot (\x, {f(\x)});
+
+        % Envolvente inicial trazada desde (0, 0.25)
+        \draw[NaranjaBase, thick] (-1.0, -2.75) -- (0.0, 0.25) -- (1.0, -2.75);
+
+        % Punto inferior evaluado en x = -1
+        \filldraw[NaranjaBase] (-1.0, -2.75) circle (1.5pt) node[below right, text=NaranjaBase, yshift=-1pt] {\((-1, -2.75)\)};
+
+        % Flecha de evaluación vertical
+        \draw[-stealth, dashed, white, thick] (-1.0, -2.6) -- (-1.0, 2.15);
+
+        % Nuevo rayo exacto: desde (-1, 2.25) hasta la intersección (-0.1667, -0.25)
+        \draw[CelesteBrillante, very thick] (-1.0, 2.25) -- (-0.1667, -0.25);
+        \filldraw[CelesteBrillante] (-0.1667, -0.25) circle (1.3pt) node[below, text=CelesteBrillante, yshift=-3pt] {\scriptsize\((-0.17, -0.25)\)};
+
+        % Nodos evaluados sobre f(x)
+        \filldraw[CelesteBrillante] (0.0, 0.25) circle (1.6pt) node[above, text=CelesteBrillante, yshift=2pt] {\((0, 0.25)\)};
+        % Reubicado para que no choque con el eje Y
+        \filldraw[CelesteBrillante] (-1.0, 2.25) circle (1.6pt) node[above right, text=CelesteBrillante] {\(x^{(1)} = -1\)};
+    \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+
+% ---------------------------------------------------------------
+% Shubert-Piyavskii: Iteración 2
+% ---------------------------------------------------------------
+\begin{frame}{Shubert-Piyavskii: Iteración 2}
+    \vspace{-0.2cm}
+    \begin{exampleblock}{Iteración 2: Exploración de la frontera derecha}
+        \footnotesize
+        Tras actualizar la envolvente, el mínimo estimado (el vértice más profundo) se ubica en la frontera derecha en \(x^{(2)} = 1.00\), donde \(y_{\text{der}} = -2.75\). Al evaluar, obtenemos \(f(1.0) = 0.25\). Se traza un nuevo rayo hacia el interior que levanta la cota inferior por la derecha.
+    \end{exampleblock}
+
+    \vspace{-0.1cm}
+    \begin{center}
+    \begin{tikzpicture}[
+        x=3.8cm, y=0.7cm, font=\scriptsize,
+        declare function={
+            f(\x) = (\x - 0.5)^2;
+        }
+    ]
+        % Marco exterior ajustado a las dimensiones del slide
+        \draw[thick, GrisTexto] (-1.15, -3.1) rectangle (1.15, 2.7);
+
+        % Eje horizontal y = 0
+        \draw[GrisTexto, dashed, thin] (-1.15, 0) -- (1.15, 0);
+
+        % Marcas en el eje X (Dibujadas hacia AFUERA del marco)
+        \draw[GrisTexto] (-1.0, -3.1) -- (-1.0, -3.25) node[below, text=GrisTexto] {\(-1\)};
+        \draw[GrisTexto] (0.0, -3.1) -- (0.0, -3.25) node[below, text=GrisTexto] {\(0\)};
+        \draw[GrisTexto] (1.0, -3.1) -- (1.0, -3.25) node[below, text=GrisTexto] {\(1\)};
+
+        % Marcas en el eje Y (Dibujadas hacia AFUERA del marco)
+        \draw[GrisTexto] (-1.15, -2.75) -- (-1.25, -2.75) node[left, text=GrisTexto] {\(-2.75\)};
+        \draw[GrisTexto] (-1.15, 0.0) -- (-1.25, 0.0) node[left, text=GrisTexto] {\(0\)};
+        \draw[GrisTexto] (-1.15, 2.25) -- (-1.25, 2.25) node[left, text=GrisTexto] {\(2.25\)};
+
+        % Leyenda distribuida horizontalmente para evitar superposición
+        \draw[white, thick] (-1.0, 2.45) -- (-0.8, 2.45) node[right, text=white] {\(f(x) = (x-0.5)^2\)};
+        \draw[NaranjaBase, thick] (-0.2, 2.45) -- (0.0, 2.45) node[right, text=NaranjaBase] {Envolvente actual};
+        \draw[CelesteBrillante, thick] (0.65, 2.45) -- (0.8, 2.45) node[right, text=CelesteBrillante] {Nuevo cono};
+
+        % Función objetivo f(x)
+        \draw[white, thick, domain=-1:1, samples=60, smooth] plot (\x, {f(\x)});
+
+        % Envolvente actual consolidada (heredada de la iteración 1)
+        % Recorrido: (-1, 2.25) -> intersección izq -> (0, 0.25) -> fondo derecho
+        \draw[NaranjaBase, thick] (-1.0, 2.25) -- (-0.1667, -0.25) -- (0.0, 0.25) -- (1.0, -2.75);
+        
+        % Vértice consolidado de la iteración anterior (pasa a ser naranja)
+        \filldraw[NaranjaBase] (-0.1667, -0.25) circle (1.3pt) node[below, text=NaranjaBase, yshift=-3pt] {\scriptsize\((-0.17, -0.25)\)};
+
+        % Punto inferior evaluado en el paso actual: x = 1
+        \filldraw[NaranjaBase] (1.0, -2.75) circle (1.5pt) node[below left, text=NaranjaBase, yshift=-1pt] {\((1, -2.75)\)};
+
+        % Flecha de evaluación vertical (desde el mínimo inferior hasta f(1))
+        \draw[-stealth, dashed, white, thick] (1.0, -2.6) -- (1.0, 0.15);
+
+        % Nuevo rayo exacto: desde (1, 0.25) hacia la izquierda hasta la intersección (0.5, -1.25)
+        \draw[CelesteBrillante, very thick] (1.0, 0.25) -- (0.5, -1.25);
+        \filldraw[CelesteBrillante] (0.5, -1.25) circle (1.3pt) node[below, text=CelesteBrillante, yshift=-3pt] {\scriptsize\((0.5, -1.25)\)};
+
+        % Nodos evaluados sobre f(x)
+        \filldraw[CelesteBrillante] (-1.0, 2.25) circle (1.6pt); % Nodo antiguo
+        \filldraw[CelesteBrillante] (0.0, 0.25) circle (1.6pt) node[above, text=CelesteBrillante, yshift=2pt] {\((0, 0.25)\)}; % Nodo central
+        
+        % Nodo recién evaluado, etiqueta desplazada a la izquierda para evitar el marco
+        \filldraw[CelesteBrillante] (1.0, 0.25) circle (1.6pt) node[above left, text=CelesteBrillante] {\(x^{(2)} = 1\)};
+    \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+
+% ---------------------------------------------------------------
+% Shubert-Piyavskii: Iteración 3
+% ---------------------------------------------------------------
+\begin{frame}{Shubert-Piyavskii: Iteración 3}
+    \vspace{-0.2cm}
+    \begin{exampleblock}{Iteración 3: Exploración del interior}
+        \footnotesize
+        El mínimo estimado de la envolvente se encuentra ahora en el interior, en \(x^{(3)} = 0.50\), donde \(y_{\min} = -1.25\). Al evaluar, obtenemos \(f(0.5) = 0.00\) (el mínimo exacto). Se traza un nuevo cono desde este punto, levantando la envolvente y generando dos intersecciones simétricas.
+    \end{exampleblock}
+
+    \vspace{-0.1cm}
+    \begin{center}
+    \begin{tikzpicture}[
+        x=3.8cm, y=0.7cm, font=\scriptsize,
+        declare function={
+            f(\x) = (\x - 0.5)^2;
+        }
+    ]
+        % Marco exterior ajustado a las dimensiones del slide
+        \draw[thick, GrisTexto] (-1.15, -3.1) rectangle (1.15, 2.7);
+
+        % Eje horizontal y = 0
+        \draw[GrisTexto, dashed, thin] (-1.15, 0) -- (1.15, 0);
+
+        % Marcas en el eje X (Dibujadas hacia AFUERA del marco)
+        \draw[GrisTexto] (-1.0, -3.1) -- (-1.0, -3.25) node[below, text=GrisTexto] {\(-1\)};
+        \draw[GrisTexto] (0.0, -3.1) -- (0.0, -3.25) node[below, text=GrisTexto] {\(0\)};
+        \draw[GrisTexto] (1.0, -3.1) -- (1.0, -3.25) node[below, text=GrisTexto] {\(1\)};
+
+        % Marcas en el eje Y (Dibujadas hacia AFUERA del marco)
+        \draw[GrisTexto] (-1.15, -2.75) -- (-1.25, -2.75) node[left, text=GrisTexto] {\(-2.75\)};
+        \draw[GrisTexto] (-1.15, -1.25) -- (-1.25, -1.25) node[left, text=GrisTexto] {\(-1.25\)};
+        \draw[GrisTexto] (-1.15, 0.0) -- (-1.25, 0.0) node[left, text=GrisTexto] {\(0\)};
+        \draw[GrisTexto] (-1.15, 2.25) -- (-1.25, 2.25) node[left, text=GrisTexto] {\(2.25\)};
+
+        % Leyenda distribuida horizontalmente
+        \draw[white, thick] (-1.0, 2.45) -- (-0.8, 2.45) node[right, text=white] {\(f(x) = (x-0.5)^2\)};
+        \draw[NaranjaBase, thick] (-0.2, 2.45) -- (0.0, 2.45) node[right, text=NaranjaBase] {Envolvente actual};
+        \draw[CelesteBrillante, thick] (0.65, 2.45) -- (0.8, 2.45) node[right, text=CelesteBrillante] {Nuevo cono};
+
+        % Función objetivo f(x)
+        \draw[white, thick, domain=-1:1, samples=60, smooth] plot (\x, {f(\x)});
+
+        % Envolvente actual consolidada (heredada de la iteración 2)
+        \draw[NaranjaBase, thick] (-1.0, 2.25) -- (-0.1667, -0.25) -- (0.0, 0.25) -- (0.5, -1.25) -- (1.0, 0.25);
+        
+        % Vértice izquierdo consolidado
+        \filldraw[NaranjaBase] (-0.1667, -0.25) circle (1.3pt);
+
+        % Punto inferior evaluado en el paso actual: x = 0.5
+        \filldraw[NaranjaBase] (0.5, -1.25) circle (1.5pt) node[below, text=NaranjaBase, yshift=-1pt] {\((0.5, -1.25)\)};
+
+        % Flecha de evaluación vertical
+        \draw[-stealth, dashed, white, thick] (0.5, -1.1) -- (0.5, -0.15);
+
+        % Nuevo cono exacto: desde (0.5, 0.0) hacia izquierda y derecha
+        % Intersección izquierda: (0.2917, -0.625)
+        % Intersección derecha: (0.7083, -0.625)
+        \draw[CelesteBrillante, very thick] (0.5, 0.0) -- (0.2917, -0.625);
+        \draw[CelesteBrillante, very thick] (0.5, 0.0) -- (0.7083, -0.625);
+        
+        % Etiquetas de las nuevas intersecciones
+        \filldraw[CelesteBrillante] (0.2917, -0.625) circle (1.3pt) node[below left, text=CelesteBrillante, xshift=6pt, yshift=-2pt] {\scriptsize\((0.29, -0.63)\)};
+        \filldraw[CelesteBrillante] (0.7083, -0.625) circle (1.3pt) node[below right, text=CelesteBrillante, xshift=-6pt, yshift=-2pt] {\scriptsize\((0.71, -0.63)\)};
+
+        % Nodos evaluados sobre f(x)
+        \filldraw[CelesteBrillante] (-1.0, 2.25) circle (1.6pt);
+        \filldraw[CelesteBrillante] (0.0, 0.25) circle (1.6pt) node[above, text=CelesteBrillante, yshift=2pt] {\((0, 0.25)\)};
+        \filldraw[CelesteBrillante] (1.0, 0.25) circle (1.6pt);
+        
+        % Nodo recién evaluado
+        \filldraw[CelesteBrillante] (0.5, 0.0) circle (1.6pt) node[above, text=CelesteBrillante, yshift=2pt] {\(x^{(3)} = 0.5\)};
+    \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+
+% Implementación
 \begin{frame}[fragile]{Shubert-Piyavskii: Implementación}
     \begin{lstlisting}[basicstyle=\ttfamily\tiny]
 class Punto:
@@ -357,6 +573,7 @@ def shubert_piyavskii(f, a, b, l, epsilon):
     return mejor_punto.x, mejor_punto.y
     \end{lstlisting}
 \end{frame}
+
 
 % ---------------------------------------------------------------
 % 8. Análisis de Convergencia
