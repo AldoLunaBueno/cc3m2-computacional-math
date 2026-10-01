@@ -1,0 +1,57 @@
+\subsection{RMSProp}
+
+\begin{frame}{RMSProp: Explicación Gráfica}
+    \begin{block}{Concepto principal}
+        [Explica el uso de la media móvil exponencial de gradientes para corregir la limitación de Adagrad].
+    \end{block}
+    \begin{itemize}
+        \item {[Idea gráfica 1: Ventana móvil de memoria reciente en lugar de suma histórica infinita].}
+        \item {[Idea gráfica 2: Estabilización de trayectorias en valles alargados].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{RMSProp: Pseudocódigo}
+    \begin{algorithmic}[1]
+        \State \textbf{Input:} {[Tasa \(\alpha\), factor de decaimiento \(\gamma\), \(\epsilon\), punto \(x\)]}
+        \State Inicializar promedio móvil \(v \leftarrow 0\)
+        \While{[Condición de parada]}
+            \State Calcular gradiente \(g\)
+            \State Actualizar promedio exponencial: \(v \leftarrow \gamma v + (1-\gamma) g \odot g\)
+            \State Actualizar parámetros: \(x \leftarrow x - \frac{\alpha}{\sqrt{v + \epsilon}} \odot g\)
+        \EndWhile
+        \State \textbf{Return} {[Punto óptimo]}
+    \end{algorithmic}
+\end{frame}
+
+\begin{frame}{RMSProp: Ejemplo Paso a Paso}
+    \begin{exampleblock}{Planteamiento del problema}
+        [Define función objetivo, valor inicial y tasa de decaimiento \(\gamma\) (ej: $0.9$)].
+    \end{exampleblock}
+    \begin{itemize}
+        \item \textbf{Paso 1:} {[Evaluación de \(g\) y primer valor de \(v\)].}
+        \item \textbf{Paso 2:} {[Paso adaptativo normalizado y actualización de \(x\)].}
+        \item \textbf{Paso 3:} {[Evolución observada en los siguientes pasos].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{RMSProp: Código}
+\begin{lstlisting}[language=Python]
+def rmsprop(grad_f, x0, alpha=0.01, gamma=0.9, eps=1e-8, max_iter=100):
+    # TODO: Inicializar vector v en ceros
+    # for t in range(max_iter):
+    #     g = grad_f(x)
+    #     v = gamma * v + (1 - gamma) * (g ** 2)
+    #     x = x - (alpha / (np.sqrt(v) + eps)) * g
+    pass
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{RMSProp: Análisis de Convergencia}
+    \begin{alertblock}{Propiedades de Convergencia}
+        [Discutir estabilidad en problemas no convexos y aprendizaje profundo].
+    \end{alertblock}
+    \begin{itemize}
+        \item {[Ventaja frente a la saturación de pasos de Adagrad].}
+        \item {[Sensibilidad respecto al parámetro de tasa base \(\alpha\)].}
+    \end{itemize}
+\end{frame}

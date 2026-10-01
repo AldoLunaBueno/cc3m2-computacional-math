@@ -5,7 +5,7 @@
 
 \usepackage{graphicx}
 \usepackage{algorithm}
-\usepackage{algpseudocode}
+
 \usepackage{xcolor}
 \usepackage{tikz}
 \usepackage{booktabs}
@@ -20,7 +20,7 @@
 \usepackage{listings}
 \lstset{
 language=Python,
-basicstyle=\ttfamily\scriptsize,
+basicstyle=\ttfamily\tiny,
 keywordstyle=\color{blue},
 stringstyle=\color{green!50!black},
 commentstyle=\color{gray},
@@ -30,7 +30,27 @@ extendedchars=true,
 literate={á}{{'a}}1 {é}{{'e}}1 {í}{{'i}}1 {ó}{{'o}}1 {ú}{{'u}}1 {Á}{{'A}}1 {É}{{'E}}1 {Í}{{'I}}1 {Ó}{{'O}}1 {Ú}{{'U}}1 {ñ}{{~n}}1 {Ñ}{{~N}}1
 }
 
+\usepackage{algpseudocode}
+\usepackage{etoolbox}
+% Reducir el cuerpo del texto del pseudocódigo a \tiny
+\AtBeginEnvironment{algorithmic}{\scriptsize}
+% Reducir también los números de línea a \tiny
+\algrenewcommand{\alglinenumber}[1]{\tiny #1:}
+
 \setbeamertemplate{navigation symbols}{}
+
+
+% Mostrar numeración de diapositivas tipo "16 / 70" en la esquina inferior derecha
+\setbeamertemplate{footline}{
+    \leavevmode%
+    \hbox{%
+        \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.125ex,right]{page number in head/foot}%
+            \usebeamercolor[fg]{page number in head/foot}
+            \insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+        \end{beamercolorbox}%
+    }%
+    \vskip0pt%
+}
 
 % Cargar los metadatos de la presentación
 \input{sections/00_metadata}

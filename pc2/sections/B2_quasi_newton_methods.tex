@@ -1,0 +1,61 @@
+\subsection{Quasi-Newton Methods}
+
+\begin{frame}{Quasi-Newton Methods: Explicación Gráfica}
+    \begin{block}{Concepto principal}
+        [Explica la aproximación iterativa de la matriz inversa del Hessiano \(H^{-1}\) usando solo información de gradientes].
+    \end{block}
+    \begin{itemize}
+        \item {[Idea gráfica 1: Modelo cuadrático local que se ajusta iterativamente].}
+        \item {[Idea gráfica 2: Corrección secante matricial en varias dimensiones].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Quasi-Newton Methods: Pseudocódigo}
+    \begin{algorithmic}[1]
+        \State \textbf{Input:} {[Gradiente \(\nabla f\), matriz inicial \(B_0\) (o \(H_0^{-1}\)), punto \(x_0\)]}
+        \While{[Condición de parada]}
+            \State Calcular dirección de búsqueda: \(d \leftarrow -H \nabla f(x)\)
+            \State Realizar búsqueda de línea para obtener \(\alpha\)
+            \State Calcular diferencias de posiciones \(s\) y gradientes \(y\)
+            \State Actualizar matriz aproximada (ej. fórmula BFGS o DFP)
+            \State \(x \leftarrow x + \alpha d\)
+        \EndWhile
+        \State \textbf{Return} {[Punto óptimo]}
+    \end{algorithmic}
+\end{frame}
+
+\begin{frame}{Quasi-Newton Methods: Ejemplo Paso a Paso}
+    \begin{exampleblock}{Planteamiento del problema}
+        [Define función cuadrática multivariable y matriz inicial \(H_0 = I\)].
+    \end{exampleblock}
+    \begin{itemize}
+        \item \textbf{Paso 1:} {[Cálculo del primer paso en dirección del gradiente].}
+        \item \textbf{Paso 2:} {[Cálculo de los vectores \(s_k, y_k\) y actualización de la matriz].}
+        \item \textbf{Paso 3:} {[Determinación de la nueva dirección deformada por la curvatura].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Quasi-Newton Methods: Código}
+\begin{lstlisting}[language=Python]
+def bfgs_method(f, grad_f, x0, max_iter=50, tol=1e-5):
+    # TODO: Inicializar H como la matriz identidad
+    # while iter < max_iter:
+    #     d = -H @ grad_f(x)
+    #     alpha = line_search(...)
+    #     x_next = x + alpha * d
+    #     s = x_next - x
+    #     y = grad_f(x_next) - grad_f(x)
+    #     H = update_bfgs(H, s, y)
+    pass
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Quasi-Newton Methods: Análisis de Convergencia}
+    \begin{alertblock}{Tasa de Convergencia}
+        [Indicar convergencia superlineal y preservación de definida positiva].
+    \end{alertblock}
+    \begin{itemize}
+        \item {[Comparación de costo por iteración \(O(n^2)\) vs Newton \(O(n^3)\)].}
+        \item {[Ventajas de BFGS y L-BFGS para problemas a gran escala].}
+    \end{itemize}
+\end{frame}

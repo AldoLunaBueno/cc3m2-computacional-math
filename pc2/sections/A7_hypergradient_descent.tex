@@ -1,0 +1,58 @@
+\subsection{Hypergradient Descent}
+
+\begin{frame}{Hypergradient Descent: Explicación Gráfica}
+    \begin{block}{Concepto principal}
+        [Explica la idea de ajustar dinámicamente la propia tasa de aprendizaje usando el gradiente del paso previo].
+    \end{block}
+    \begin{itemize}
+        \item {[Idea gráfica 1: Producto punto entre gradientes consecutivos indicando alineación o cambio brusco].}
+        \item {[Idea gráfica 2: Auto-sintonización de \(\alpha\) en tiempo de ejecución].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Hypergradient Descent: Pseudocódigo}
+    \begin{algorithmic}[1]
+        \State \textbf{Input:} {[Tasa inicial \(\alpha_0\), hiper-tasa \(\mu\), posición \(x_0\)]}
+        \State Calcular gradiente inicial \(g_0\)
+        \While{[Condición de parada]}
+            \State Actualizar posición usando \(\alpha_{t-1}\) y \(g_{t-1}\)
+            \State Calcular nuevo gradiente \(g_t\)
+            \State Actualizar tasa de aprendizaje: \(\alpha_t \leftarrow \alpha_{t-1} + \mu \langle g_t, g_{t-1} \rangle\)
+        \EndWhile
+        \State \textbf{Return} {[Punto óptimo]}
+    \end{algorithmic}
+\end{frame}
+
+\begin{frame}{Hypergradient Descent: Ejemplo Paso a Paso}
+    \begin{exampleblock}{Planteamiento del problema}
+        [Define función 1D o 2D, \(\alpha_0\) y \(\mu\)].
+    \end{exampleblock}
+    \begin{itemize}
+        \item \textbf{Paso 1:} {[Cálculo de primer avance y nuevo gradiente].}
+        \item \textbf{Paso 2:} {[Evaluación del producto de gradientes y actualización de \(\alpha\)].}
+        \item \textbf{Paso 3:} {[Observar si la tasa se expande o se reduce].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Hypergradient Descent: Código}
+\begin{lstlisting}[language=Python]
+def hypergradient_descent(grad_f, x0, alpha0=0.01, mu=0.001, max_iter=100):
+    # TODO: Inicializar x, alpha y gradiente previo
+    # for t in range(max_iter):
+    #     g = grad_f(x)
+    #     alpha = alpha + mu * np.dot(g, g_prev)
+    #     x = x - alpha * g
+    #     g_prev = g
+    pass
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Hypergradient Descent: Análisis de Convergencia}
+    \begin{alertblock}{Propiedades de Convergencia}
+        [Discutir estabilidad frente a la elección de la hiper-tasa \(\mu\)].
+    \end{alertblock}
+    \begin{itemize}
+        \item {[Ventajas en trayectorias con tramos de curvatura muy dispar].}
+        \item {[Riesgos de divergencia si \(\mu\) es excesivo].}
+    \end{itemize}
+\end{frame}

@@ -1,0 +1,55 @@
+\subsection{Momentum}
+
+\begin{frame}{Momentum: Explicación Gráfica}
+    \begin{block}{Concepto principal}
+        [Explica la analogía física de la partícula con masa e inercia bajando por una superficie].
+    \end{block}
+    \begin{itemize}
+        \item {[Idea gráfica 1: Reducción de oscilaciones transversales en cañones estrechos].}
+        \item {[Idea gráfica 2: Acumulación de velocidad en la dirección persistente].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Momentum: Pseudocódigo}
+    \begin{algorithmic}[1]
+        \State \textbf{Input:} {[Tasa de aprendizaje \(\alpha\), coeficiente de momento \(\beta\), punto inicial \(x\)]}
+        \State Inicializar vector de velocidad \(v \leftarrow 0\)
+        \While{[Condición de parada]}
+            \State Actualizar velocidad con inercia y gradiente
+            \State Actualizar posición usando la velocidad
+        \EndWhile
+        \State \textbf{Return} {[Punto óptimo]}
+    \end{algorithmic}
+\end{frame}
+
+\begin{frame}{Momentum: Ejemplo Paso a Paso}
+    \begin{exampleblock}{Planteamiento del problema}
+        [Define función de prueba 2D con distinta curvatura por eje y parámetros \(\alpha\), \(\beta\)].
+    \end{exampleblock}
+    \begin{itemize}
+        \item \textbf{Paso 1:} {[Calcular gradiente y velocidad inicial en \(t=1\)].}
+        \item \textbf{Paso 2:} {[Calcular velocidad acumulada y nueva posición en \(t=2\)].}
+        \item \textbf{Paso 3:} {[Observación de la trayectoria resultante].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Momentum: Código}
+\begin{lstlisting}[language=Python]
+def momentum_descent(grad_f, x0, alpha=0.01, beta=0.9, max_iter=100):
+    # TODO: Inicializar v = 0
+    # for t in range(max_iter):
+    #     v = beta * v + alpha * grad_f(x)
+    #     x = x - v
+    pass
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Momentum: Análisis de Convergencia}
+    \begin{alertblock}{Tasa de Convergencia}
+        [Comparativa de velocidad de convergencia frente al descenso de gradiente clásico].
+    \end{alertblock}
+    \begin{itemize}
+        \item {[Efecto del hiperparámetro de momento en el amortiguamiento].}
+        \item {[Comportamiento frente a mínimos locales y zonas planas].}
+    \end{itemize}
+\end{frame}

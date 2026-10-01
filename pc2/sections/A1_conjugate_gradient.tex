@@ -1,0 +1,59 @@
+\subsection{Conjugate Gradient}
+
+\begin{frame}{Conjugate Gradient: Explicación Gráfica}
+    \begin{block}{Concepto principal}
+        [Explica aquí la idea central de direcciones conjugadas y ortogonalidad respecto a la matriz hessiana].
+    \end{block}
+    \begin{itemize}
+        \item {[Idea gráfica 1: Comportamiento en curvas de nivel cuadráticas frente al descenso estándar].}
+        \item {[Idea gráfica 2: Ortogonalidad de las direcciones de búsqueda sucesivas].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Conjugate Gradient: Pseudocódigo}
+    \begin{algorithmic}[1]
+        \State \textbf{Input:} {[Definir entradas: función \(f\), gradiente \(\nabla f\), punto inicial \(x^{(1)}\), tolerancias]}
+        \State Inicializar dirección de descenso inicial \(d^{(1)}\)
+        \While{[Condición de parada]}
+            \State Calcular longitud de paso \(\alpha\)
+            \State Actualizar punto: \(x \leftarrow x + \alpha d\)
+            \State Calcular factor de conjugación \(\beta\)
+            \State Actualizar nueva dirección: \(d \leftarrow -\nabla f + \beta d\)
+        \EndWhile
+        \State \textbf{Return} {[Punto óptimo]}
+    \end{algorithmic}
+\end{frame}
+
+\begin{frame}{Conjugate Gradient: Ejemplo Paso a Paso}
+    \begin{exampleblock}{Planteamiento del problema}
+        [Define aquí una función de prueba cuadrática simple, ej: \(f(x_1, x_2) = x_1^2 + 2x_2^2\), y punto inicial].
+    \end{exampleblock}
+    \begin{itemize}
+        \item \textbf{Paso 1:} {[Cálculo del gradiente inicial y primera dirección de búsqueda].}
+        \item \textbf{Paso 2:} {[Cálculo del factor de actualización \(\beta\) y siguiente dirección].}
+        \item \textbf{Paso 3:} {[Estado de convergencia y resultado].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Conjugate Gradient: Código}
+\begin{lstlisting}[language=Python]
+def conjugate_gradient(f, grad_f, x0, max_iter=50, tol=1e-5):
+    # TODO: Inicializar variables y primera direccion d
+    # while iter < max_iter:
+    #     alpha = line_search(...)
+    #     x = x + alpha * d
+    #     beta = compute_beta(...)
+    #     d = -grad + beta * d
+    pass
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Conjugate Gradient: Análisis de Convergencia}
+    \begin{alertblock}{Tasa de Convergencia}
+        [Indicar tipo de convergencia en funciones cuadráticas vs funciones no lineales].
+    \end{alertblock}
+    \begin{itemize}
+        \item {[Propiedades teóricas de convergencia en \(n\) dimensiones].}
+        \item {[Ventajas y limitaciones frente a métodos de segundo orden puros].}
+    \end{itemize}
+\end{frame}

@@ -1,0 +1,57 @@
+\subsection{Adagrad}
+
+\begin{frame}{Adagrad: Explicación Gráfica}
+    \begin{block}{Concepto principal}
+        [Explica la adaptación de la tasa de aprendizaje por dimensión según frecuencias de actualización].
+    \end{block}
+    \begin{itemize}
+        \item {[Idea gráfica 1: Escalamiento elipsoidal vs pasos simétricos estándar].}
+        \item {[Idea gráfica 2: Atenuación progresiva del paso a lo largo de las iteraciones].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Adagrad: Pseudocódigo}
+    \begin{algorithmic}[1]
+        \State \textbf{Input:} {[Tasa base \(\alpha\), parámetro de suavizado \(\epsilon\), punto inicial \(x\)]}
+        \State Inicializar acumulador de gradientes al cuadrado \(s \leftarrow 0\)
+        \While{[Condición de parada]}
+            \State Calcular gradiente actual \(g\)
+            \State Acumular cuadrados de componentes: \(s \leftarrow s + g \odot g\)
+            \State Actualizar variables escalando por \(1 / \sqrt{s + \epsilon}\)
+        \EndWhile
+        \State \textbf{Return} {[Punto óptimo]}
+    \end{algorithmic}
+\end{frame}
+
+\begin{frame}{Adagrad: Ejemplo Paso a Paso}
+    \begin{exampleblock}{Planteamiento del problema}
+        [Define función con diferentes escalas por eje y un punto de partida].
+    \end{exampleblock}
+    \begin{itemize}
+        \item \textbf{Paso 1:} {[Cálculo del gradiente y primer vector acumulador \(s\)].}
+        \item \textbf{Paso 2:} {[Actualización diferenciada para cada componente].}
+        \item \textbf{Paso 3:} {[Resultado tras las primeras iteraciones].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Adagrad: Código}
+\begin{lstlisting}[language=Python]
+def adagrad(grad_f, x0, alpha=0.1, eps=1e-8, max_iter=100):
+    # TODO: Inicializar s acumulador en ceros
+    # for t in range(max_iter):
+    #     g = grad_f(x)
+    #     s += g**2
+    #     x -= (alpha / (np.sqrt(s) + eps)) * g
+    pass
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Adagrad: Análisis de Convergencia}
+    \begin{alertblock}{Propiedades de Convergencia}
+        [Discute cómo decae la tasa de aprendizaje efectiva y su impacto final].
+    \end{alertblock}
+    \begin{itemize}
+        \item {[Idoneidad para problemas con características o gradientes dispersos (sparse)].}
+        \item {[Limitación principal: congelamiento prematuro del paso].}
+    \end{itemize}
+\end{frame}

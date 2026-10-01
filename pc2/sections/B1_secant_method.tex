@@ -1,0 +1,56 @@
+\subsection{Secant Method}
+
+\begin{frame}{Secant Method: Explicación Gráfica}
+    \begin{block}{Concepto principal}
+        [Explica la aproximación de la segunda derivada mediante diferencias finitas de primeras derivadas].
+    \end{block}
+    \begin{itemize}
+        \item {[Idea gráfica 1: Recta secante a la curva de la derivada interceptando el eje cero].}
+        \item {[Idea gráfica 2: Comparación geométrica frente al paso de Newton clásico].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Secant Method: Pseudocódigo}
+    \begin{algorithmic}[1]
+        \State \textbf{Input:} {[Derivada \(f'\), puntos iniciales \(x^{(0)}\) y \(x^{(1)}\), tolerancia]}
+        \While{[Condición de parada]}
+            \State Evaluar derivadas en los dos puntos previos
+            \State Aproximar curvatura secante: \(\Delta x / \Delta f'\)
+            \State Calcular siguiente iteración \(x^{(k+1)}\)
+        \EndWhile
+        \State \textbf{Return} {[Punto estacionario]}
+    \end{algorithmic}
+\end{frame}
+
+\begin{frame}{Secant Method: Ejemplo Paso a Paso}
+    \begin{exampleblock}{Planteamiento del problema}
+        [Define función univariable no lineal \(f(x)\) y dos valores semilla \(x_0, x_1\)].
+    \end{exampleblock}
+    \begin{itemize}
+        \item \textbf{Paso 1:} {[Evaluación de \(f'(x_0)\) y \(f'(x_1)\)].}
+        \item \textbf{Paso 2:} {[Cálculo de la secante y determinación de \(x_2\)].}
+        \item \textbf{Paso 3:} {[Verificación del error respecto al óptimo].}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Secant Method: Código}
+\begin{lstlisting}[language=Python]
+def secant_method(df, x0, x1, tol=1e-5, max_iter=50):
+    # TODO: Bucle de la secante
+    # for _ in range(max_iter):
+    #     d0, d1 = df(x0), df(x1)
+    #     x_next = x1 - d1 * (x1 - x0) / (d1 - d0)
+    #     x0, x1 = x1, x_next
+    pass
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Secant Method: Análisis de Convergencia}
+    \begin{alertblock}{Tasa de Convergencia}
+        [Colocar orden de convergencia superlineal (aprox. número áureo $1.618$)].
+    \end{alertblock}
+    \begin{itemize}
+        \item {[Comparativa frente a la convergencia cuadrática de Newton].}
+        \item {[Ahorro computacional al no requerir segundas derivadas analíticas].}
+    \end{itemize}
+\end{frame}
