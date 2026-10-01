@@ -1,0 +1,65 @@
+\documentclass{beamer}
+
+\usepackage[spanish]{babel}
+\decimalpoint
+
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{bm}
+\usepackage{amsmath}
+
+\usetheme{Warsaw}
+\usepackage{styles/warsaw-mod}
+\usepackage{styles/warsaw-dark}
+
+% Configuración de colores para el código
+\usepackage{listings}
+\lstset{
+language=Python,
+basicstyle=\ttfamily\scriptsize,
+keywordstyle=\color{blue},
+stringstyle=\color{green!50!black},
+commentstyle=\color{gray},
+showstringspaces=false,
+frame=single,
+extendedchars=true,
+literate={á}{{'a}}1 {é}{{'e}}1 {í}{{'i}}1 {ó}{{'o}}1 {ú}{{'u}}1 {Á}{{'A}}1 {É}{{'E}}1 {Í}{{'I}}1 {Ó}{{'O}}1 {Ú}{{'U}}1 {ñ}{{~n}}1 {Ñ}{{~N}}1
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+% Cargar los metadatos de la presentación
+\input{sections/00_metadata}
+
+\begin{document}
+
+% Diapositiva de título
+\input{sections/00_presentation_slide}
+
+\begin{frame}{Contenido}
+\tableofcontents
+\end{frame}
+
+% A. First-Order Methods
+\section{First-Order Methods}
+\input{sections/A1_conjugate_gradient}
+\input{sections/A2_momentum}
+\input{sections/A3_adagrad}
+\input{sections/A4_rmsprop}
+\input{sections/A5_adadelta}
+\input{sections/A6_adam}
+\input{sections/A7_hypergradient_descent}
+
+% B. Second-Order Methods
+\section{Second-Order Methods}
+\input{sections/B1_secant_method}
+\input{sections/B2_quasi_newton_methods}
+
+% Bibliografía
+\input{sections/00_bibliography}
+
+\end{document}

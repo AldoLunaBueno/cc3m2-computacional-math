@@ -1,0 +1,40 @@
+% 1. DEFINICIÓN DE COLORES PERSONALIZADOS
+\definecolor{FondoOscuro}{HTML}{2F2F2F} 
+\definecolor{FondoBloque}{HTML}{1C1C1C}
+\definecolor{NaranjaBase}{HTML}{FF8C00}
+\definecolor{CelesteBrillante}{HTML}{00BFFF}
+\definecolor{VerdeNeon}{HTML}{39FF14}
+\definecolor{RojoAlerta}{HTML}{FF3131}
+\definecolor{AmarilloAviso}{HTML}{FFD700}
+\definecolor{GrisTexto}{HTML}{D4D4D4}
+
+% 2. MODIFICACIÓN DE LA ESTRUCTURA BASE
+% El lienzo completo ahora es negro puro (más oscuro)
+\setbeamercolor{normal text}{fg=GrisTexto, bg=black}
+\setbeamercolor{structure}{fg=NaranjaBase}
+
+% 3. MODIFICACIÓN DE LAS PALETAS DE WARSAW
+% Las áreas destacadas (cabecera superior, pie de página inferior) ahora son gris oscuro
+\setbeamercolor{palette primary}{bg=FondoOscuro, fg=NaranjaBase}
+\setbeamercolor{palette secondary}{bg=black, fg=CelesteBrillante}
+\setbeamercolor{palette tertiary}{bg=FondoOscuro, fg=NaranjaBase}
+\setbeamercolor{palette quaternary}{bg=black, fg=GrisTexto}
+
+% Títulos de las diapositivas y título principal
+\setbeamercolor{frametitle}{bg=FondoOscuro, fg=CelesteBrillante}
+\setbeamercolor{titlelike}{bg=FondoOscuro, fg=CelesteBrillante}
+
+% 4. MODIFICACIÓN DE LOS BLOQUES (Cajas de contenido)
+% Usamos el nuevo FondoBloque para que resalte sutilmente sobre el fondo negro
+
+% Bloque normal
+\setbeamercolor{block title}{bg=FondoOscuro, fg=NaranjaBase}
+\setbeamercolor{block body}{bg=FondoBloque, fg=GrisTexto}
+
+% Bloque de alerta
+\setbeamercolor{block title alerted}{bg=FondoOscuro, fg=RojoAlerta}
+\setbeamercolor{block body alerted}{bg=FondoBloque, fg=GrisTexto}
+
+% Bloque de ejemplo
+\setbeamercolor{block title example}{bg=FondoOscuro, fg=VerdeNeon}
+\setbeamercolor{block body example}{bg=FondoBloque, fg=GrisTexto}

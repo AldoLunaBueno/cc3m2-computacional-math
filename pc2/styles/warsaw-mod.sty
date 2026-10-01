@@ -1,0 +1,82 @@
+\ProvidesPackage{warsaw-mod}[2026/07/18 Modificacion de cabecera Warsaw]
+
+% Cargamos herramientas necesarias
+\RequirePackage{nameref}
+
+% 1. Redefinición segura de \section para que autogenere etiquetas
+\let\oldsection\section
+\DeclareDocumentCommand{\section}{ s o m }{%
+  \IfBooleanTF{#1}%
+    {\oldsection*{#3}}%
+    {\IfNoValueTF{#2}%
+       {\oldsection{#3}}%
+       {\oldsection[#2]{#3}}%
+     \label{sec:\thesection}% Aquí ocurre la magia
+    }%
+}
+
+% 2. Redefinición segura de \subsection para que autogenere etiquetas
+\let\oldsubsection\subsection
+\DeclareDocumentCommand{\subsection}{ s o m }{%
+  \IfBooleanTF{#1}%
+    {\oldsubsection*{#3}}%
+    {\IfNoValueTF{#2}%
+       {\oldsubsection{#3}}%
+       {\oldsubsection[#2]{#3}}%
+     \label{sec:\thesection.\thesubsection}% Aquí ocurre la magia
+    }%
+}
+
+% 3. Inicializamos los contadores matemáticos
+\newcounter{calculator}
+\newcounter{calcmaxsec}
+\newcounter{calcmaxsubsec}
+
+% 4. Macros que buscan el nombre y le aplican el color tenue (fg!40!bg)
+\newcommand{\calcsubsection}[1]{%
+    \setcounter{calculator}{\thesubsection}\addtocounter{calculator}{#1}%
+    \@ifundefined{r@sec:\thesection.\thecalculator}{}{\color{fg!40!bg}\nameref{sec:\thesection.\thecalculator}}%
+}
+\newcommand{\calcsection}[1]{%
+    \setcounter{calculator}{\thesection}\addtocounter{calculator}{#1}%
+    \@ifundefined{r@sec:\thecalculator}{}{\color{fg!40!bg}\nameref{sec:\thecalculator}}%
+}
+
+% 5. El diseño de la cabecera compactada a 3 items con márgenes perfectos
+\setbeamertemplate{headline}
+{%
+  \leavevmode%
+  \@tempdimb=2.6ex% Altura ideal por ítem
+  \multiply\@tempdimb by 3% Fijo para 3 items
+  \ifdim\@tempdimb>0pt%
+     \advance\@tempdimb by 1ex%
+     % AQUÍ ESTÁ LA MAGIA: Añadimos dp=1.5ex para que el color baje más allá del texto
+     \begin{beamercolorbox}[wd=.5\paperwidth,ht=\@tempdimb,dp=1.5ex,right,rightskip=1em]{section in head/foot}%
+        \vbox to \@tempdimb{%
+        \vspace*{0.5ex}\vfill% <-- Margen superior interno
+        \setcounter{calcmaxsec}{\thesection}\addtocounter{calcmaxsec}{-\beamer@sectionmax}%
+        \ifnum\thecalcmaxsec>-1\ifnum\thesection>2\vfill{\calcsection{-2}}\fi\fi%
+        \ifnum\thesection>1\vfill{\calcsection{-1}}\fi%
+        \ifnum\thesection>0\vfill\insertsectionhead\fi%
+        \ifnum\thecalcmaxsec<0\vfill{\calcsection{1}}\fi%
+        \ifnum\thesection<2\ifnum\thecalcmaxsec<-1\vfill{\calcsection{2}}\fi\fi%
+        \ifnum\thesection<1\ifnum\thecalcmaxsec<-2\vfill{\calcsection{3}}\fi\fi%
+        \vfill\vspace*{0.5ex}% <-- Margen inferior interno
+     }%
+     \end{beamercolorbox}%
+     % AQUÍ TAMBIÉN: dp=1.5ex
+     \begin{beamercolorbox}[wd=.5\paperwidth,ht=\@tempdimb,dp=1.5ex]{subsection in head/foot}%
+        \vbox to \@tempdimb{%
+        \vspace*{0.5ex}\vfill% <-- Margen superior interno
+        \setcounter{calcmaxsubsec}{\thesubsection}\addtocounter{calcmaxsubsec}{-\beamer@subsectionmax}%
+        \ifnum\thecalcmaxsubsec>-1\ifnum\thesubsection>2\vfill{\calcsubsection{-2}}\fi\fi%
+        \ifnum\thesubsection>1\vfill{\calcsubsection{-1}}\fi%
+        \ifnum\thesubsection>0\vfill\insertsubsectionhead\fi%
+        \ifnum\thecalcmaxsubsec<0\vfill{\calcsubsection{1}}\fi%
+        \ifnum\thesubsection<2\ifnum\thecalcmaxsubsec<-1\vfill{\calcsubsection{2}}\fi\fi%
+        \ifnum\thesubsection<1\ifnum\thecalcmaxsubsec<-2\vfill{\calcsubsection{3}}\fi\fi%
+        \vfill\vspace*{0.5ex}% <-- Margen inferior interno
+      }%
+     \end{beamercolorbox}%
+  \fi%
+}
