@@ -1,57 +1,60 @@
-\subsection{RMSProp}
+\subsection{Adadelta}
 
-\begin{frame}{RMSProp: Explicación Gráfica}
+\begin{frame}{Adadelta: Explicación Gráfica}
     \begin{block}{Concepto principal}
-        [Explica el uso de la media móvil exponencial de gradientes para corregir la limitación de Adagrad].
+        [Explica la eliminación de la tasa de aprendizaje explícita usando la curvatura empírica y coherencia de unidades].
     \end{block}
     \begin{itemize}
-        \item {[Idea gráfica 1: Ventana móvil de memoria reciente en lugar de suma histórica infinita].}
-        \item {[Idea gráfica 2: Estabilización de trayectorias en valles alargados].}
+        \item {[Idea gráfica 1: Relación entre la escala de actualización \(\Delta x\) y el gradiente \(g\)].}
+        \item {[Idea gráfica 2: Robustez ante cambios de escala de la función].}
     \end{itemize}
 \end{frame}
 
-\begin{frame}{RMSProp: Pseudocódigo}
+\begin{frame}{Adadelta: Pseudocódigo}
     \begin{algorithmic}[1]
-        \State \textbf{Input:} {[Tasa \(\alpha\), factor de decaimiento \(\gamma\), \(\epsilon\), punto \(x\)]}
-        \State Inicializar promedio móvil \(v \leftarrow 0\)
+        \State \textbf{Input:} {[Factor de decaimiento \(\rho\), constante \(\epsilon\), punto \(x\)]}
+        \State Inicializar acumuladores: \(E[g^2] \leftarrow 0\), \(E[\Delta x^2] \leftarrow 0\)
         \While{[Condición de parada]}
             \State Calcular gradiente \(g\)
-            \State Actualizar promedio exponencial: \(v \leftarrow \gamma v + (1-\gamma) g \odot g\)
-            \State Actualizar parámetros: \(x \leftarrow x - \frac{\alpha}{\sqrt{v + \epsilon}} \odot g\)
+            \State Actualizar \(E[g^2]\) con promedio exponencial
+            \State Calcular paso \(\Delta x\) en función de \(\text{RMS}[\Delta x]\) y \(\text{RMS}[g]\)
+            \State Actualizar \(E[\Delta x^2]\) y posición \(x \leftarrow x + \Delta x\)
         \EndWhile
         \State \textbf{Return} {[Punto óptimo]}
     \end{algorithmic}
 \end{frame}
 
-\begin{frame}{RMSProp: Ejemplo Paso a Paso}
+\begin{frame}{Adadelta: Ejemplo Paso a Paso}
     \begin{exampleblock}{Planteamiento del problema}
-        [Define función objetivo, valor inicial y tasa de decaimiento \(\gamma\) (ej: $0.9$)].
+        [Define función unidimensional o bidimensional y valores de inicio].
     \end{exampleblock}
     \begin{itemize}
-        \item \textbf{Paso 1:} {[Evaluación de \(g\) y primer valor de \(v\)].}
-        \item \textbf{Paso 2:} {[Paso adaptativo normalizado y actualización de \(x\)].}
-        \item \textbf{Paso 3:} {[Evolución observada en los siguientes pasos].}
+        \item \textbf{Paso 1:} {[Cálculo inicial con \(E[\Delta x^2]_0 = 0\)].}
+        \item \textbf{Paso 2:} {[Actualización simultánea de ambos acumuladores cuadráticos].}
+        \item \textbf{Paso 3:} {[Comprobación del avance de la solución].}
     \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{RMSProp: Código}
+\begin{frame}[fragile]{Adadelta: Código}
 \begin{lstlisting}[language=Python]
-def rmsprop(grad_f, x0, alpha=0.01, gamma=0.9, eps=1e-8, max_iter=100):
-    # TODO: Inicializar vector v en ceros
+def adadelta(grad_f, x0, rho=0.95, eps=1e-6, max_iter=100):
+    # TODO: Inicializar acumuladores eg2 y edx2
     # for t in range(max_iter):
     #     g = grad_f(x)
-    #     v = gamma * v + (1 - gamma) * (g ** 2)
-    #     x = x - (alpha / (np.sqrt(v) + eps)) * g
+    #     eg2 = rho * eg2 + (1 - rho) * (g ** 2)
+    #     dx = - (np.sqrt(edx2 + eps) / np.sqrt(eg2 + eps)) * g
+    #     edx2 = rho * edx2 + (1 - rho) * (dx ** 2)
+    #     x = x + dx
     pass
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}{RMSProp: Análisis de Convergencia}
+\begin{frame}{Adadelta: Análisis de Convergencia}
     \begin{alertblock}{Propiedades de Convergencia}
-        [Discutir estabilidad en problemas no convexos y aprendizaje profundo].
+        [Indicar ventajas de no requerir sintonización de un \(\alpha\) inicial].
     \end{alertblock}
     \begin{itemize}
-        \item {[Ventaja frente a la saturación de pasos de Adagrad].}
-        \item {[Sensibilidad respecto al parámetro de tasa base \(\alpha\)].}
+        \item {[Preservación de unidades físicas de las variables].}
+        \item {[Velocidad relativa de convergencia en etapas tardías].}
     \end{itemize}
 \end{frame}
