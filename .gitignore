@@ -6,6 +6,7 @@
 *.out
 *.toc
 *.synctex.gz
+*.synctex(busy)
 
 # Archivos temporales específicos de Beamer
 *.nav
