@@ -1,59 +1,490 @@
 \subsection{Conjugate Gradient}
 
-\begin{frame}{Conjugate Gradient: Explicación Gráfica}
+% Paleta de curvas de nivel (centro amarillo -> borde azul, como en las figuras del libro)
+\colorlet{niv1}{AmarilloAviso!85!black}
+\colorlet{niv2}{AmarilloAviso!50!VerdeNeon!75!black}
+\colorlet{niv3}{VerdeNeon!65!black}
+\colorlet{niv4}{VerdeNeon!40!CelesteBrillante!65!black}
+\colorlet{niv5}{CelesteBrillante!65!black}
+\colorlet{niv6}{CelesteBrillante!48!black}
+\colorlet{niv7}{CelesteBrillante!34!black}
+% Referencia al libro al pie de la diapositiva
+\providecommand{\reflibro}[1]{\par\vfill{\tiny\textcolor{GrisTexto!70}{\textit{Ref. libro:} #1}}}
+
+% ---------------------------------------------------------------
+% 1. Explicación gráfica: un mismo problema, paso a paso
+%    f = 1/2 x^T A x, kappa(A)=10, valle girado 30 grados, x(1)=(-3.6,-1.2)
+% ---------------------------------------------------------------
+\begin{frame}{Conjugate Gradient: Explicación Gráfica (1/3)}
     \begin{block}{Concepto principal}
-        [Explica aquí la idea central de direcciones conjugadas y ortogonalidad respecto a la matriz hessiana].
+        \footnotesize
+        Cada dirección nueva combina $-\nabla f$ con la anterior para que sean
+        \textbf{conjugadas}: una cuadrática de $n$ variables se minimiza en \textbf{$n$ pasos}.
     \end{block}
-    \begin{itemize}
-        \item {[Idea gráfica 1: Comportamiento en curvas de nivel cuadráticas frente al descenso estándar].}
-        \item {[Idea gráfica 2: Ortogonalidad de las direcciones de búsqueda sucesivas].}
-    \end{itemize}
+
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.12cm, y=1.12cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-3.9,-2.15) rectangle (1.25,0.95);
+                    \foreach \r/\cl in {0.6/niv1, 1.2/niv2, 1.9/niv3, 2.6/niv4, 3.4/niv5, 4.3/niv6}
+                        \draw[\cl, rotate around={30:(0,0)}] (0,0) ellipse ({\r} and {\r/3.1623});
+                    % Recta de búsqueda x(1) + alpha d(1)
+                    \draw[GrisTexto!55, dashed] (-3.85,-1.03) -- (-2.27,-2.09);
+                    % Curva de nivel tangente en x(2)
+                    \draw[white, dashed, rotate around={30:(0,0)}] (0,0) ellipse (3.307 and 1.046);
+                    \draw[NaranjaBase, very thick, -stealth] (-3.6,-1.2) -- (-2.78,-1.752);
+                \end{scope}
+                \draw[gray!50] (-3.9,-2.15) rectangle (1.25,0.95);
+                \fill[GrisTexto] (-3.6,-1.2) circle (1.8pt) node[above, inner sep=2pt] {$x^{(1)}$};
+                \fill[NaranjaBase] (-2.750,-1.772) circle (1.8pt) node[below right, inner sep=1pt, text=GrisTexto] {$x^{(2)}$};
+                \fill[white] (0,0) circle (1.8pt) node[below right, inner sep=1pt] {$x^*$};
+                \node[NaranjaBase] at (-3.4,-1.65) {$d^{(1)}$};
+                \node[white, anchor=west] at (-1.6,-1.85) {tangencia};
+            \end{tikzpicture}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \begin{block}{Iteración 1}
+                \footnotesize
+                $d^{(1)}=-g^{(1)}$ \ (descenso máximo)\\[2pt]
+                $\alpha^{(1)}=\arg\min_\alpha f(x^{(1)}+\alpha d^{(1)})$
+            \end{block}
+            \centering
+            % f a lo largo de la recta de búsqueda: phi(a) = 9.804 - 71.70 a + 296.3 a^2
+            \begin{tikzpicture}[x=15cm, y=0.27cm, font=\tiny]
+                \draw[gray!60] (0,0) -- (0.26,0);
+                \draw[gray!60] (0,0) -- (0,5.8);
+                \draw[GrisTexto, thick, domain=0:0.25, samples=40, smooth]
+                    plot (\x, {9.804-71.70*\x+296.3*\x*\x-5});
+                \draw[NaranjaBase, dashed] (0.121,0) -- (0.121,0.467);
+                \fill[NaranjaBase] (0.121,0.467) circle (1.5pt);
+                \node[below, text=NaranjaBase] at (0.121,0) {$\alpha^{(1)}$};
+                \node[anchor=west] at (0.262,0) {$\alpha$};
+                \node[anchor=south west] at (0.005,5.4) {$f(x^{(1)}+\alpha d^{(1)})$};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    \reflibro{Ec.~(5.8), (5.10)--(5.11); Ejemplo~5.1 (paso exacto).}
 \end{frame}
 
+\begin{frame}{Conjugate Gradient: Explicación Gráfica (2/3)}
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.12cm, y=1.12cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-3.9,-2.15) rectangle (1.25,0.95);
+                    \foreach \r/\cl in {0.6/niv1, 1.2/niv2, 1.9/niv3, 2.6/niv4, 3.4/niv5, 4.3/niv6}
+                        \draw[\cl, rotate around={30:(0,0)}] (0,0) ellipse ({\r} and {\r/3.1623});
+                    \draw[white, dashed, rotate around={30:(0,0)}] (0,0) ellipse (3.307 and 1.046);
+                    % Paso 1 (ya realizado)
+                    \draw[NaranjaBase!50, very thick] (-3.6,-1.2) -- (-2.750,-1.772);
+                    % Descomposición de d^(2)
+                    \draw[CelesteBrillante, very thick, -stealth] (-2.750,-1.772) -- (-1.071,0.721);
+                    \draw[VerdeNeon, very thick, -stealth] (-1.071,0.721) -- (-0.03,0.02);
+                    \draw[NaranjaBase, ultra thick, -stealth] (-2.750,-1.772) -- (-0.05,-0.03);
+                    % Ángulo recto entre d^(1) y -g^(2)
+                    \draw[RojoAlerta, thick] (-2.875,-1.688) -- (-2.791,-1.564) -- (-2.666,-1.648);
+                \end{scope}
+                \draw[gray!50] (-3.9,-2.15) rectangle (1.25,0.95);
+                \fill[GrisTexto!70] (-3.6,-1.2) circle (1.6pt) node[above, inner sep=2pt] {$x^{(1)}$};
+                \fill[GrisTexto] (-2.750,-1.772) circle (1.8pt) node[below, inner sep=2pt] {$x^{(2)}$};
+                \fill[white] (0,0) circle (1.8pt) node[below right, inner sep=1pt] {$x^*$};
+                \node[CelesteBrillante, anchor=east] at (-1.55,0.15) {$-g^{(2)}$};
+                \node[VerdeNeon, anchor=west, inner sep=1pt] at (-0.05,0.68) {$\beta^{(2)} d^{(1)}$};
+                \node[NaranjaBase, anchor=north west] at (-1.0,-1.0) {$d^{(2)}$};
+            \end{tikzpicture}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \begin{block}{Iteración 2: nueva dirección}
+                \footnotesize
+                \[ d^{(2)} = -g^{(2)} + \beta^{(2)}\, d^{(1)} \]
+            \end{block}
+            \small
+            \begin{itemize}
+                \item \textcolor{CelesteBrillante}{$-g^{(2)}$} $\perp d^{(1)}$: lo que haría GD
+                \item \textcolor{VerdeNeon}{$\beta d^{(1)}$}: la vuelve \textbf{conjugada}
+                \item \textcolor{NaranjaBase}{$d^{(2)}$}: apunta a $x^*$
+            \end{itemize}
+            \vspace{0.3em}
+            {\scriptsize $\beta$: Fletcher--Reeves (5.17) o Polak--Ribière (5.18).\par}
+        \end{column}
+    \end{columns}
+    \reflibro{Ec.~(5.12)--(5.18).}
+\end{frame}
+
+\begin{frame}{Conjugate Gradient: Explicación Gráfica (3/3)}
+    \begin{columns}[T]
+        \begin{column}{0.58\textwidth}
+            \centering
+            \begin{tikzpicture}[x=0.72cm, y=0.72cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-4.3,-2.7) rectangle (4.3,2.7);
+                    \foreach \r/\cl in {0.6/niv1, 1.2/niv2, 1.9/niv3, 2.6/niv4, 3.4/niv5, 4.3/niv6, 5.3/niv7}
+                        \draw[\cl, rotate around={30:(0,0)}] (0,0) ellipse ({\r} and {\r/3.1623});
+                    % GD con búsqueda exacta, como referencia
+                    \draw[GrisTexto!65, thick] plot coordinates {(-3.600,-1.200) (-2.750,-1.772) (-2.007,-0.669) (-1.534,-0.988) (-1.119,-0.373) (-0.855,-0.551) (-0.624,-0.208) (-0.477,-0.307) (-0.348,-0.116) (-0.266,-0.171) (-0.194,-0.065) (-0.148,-0.096) (-0.108,-0.036) (-0.083,-0.053) (-0.060,-0.020) (-0.046,-0.030) (-0.034,-0.011)};
+                    \foreach \p in {(-2.007,-0.669), (-1.534,-0.988), (-1.119,-0.373), (-0.855,-0.551), (-0.624,-0.208), (-0.477,-0.307)}
+                        \fill[GrisTexto!65] \p circle (1.3pt);
+                    % CG: 2 pasos
+                    \draw[NaranjaBase, very thick, -stealth] (-3.6,-1.2) -- (-2.750,-1.772);
+                    \draw[NaranjaBase, very thick, -stealth] (-2.750,-1.772) -- (-0.06,-0.04);
+                \end{scope}
+                \draw[gray!50] (-4.3,-2.7) rectangle (4.3,2.7);
+                \fill[NaranjaBase] (-3.6,-1.2) circle (2pt) node[above left, text=GrisTexto, inner sep=1pt] {$x^{(1)}$};
+                \fill[NaranjaBase] (-2.750,-1.772) circle (2pt) node[below, text=GrisTexto] {$x^{(2)}$};
+                \fill[VerdeNeon] (0,0) circle (2pt);
+                \draw[VerdeNeon] (0.05,0.05) -- (0.9,1.0) node[anchor=south, text=VerdeNeon, fill=black, inner sep=1pt] {$x^{(3)}=x^*$};
+                \draw[GrisTexto!65, thick] (-4.2,-3.2) -- (-3.6,-3.2) node[right, text=GrisTexto] {GD exacto (16 pasos)};
+                \draw[NaranjaBase, very thick] (1.0,-3.2) -- (1.6,-3.2) node[right, text=GrisTexto] {CG (2 pasos)};
+            \end{tikzpicture}
+        \end{column}
+        \begin{column}{0.40\textwidth}
+            \begin{block}{Iteración 2: llega a $x^*$}
+                \footnotesize
+                La búsqueda sobre $d^{(2)}$ termina en $x^*$:
+                \textbf{$n=2$ pasos}
+            \end{block}
+            \small
+            \begin{itemize}
+                \item GD: cada paso $\perp$ al anterior $\Rightarrow$ zig-zag
+                \item CG: $d^{(1)\top}A\,d^{(2)}=0$\\ (conjugadas, no ortogonales)
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \reflibro{Fig.~5.1 (zig-zag de GD), Fig.~5.2 (CG en $n$ pasos), Ec.~(5.9).}
+\end{frame}
+
+% ---------------------------------------------------------------
+% 2. Pseudocódigo
+% ---------------------------------------------------------------
 \begin{frame}{Conjugate Gradient: Pseudocódigo}
+    \scriptsize
     \begin{algorithmic}[1]
-        \State \textbf{Input:} {[Definir entradas: función \(f\), gradiente \(\nabla f\), punto inicial \(x^{(1)}\), tolerancias]}
-        \State Inicializar dirección de descenso inicial \(d^{(1)}\)
-        \While{[Condición de parada]}
-            \State Calcular longitud de paso \(\alpha\)
-            \State Actualizar punto: \(x \leftarrow x + \alpha d\)
-            \State Calcular factor de conjugación \(\beta\)
-            \State Actualizar nueva dirección: \(d \leftarrow -\nabla f + \beta d\)
-        \EndWhile
-        \State \textbf{Return} {[Punto óptimo]}
+        \Require $f$, $\nabla f$, $x^{(1)}$, tolerancia $\epsilon$, $k_{\max}$
+        \State $g \gets \nabla f(x)$; \quad $d \gets -g$ \Comment{(5.10)}
+        \For{$k = 1, \dots, k_{\max}$}
+            \State $\alpha \gets \arg\min_{\alpha} f(x + \alpha d)$ \Comment{búsqueda en línea}
+            \State $x \gets x + \alpha\, d$ \Comment{(5.11)}
+            \State $g' \gets \nabla f(x)$
+            \State \textbf{if} $\lVert g' \rVert < \epsilon$ \textbf{then break}
+            \State $\beta \gets \max\bigl(0,\ g'^{\top}(g' - g)\,/\,g^{\top} g\bigr)$ \Comment{Polak--Ribière (5.18)--(5.19)}
+            \State $d \gets -g' + \beta\, d$ \Comment{(5.12)}
+            \State $g \gets g'$
+        \EndFor
+        \State \Return $x$
     \end{algorithmic}
+
+    \vspace{0.8em}
+    \begin{block}{Paso exacto en cuadráticas (línea 3)}
+        \centering\footnotesize
+        $\alpha = -\dfrac{d^\top(Ax+b)}{d^\top A d}$ \qquad (Ejemplo~5.1)
+    \end{block}
+    \reflibro{Algoritmo~5.2, Ejemplo~5.1, Ec.~(5.10)--(5.19).}
 \end{frame}
 
-\begin{frame}{Conjugate Gradient: Ejemplo Paso a Paso}
-    \begin{exampleblock}{Planteamiento del problema}
-        [Define aquí una función de prueba cuadrática simple, ej: \(f(x_1, x_2) = x_1^2 + 2x_2^2\), y punto inicial].
+% ---------------------------------------------------------------
+% 3. Ejemplo paso a paso
+% ---------------------------------------------------------------
+\begin{frame}{Conjugate Gradient: Ejemplo Paso a Paso (1/3)}
+    \begin{exampleblock}{Planteamiento}
+        \footnotesize
+        $f(x)=x_1^2+x_1x_2+x_2^2+5$, \quad
+        $A=\left[\begin{smallmatrix}2&1\\1&2\end{smallmatrix}\right]$, \quad
+        $x^{(1)}=(2,0)$, \quad $x^*=(0,0)$
     \end{exampleblock}
-    \begin{itemize}
-        \item \textbf{Paso 1:} {[Cálculo del gradiente inicial y primera dirección de búsqueda].}
-        \item \textbf{Paso 2:} {[Cálculo del factor de actualización \(\beta\) y siguiente dirección].}
-        \item \textbf{Paso 3:} {[Estado de convergencia y resultado].}
-    \end{itemize}
+
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \begin{block}{Inicialización (línea 1)}
+                \footnotesize
+                $g^{(1)}=(4,\ 2)$, \quad $d^{(1)}=(-4,\ -2)$
+            \end{block}
+            \begin{block}{Iteración $k=1$ (líneas 3--4)}
+                \footnotesize
+                $\alpha^{(1)}=-\frac{d^{(1)\top}g^{(1)}}{d^{(1)\top}Ad^{(1)}}=\frac{20}{56}=0.3571$\\[4pt]
+                $x^{(2)}=(0.5714,\ -0.7143)$
+            \end{block}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.22cm, y=1.22cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-0.9,-1.4) rectangle (2.35,1.0);
+                    \foreach \r/\cl in {0.5/niv1, 0.926/niv2, 1.5/niv3, 2.1/niv4, 2.828/niv5, 3.6/niv6}
+                        \draw[\cl, rotate around={-45:(0,0)}] (0,0) ellipse ({\r} and {\r/1.7321});
+                    \draw[white, dashed, rotate around={-45:(0,0)}] (0,0) ellipse (0.926 and 0.5345);
+                    % Recta de búsqueda x(1) + alpha d(1)
+                    \draw[GrisTexto!50, dashed] (2.6,0.3) -- (-0.4,-1.2);
+                    \draw[NaranjaBase, very thick, -stealth] (2,0) -- (0.60,-0.70);
+                    \draw[CelesteBrillante, thick, -stealth] (2,0) -- (2.32,0.16);
+                \end{scope}
+                \draw[gray!50] (-0.9,-1.4) rectangle (2.35,1.0);
+                \fill[GrisTexto] (2,0) circle (1.8pt) node[below right, inner sep=2pt] {$x^{(1)}$};
+                \fill[NaranjaBase] (0.5714,-0.7143) circle (1.8pt) node[above left, inner sep=1pt, text=GrisTexto] {$x^{(2)}$};
+                \fill[white] (0,0) circle (1.6pt) node[above left, inner sep=1pt] {$x^*$};
+                \node[CelesteBrillante, anchor=south east, inner sep=1pt] at (2.3,0.18) {$g^{(1)}$};
+                \node[NaranjaBase, anchor=north] at (1.45,-0.5) {$\alpha^{(1)}d^{(1)}$};
+            \end{tikzpicture}
+
+            {\scriptsize Se detiene en la \textbf{tangencia}\par}
+        \end{column}
+    \end{columns}
+    \reflibro{Ejercicio~5.8 (allí desde $(1,1)$); Ejemplo~5.1.}
 \end{frame}
 
+\begin{frame}{Conjugate Gradient: Ejemplo Paso a Paso (2/3)}
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \begin{block}{Iteración $k=1$, cont. (líneas 5--9)}
+                \footnotesize
+                $g'=(0.4286,\ -0.8571)$\\[4pt]
+                $\beta=\frac{g'^\top(g'-g^{(1)})}{g^{(1)\top}g^{(1)}}=0.0459$\\[4pt]
+                $d^{(2)}=-g'+\beta\,d^{(1)}=(-0.6122,\ 0.7653)$
+            \end{block}
+            \begin{exampleblock}{¿Es conjugada?}
+                \footnotesize
+                $d^{(1)\top}A\,d^{(2)}=0$ \ \textbf{sí}
+            \end{exampleblock}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \centering
+            \begin{tikzpicture}[x=2.3cm, y=2.3cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-0.7,-0.95) rectangle (1.2,0.7);
+                    \foreach \r/\cl in {0.5/niv1, 0.926/niv2, 1.5/niv3, 2.1/niv4}
+                        \draw[\cl, rotate around={-45:(0,0)}] (0,0) ellipse ({\r} and {\r/1.7321});
+                    \draw[white, dashed, rotate around={-45:(0,0)}] (0,0) ellipse (0.926 and 0.5345);
+                    \draw[NaranjaBase!60, thick] (1.2,-0.4) -- (0.5714,-0.7143);
+                    \draw[CelesteBrillante, very thick, -stealth] (0.5714,-0.7143) -- (0.1714,0.0857);
+                    \draw[VerdeNeon, very thick, -stealth] (0.1714,0.0857) -- (0.015,0.008);
+                    \draw[NaranjaBase, ultra thick, -stealth] (0.5714,-0.7143) -- (0.02,-0.025);
+                    \draw[RojoAlerta, thick] (0.661,-0.670) -- (0.616,-0.580) -- (0.527,-0.625);
+                \end{scope}
+                \draw[gray!50] (-0.7,-0.95) rectangle (1.2,0.7);
+                \fill[GrisTexto] (0.5714,-0.7143) circle (1.6pt) node[below left, inner sep=1pt] {$x^{(2)}$};
+                \fill[white] (0,0) circle (1.5pt) node[left, inner sep=3pt] {$x^*$};
+                \node[CelesteBrillante, anchor=west] at (0.42,-0.22) {$-g'$};
+                \node[VerdeNeon, anchor=south west, inner sep=1pt] at (0.14,0.1) {$\beta d^{(1)}$};
+                \node[NaranjaBase, anchor=east] at (0.24,-0.42) {$d^{(2)}$};
+                \node[NaranjaBase!70, anchor=south] at (0.95,-0.5) {$d^{(1)}$};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Conjugate Gradient: Ejemplo Paso a Paso (3/3)}
+    \begin{block}{Iteración $k=2$ (líneas 3--6)}
+        \footnotesize
+        $\alpha^{(2)}=0.9333$, \quad $x^{(3)}=x^{(2)}+\alpha^{(2)}d^{(2)}=(0,\ 0)$, \quad
+        $g'=(0,0)$ $\Rightarrow$ \textbf{break}
+    \end{block}
+
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \centering
+            {\tiny
+            \begin{tabular}{c c c c c}
+                \toprule
+                $k$ & $x^{(k)}$ & $f(x^{(k)})$ & $\lVert g^{(k)}\rVert$ & $\alpha^{(k)}$ / $\beta^{(k+1)}$ \\
+                \midrule
+                1 & $(2,\ 0)$ & $9$ & $4.4721$ & $0.3571$ / $0.0459$ \\
+                2 & $(0.5714,\ -0.7143)$ & $5.4286$ & $0.9583$ & $0.9333$ / -- \\
+                3 & $(0,\ 0)$ & $5$ & $0$ & -- \\
+                \bottomrule
+            \end{tabular}\par}
+
+            \vspace{0.6em}
+            \begin{exampleblock}{Resultado}
+                \footnotesize
+                $x^*$ en \textbf{2 iteraciones} $=n$\\[2pt]
+                GD exacto: 8 iteraciones
+            \end{exampleblock}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.22cm, y=1.22cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-0.9,-1.4) rectangle (2.35,1.0);
+                    \foreach \r/\cl in {0.5/niv1, 0.926/niv2, 1.5/niv3, 2.1/niv4, 2.828/niv5, 3.6/niv6}
+                        \draw[\cl, rotate around={-45:(0,0)}] (0,0) ellipse ({\r} and {\r/1.7321});
+                    \draw[GrisTexto!65, thick] plot coordinates {(2.000,0.000) (0.571,-0.714) (0.214,0.000) (0.061,-0.077) (0.023,0.000) (0.007,-0.008) (0,0)};
+                    \foreach \p in {(0.214,0.000), (0.061,-0.077), (0.023,0.000)}
+                        \fill[GrisTexto!65] \p circle (1.2pt);
+                    \draw[NaranjaBase, very thick, -stealth] (2,0) -- (0.60,-0.70);
+                    \draw[NaranjaBase, very thick, -stealth] (0.5714,-0.7143) -- (0.02,-0.025);
+                \end{scope}
+                \draw[gray!50] (-0.9,-1.4) rectangle (2.35,1.0);
+                \fill[NaranjaBase] (2,0) circle (1.8pt) node[above left, inner sep=1pt, text=GrisTexto] {$x^{(1)}$};
+                \fill[NaranjaBase] (0.5714,-0.7143) circle (1.8pt) node[below left, inner sep=1pt, text=GrisTexto] {$x^{(2)}$};
+                \fill[white] (0,0) circle (1.6pt) node[above left, inner sep=1pt] {$x^{(3)}=x^*$};
+                \draw[NaranjaBase, very thick] (-0.8,-1.65) -- (-0.5,-1.65) node[right, text=GrisTexto] {CG};
+                \draw[GrisTexto!65, thick] (0.4,-1.65) -- (0.7,-1.65) node[right, text=GrisTexto] {GD exacto};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------
+% 4. Código
+% ---------------------------------------------------------------
 \begin{frame}[fragile]{Conjugate Gradient: Código}
 \begin{lstlisting}[language=Python]
-def conjugate_gradient(f, grad_f, x0, max_iter=50, tol=1e-5):
-    # TODO: Inicializar variables y primera direccion d
-    # while iter < max_iter:
-    #     alpha = line_search(...)
-    #     x = x + alpha * d
-    #     beta = compute_beta(...)
-    #     d = -grad + beta * d
-    pass
+import numpy as np
+from scipy.optimize import minimize_scalar
+def line_search(f, x, d):            # alpha = argmin f(x + alpha*d)
+    alpha = minimize_scalar(lambda a: f(x + a*d)).x
+    return x + alpha*d
+
+def conjugate_gradient(f, grad, x, k_max=100, eps=1e-6):
+    g = grad(x)
+    d = -g                                  # (5.10) direccion inicial
+    for k in range(1, k_max + 1):
+        x = line_search(f, x, d)            # (5.11) x <- x + alpha*d
+        g_new = grad(x)
+        if np.linalg.norm(g_new) < eps:     # criterio de parada
+            break
+        beta = max(0.0, g_new @ (g_new - g) / (g @ g))  # (5.18)-(5.19)
+        d = -g_new + beta*d                 # (5.12) nueva direccion
+        g = g_new
+    return x, k
+
+# Ejemplo: f(x1, x2) = x1^2 + x1*x2 + x2^2 + 5
+f    = lambda x: x[0]**2 + x[0]*x[1] + x[1]**2 + 5
+grad = lambda x: np.array([2*x[0] + x[1], x[0] + 2*x[1]])
+conjugate_gradient(f, grad, np.array([2.0, 0.0]))    # -> ([0., 0.], 2)
+# Rosenbrock (a=1, b=5) del Apendice B.6
+ros  = lambda x: (1 - x[0])**2 + 5*(x[1] - x[0]**2)**2
+gros = lambda x: np.array([-2*(1 - x[0]) - 20*x[0]*(x[1] - x[0]**2),
+                           10*(x[1] - x[0]**2)])
+conjugate_gradient(ros, gros, np.array([-1.3, -1.6]))  # -> ([1., 1.], 9)
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}{Conjugate Gradient: Análisis de Convergencia}
-    \begin{alertblock}{Tasa de Convergencia}
-        [Indicar tipo de convergencia en funciones cuadráticas vs funciones no lineales].
+% ---------------------------------------------------------------
+% 5. Análisis de convergencia
+% ---------------------------------------------------------------
+\begin{frame}{Conjugate Gradient: Análisis de Convergencia (1/2)}
+    \begin{alertblock}{Cuadráticas: terminación finita}
+        \footnotesize
+        CG converge en \textbf{a lo sumo $n$ iteraciones} (aritmética exacta).
     \end{alertblock}
-    \begin{itemize}
-        \item {[Propiedades teóricas de convergencia en \(n\) dimensiones].}
-        \item {[Ventajas y limitaciones frente a métodos de segundo orden puros].}
-    \end{itemize}
+
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \centering
+            \begin{tikzpicture}[x=0.16cm, y=0.19cm, font=\tiny]
+                % Ejes
+                \draw[gray!60] (0,0) -- (30,0);
+                \draw[gray!60] (0,-16) -- (0,0.6);
+                \foreach \yy/\lb in {0/{10^{0}}, -4/{10^{-4}}, -8/{10^{-8}}, -12/{10^{-12}}, -16/{10^{-16}}}{
+                    \draw[gray!60] (-0.5,\yy) -- (0,\yy);
+                    \draw[gray!25] (0,\yy) -- (30,\yy);
+                    \node[left] at (-0.5,\yy) {$\lb$};
+                }
+                \foreach \xx in {0,10,20,30}{
+                    \draw[gray!60] (\xx,-16) -- (\xx,-16.5) node[below] {$\xx$};
+                }
+                \draw[gray!60] (0,-16) -- (30,-16);
+                \node[below] at (15,-17.8) {iteraciones realizadas $k$};
+                \node[rotate=90] at (-6.2,-8) {error relativo en norma $A$};
+                % Cotas teóricas (punteadas)
+                \draw[NaranjaBase!60, dashed] (0,0.301) -- (30,-2.315);
+                \draw[GrisTexto!50, dashed] (0,0) -- (30,-0.262);
+                % GD
+                \draw[GrisTexto!80, thick] plot coordinates {(0,0.00) (1,-0.07) (2,-0.11) (3,-0.13) (4,-0.15) (5,-0.17) (6,-0.18) (7,-0.19) (8,-0.20) (9,-0.21) (10,-0.22) (12,-0.24) (14,-0.26) (16,-0.28) (18,-0.30) (20,-0.31) (22,-0.33) (24,-0.35) (26,-0.37) (28,-0.38) (30,-0.40)};
+                % CG
+                \draw[NaranjaBase, very thick] plot coordinates {(0,0.00) (1,-0.07) (2,-0.14) (3,-0.19) (4,-0.21) (5,-0.28) (6,-0.49) (7,-1.09) (8,-1.78) (9,-2.61) (10,-14.74)};
+                \foreach \xx/\yy in {7/-1.09, 8/-1.78, 9/-2.61, 10/-14.74}
+                    \fill[NaranjaBase] (\xx,\yy) circle (1.2pt);
+                \node[NaranjaBase, anchor=west] at (10.6,-14.2) {$k=n=10$: error de máquina};
+                \node[NaranjaBase, anchor=west] at (9.6,-5.5) {CG};
+                \node[GrisTexto, anchor=south] at (26,0.1) {GD};
+                \node[NaranjaBase!70, anchor=north] at (23,-2.0) {cota CG};
+            \end{tikzpicture}
+
+            {\tiny $n=10$, $\kappa=100$ (experimento propio); punteado: cotas.\par}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \small
+            Factor de reducción por iteración:
+            \vspace{0.4em}
+
+            \centering
+            \begin{tabular}{l c c}
+                \toprule
+                & fórmula & $\kappa=100$ \\
+                \midrule
+                CG & $\frac{\sqrt{\kappa}-1}{\sqrt{\kappa}+1}$ & $0.82$ \\[3pt]
+                GD & $\frac{\kappa-1}{\kappa+1}$ & $0.98$ \\
+                \bottomrule
+            \end{tabular}
+
+            \vspace{0.6em}
+            \raggedright
+            CG: $\sim\!\sqrt{\kappa}$ iteraciones \\
+            GD: $\sim\!\kappa$ iteraciones
+
+            \vspace{0.3em}
+            {\tiny Cota clásica, no figura en el libro.\par}
+        \end{column}
+    \end{columns}
+    \reflibro{Fig.~5.2 y Ec.~(5.9) (terminación en $n$ pasos).}
+\end{frame}
+
+\begin{frame}{Conjugate Gradient: Análisis de Convergencia (2/2)}
+    \begin{columns}[T]
+        \begin{column}{0.47\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.15cm, y=1.15cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-1.9,-2.0) rectangle (1.9,1.9);
+\draw[niv1] plot[smooth] coordinates {(0.62,0.35) (0.66,0.52) (0.74,0.68) (0.83,0.84) (0.91,1.00) (0.99,1.16) (1.07,1.32) (1.15,1.48) (1.22,1.64) (1.30,1.80) (1.39,1.92) (1.35,1.74) (1.30,1.57) (1.24,1.40) (1.18,1.23) (1.11,1.07) (1.04,0.91) (0.96,0.74) (0.87,0.59) (0.76,0.44) (0.62,0.35)};
+                    \draw[niv2] plot[smooth] coordinates {(1.75,3.00) (1.72,2.83) (1.68,2.66) (1.64,2.49) (1.59,2.32) (1.55,2.15) (1.50,1.99) (1.45,1.82) (1.40,1.65) (1.34,1.49) (1.28,1.32) (1.22,1.16) (1.16,1.00) (1.09,0.84) (1.01,0.68) (0.93,0.53) (0.84,0.37) (0.75,0.23) (0.63,0.10) (0.50,-0.01) (0.34,-0.07) (0.23,0.05) (0.28,0.21) (0.38,0.35) (0.48,0.49) (0.58,0.63) (0.68,0.78) (0.77,0.93) (0.86,1.08) (0.94,1.23) (1.02,1.39) (1.10,1.55) (1.17,1.70) (1.24,1.86) (1.31,2.02) (1.37,2.19) (1.44,2.35) (1.50,2.51) (1.56,2.67) (1.62,2.84) (1.68,3.00)};
+                    \draw[niv3] plot[smooth] coordinates {(1.84,3.00) (1.80,2.83) (1.76,2.67) (1.72,2.50) (1.67,2.33) (1.62,2.17) (1.58,2.00) (1.53,1.84) (1.48,1.67) (1.42,1.51) (1.37,1.35) (1.31,1.18) (1.25,1.02) (1.19,0.86) (1.12,0.71) (1.05,0.55) (0.97,0.39) (0.89,0.24) (0.80,0.10) (0.70,-0.04) (0.59,-0.17) (0.45,-0.28) (0.30,-0.36) (0.13,-0.37) (-0.03,-0.30) (-0.14,-0.18) (-0.22,-0.02) (-0.20,0.15) (-0.08,0.27) (0.07,0.36) (0.21,0.46) (0.34,0.57) (0.45,0.70) (0.56,0.83) (0.66,0.97) (0.76,1.11) (0.85,1.26) (0.93,1.41) (1.01,1.56) (1.08,1.72) (1.15,1.88) (1.22,2.03) (1.29,2.19) (1.35,2.35) (1.41,2.51) (1.47,2.68) (1.53,2.84) (1.59,3.00)};
+                    \draw[niv4] plot[smooth] coordinates {(1.93,3.00) (1.89,2.83) (1.85,2.67) (1.80,2.50) (1.76,2.33) (1.71,2.17) (1.67,2.00) (1.62,1.84) (1.57,1.67) (1.52,1.51) (1.47,1.34) (1.41,1.18) (1.36,1.02) (1.30,0.85) (1.23,0.69) (1.17,0.53) (1.10,0.38) (1.03,0.22) (0.95,0.07) (0.87,-0.08) (0.78,-0.23) (0.67,-0.37) (0.56,-0.50) (0.43,-0.61) (0.28,-0.69) (0.11,-0.72) (-0.05,-0.69) (-0.20,-0.60) (-0.33,-0.48) (-0.43,-0.35) (-0.53,-0.20) (-0.61,-0.05) (-0.68,0.10) (-0.75,0.26) (-0.80,0.43) (-0.85,0.59) (-0.87,0.76) (-0.77,0.86) (-0.61,0.80) (-0.46,0.73) (-0.29,0.69) (-0.12,0.68) (0.05,0.72) (0.20,0.80) (0.34,0.90) (0.47,1.02) (0.58,1.15) (0.68,1.29) (0.78,1.43) (0.86,1.58) (0.95,1.73) (1.02,1.89) (1.10,2.04) (1.17,2.20) (1.24,2.36) (1.30,2.52) (1.36,2.68) (1.42,2.84) (1.48,3.00)};
+                    \draw[niv5] plot[smooth] coordinates {(2.00,2.90) (1.96,2.74) (1.92,2.57) (1.88,2.41) (1.83,2.24) (1.79,2.08) (1.75,1.92) (1.70,1.75) (1.65,1.59) (1.61,1.42) (1.56,1.26) (1.50,1.10) (1.45,0.94) (1.40,0.78) (1.34,0.62) (1.28,0.46) (1.22,0.30) (1.15,0.14) (1.08,-0.01) (1.01,-0.17) (0.93,-0.32) (0.85,-0.47) (0.75,-0.61) (0.65,-0.75) (0.54,-0.87) (0.41,-0.98) (0.26,-1.07) (0.10,-1.10) (-0.07,-1.08) (-0.22,-1.00) (-0.35,-0.89) (-0.47,-0.77) (-0.57,-0.63) (-0.66,-0.49) (-0.74,-0.34) (-0.82,-0.19) (-0.89,-0.03) (-0.96,0.12) (-1.02,0.28) (-1.08,0.44) (-1.14,0.60) (-1.19,0.76) (-1.25,0.93) (-1.29,1.09) (-1.34,1.25) (-1.39,1.42) (-1.43,1.58) (-1.47,1.75) (-1.51,1.91) (-1.55,2.08) (-1.58,2.24) (-1.61,2.41) (-1.64,2.58) (-1.64,2.75) (-1.54,2.70) (-1.45,2.56) (-1.37,2.41) (-1.29,2.26) (-1.21,2.11) (-1.12,1.96) (-1.03,1.82) (-0.93,1.68) (-0.83,1.54) (-0.72,1.41) (-0.59,1.30) (-0.46,1.20) (-0.30,1.12) (-0.14,1.09) (0.03,1.10) (0.19,1.16) (0.33,1.25) (0.46,1.37) (0.57,1.49) (0.68,1.63) (0.77,1.77) (0.86,1.92) (0.94,2.07) (1.02,2.22) (1.09,2.37) (1.16,2.53) (1.23,2.68) (1.29,2.84) (1.35,3.00)};
+                    \draw[niv6] plot[smooth] coordinates {(2.00,2.45) (1.96,2.28) (1.92,2.12) (1.87,1.95) (1.83,1.78) (1.79,1.62) (1.74,1.45) (1.69,1.29) (1.65,1.12) (1.60,0.96) (1.55,0.79) (1.49,0.63) (1.44,0.47) (1.38,0.31) (1.32,0.14) (1.26,-0.02) (1.20,-0.18) (1.13,-0.33) (1.06,-0.49) (0.98,-0.64) (0.90,-0.80) (0.82,-0.94) (0.72,-1.09) (0.62,-1.22) (0.50,-1.35) (0.36,-1.45) (0.21,-1.53) (0.04,-1.55) (-0.13,-1.52) (-0.28,-1.43) (-0.41,-1.32) (-0.52,-1.19) (-0.62,-1.05) (-0.71,-0.91) (-0.80,-0.76) (-0.88,-0.61) (-0.95,-0.45) (-1.02,-0.29) (-1.09,-0.14) (-1.15,0.02) (-1.21,0.19) (-1.27,0.35) (-1.32,0.51) (-1.37,0.67) (-1.42,0.84) (-1.47,1.00) (-1.52,1.17) (-1.57,1.33) (-1.61,1.50) (-1.66,1.66) (-1.70,1.83) (-1.74,2.00) (-1.79,2.16) (-1.83,2.33) (-1.86,2.50) (-1.90,2.66) (-1.94,2.83) (-1.98,3.00)};
+                    \draw[niv6] plot[smooth] coordinates {(-1.33,3.00) (-1.26,2.84) (-1.18,2.68) (-1.10,2.53) (-1.02,2.37) (-0.93,2.22) (-0.83,2.08) (-0.72,1.94) (-0.61,1.81) (-0.47,1.70) (-0.33,1.61) (-0.16,1.55) (0.01,1.55) (0.18,1.60) (0.33,1.69) (0.46,1.81) (0.58,1.94) (0.69,2.08) (0.78,2.22) (0.87,2.37) (0.96,2.53) (1.03,2.68) (1.11,2.84) (1.18,3.00)};
+                    \draw[niv7] plot[smooth] coordinates {(-0.18,-2.00) (-0.32,-1.91) (-0.45,-1.79) (-0.56,-1.66) (-0.66,-1.52) (-0.76,-1.38) (-0.84,-1.22) (-0.92,-1.07) (-0.99,-0.91) (-1.06,-0.76) (-1.13,-0.60) (-1.19,-0.44) (-1.25,-0.27) (-1.31,-0.11) (-1.37,0.05) (-1.42,0.22) (-1.47,0.38) (-1.52,0.55) (-1.57,0.71) (-1.62,0.88) (-1.66,1.05) (-1.71,1.21) (-1.75,1.38) (-1.80,1.55) (-1.84,1.71) (-1.88,1.88) (-1.92,2.05) (-1.96,2.22) (-2.00,2.39)};
+                    \draw[niv7] plot[smooth] coordinates {(2.00,1.95) (1.96,1.78) (1.91,1.61) (1.87,1.44) (1.83,1.27) (1.78,1.10) (1.73,0.93) (1.68,0.76) (1.63,0.59) (1.58,0.42) (1.53,0.26) (1.48,0.09) (1.42,-0.08) (1.36,-0.24) (1.30,-0.41) (1.23,-0.57) (1.17,-0.73) (1.10,-0.89) (1.02,-1.05) (0.94,-1.21) (0.86,-1.36) (0.76,-1.51) (0.66,-1.66) (0.55,-1.79) (0.42,-1.91) (0.27,-2.00)};
+                    \draw[niv7] plot[smooth] coordinates {(-1.06,3.00) (-0.97,2.84) (-0.87,2.69) (-0.77,2.54) (-0.66,2.40) (-0.53,2.27) (-0.39,2.16) (-0.23,2.08) (-0.05,2.05) (0.13,2.08) (0.29,2.16) (0.43,2.27) (0.56,2.40) (0.67,2.54) (0.77,2.69) (0.86,2.84) (0.95,3.00)};
+                    \draw[GrisTexto!65, thick] plot coordinates {(-1.300,-1.600) (0.251,-1.034) (-0.099,-0.077) (0.535,0.155) (0.507,0.231) (0.601,0.265) (0.582,0.317) (0.646,0.340) (0.631,0.380) (0.680,0.398) (0.668,0.430) (0.707,0.444) (0.697,0.471) (0.730,0.483) (0.721,0.507) (0.749,0.517) (0.742,0.538) (0.766,0.547) (0.759,0.565) (0.781,0.573) (0.775,0.590) (0.794,0.597) (0.788,0.612) (0.806,0.618) (0.801,0.632) (0.817,0.638) (0.812,0.651) (0.826,0.656) (0.822,0.668) (0.835,0.672) (0.831,0.683) (0.844,0.688) (0.840,0.698) (0.851,0.702) (0.848,0.712) (0.858,0.715) (0.855,0.724) (0.865,0.728) (0.862,0.736) (0.871,0.740) (0.868,0.748)};
+                    \draw[NaranjaBase, very thick] plot coordinates {(-1.300,-1.600) (0.251,-1.034) (0.020,-0.045) (0.637,0.304) (0.677,0.480) (0.878,0.726) (1.002,1.003) (1.000,1.000)};
+                    \foreach \p in {(-1.300,-1.600), (0.251,-1.034), (0.020,-0.045), (0.637,0.304), (0.677,0.480), (0.878,0.726)}
+                        \fill[NaranjaBase] \p circle (1.5pt);
+                \end{scope}
+                \draw[gray!50] (-1.9,-2.0) rectangle (1.9,1.9);
+                \fill[white] (1,1) circle (1.6pt) node[above, inner sep=2pt] {$x^*=(1,1)$};
+                \node[anchor=north west, text=GrisTexto] at (-1.25,-1.62) {$x^{(1)}$};
+                \draw[NaranjaBase, very thick] (-1.8,-2.35) -- (-1.4,-2.35) node[right, text=GrisTexto] {CG (Polak--Ribière)};
+                \draw[GrisTexto!65, thick] (-1.8,-2.65) -- (-1.4,-2.65) node[right, text=GrisTexto] {GD con búsqueda en línea};
+            \end{tikzpicture}
+        \end{column}
+        \begin{column}{0.51\textwidth}
+            \begin{alertblock}{Funciones no cuadráticas}
+                \footnotesize
+                Cerca de $x^*$ se comporta como cuadrática $\Rightarrow$ rápido
+            \end{alertblock}
+            \centering
+            \small
+            \begin{tabular}{l c c}
+                \toprule
+                & iteraciones & $f$ final \\
+                \midrule
+                CG & $8$ & $10^{-10}$ \\
+                GD & $40$ & $10^{-2}$ \\
+                \bottomrule
+            \end{tabular}
+
+            \vspace{0.6em}
+            \raggedright
+            \begin{itemize}
+                \item[$+$] Sin Hessiana, memoria $O(n)$
+                \item[$-$] Requiere búsqueda en línea precisa
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \reflibro{Fig.~5.3 (CG vs.\ GD en Rosenbrock), Ec.~(5.17)--(5.19), Apéndice~B.6; Ejercicio~5.7.}
 \end{frame}
