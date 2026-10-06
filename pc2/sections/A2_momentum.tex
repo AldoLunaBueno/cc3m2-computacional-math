@@ -1,55 +1,457 @@
 \subsection{Momentum}
 
-\begin{frame}{Momentum: Explicación Gráfica}
+% Paleta de curvas de nivel (misma que en Conjugate Gradient)
+\colorlet{niv1}{AmarilloAviso!85!black}
+\colorlet{niv2}{AmarilloAviso!50!VerdeNeon!75!black}
+\colorlet{niv3}{VerdeNeon!65!black}
+\colorlet{niv4}{VerdeNeon!40!CelesteBrillante!65!black}
+\colorlet{niv5}{CelesteBrillante!65!black}
+\colorlet{niv6}{CelesteBrillante!48!black}
+\colorlet{niv7}{CelesteBrillante!34!black}
+\providecommand{\reflibro}[1]{\par\vfill{\tiny\textcolor{GrisTexto!70}{\textit{Ref. libro:} #1}}}
+% Curvas de nivel de f = 0.5 x1^2 + 5 x2^2 (ejes r y r/sqrt(10))
+\newcommand{\momElipses}{%
+    \foreach \r/\cl in {0.6/niv1, 1.3/niv2, 2.0/niv3, 2.8/niv4, 3.6/niv5, 4.5/niv6}
+        \draw[\cl] (0,0) ellipse ({\r} and {\r/3.1623});%
+}
+
+% ---------------------------------------------------------------
+% 1. Explicación gráfica: un mismo problema, iteración a iteración
+%    Valle girado 30 grados, kappa=10, x(1)=(-3.6,-1.2), alpha=0.17, beta=0.5
+% ---------------------------------------------------------------
+\newcommand{\momValle}{%
+    \foreach \r/\cl in {0.6/niv1, 1.2/niv2, 1.9/niv3, 2.6/niv4, 3.4/niv5, 4.3/niv6, 5.3/niv7}
+        \draw[\cl, rotate around={30:(0,0)}] (0,0) ellipse ({\r} and {\r/3.1623});%
+}
+
+\begin{frame}{Momentum: Explicación Gráfica (1/3)}
     \begin{block}{Concepto principal}
-        [Explica la analogía física de la partícula con masa e inercia bajando por una superficie].
+        \footnotesize
+        Una \textbf{bola que rueda}: la velocidad $v$ acumula los gradientes pasados.
+        \[ v^{(k+1)}=\beta\,v^{(k)}-\alpha\,g^{(k)}, \qquad x^{(k+1)}=x^{(k)}+v^{(k+1)} \]
     \end{block}
-    \begin{itemize}
-        \item {[Idea gráfica 1: Reducción de oscilaciones transversales en cañones estrechos].}
-        \item {[Idea gráfica 2: Acumulación de velocidad en la dirección persistente].}
-    \end{itemize}
+
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.3cm, y=1.3cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-3.9,-2.6) rectangle (-0.4,0.2);
+                    \momValle
+                    \draw[NaranjaBase, very thick, -stealth] (-3.6,-1.2) -- (-2.43,-1.99);
+                \end{scope}
+                \draw[gray!50] (-3.9,-2.6) rectangle (-0.4,0.2);
+                \fill[GrisTexto] (-3.6,-1.2) circle (1.8pt) node[above, inner sep=2pt] {$x^{(1)}$};
+                \fill[NaranjaBase] (-2.406,-2.004) circle (1.8pt) node[right, inner sep=3pt, text=GrisTexto] {$x^{(2)}$};
+                \node[NaranjaBase, anchor=north east] at (-3.0,-1.65) {$v^{(2)}$};
+                \draw[-stealth, GrisTexto!70] (-1.2,-0.55) -- (-0.75,-0.29);
+                \node[GrisTexto!80, anchor=north] at (-1.0,-0.55) {hacia $x^*$};
+            \end{tikzpicture}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \begin{block}{Iteración 1}
+                \footnotesize
+                $v^{(1)}=0$ $\Rightarrow$ $v^{(2)}=-\alpha\,g^{(1)}$
+            \end{block}
+            \small
+            \begin{itemize}
+                \item Sin velocidad previa: \textbf{igual que GD}
+                \item El gradiente apunta casi \textbf{a través} del valle, no hacia $x^*$
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \reflibro{Ec.~(5.20)--(5.21).}
 \end{frame}
 
+\begin{frame}{Momentum: Explicación Gráfica (2/3)}
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \centering
+            \begin{tikzpicture}[x=2.0cm, y=2.0cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-3.75,-2.55) rectangle (-1.15,-0.75);
+                    \momValle
+                    \draw[NaranjaBase!45, very thick] (-3.6,-1.2) -- (-2.406,-2.004);
+                    % paso de GD desde x(2)
+                    \draw[GrisTexto!70, thick, dashed, -stealth] (-2.406,-2.004) -- (-2.404,-0.99);
+                    % inercia + gradiente
+                    \draw[CelesteBrillante, very thick, -stealth] (-2.406,-2.004) -- (-1.83,-2.39);
+                    \draw[NaranjaBase, very thick, -stealth] (-1.809,-2.406) -- (-1.807,-1.39);
+                    \draw[VerdeNeon, ultra thick, -stealth] (-2.406,-2.004) -- (-1.83,-1.385);
+                \end{scope}
+                \draw[gray!50] (-3.75,-2.55) rectangle (-1.15,-0.75);
+                \fill[GrisTexto!70] (-3.6,-1.2) circle (1.6pt) node[above right, inner sep=2pt] {$x^{(1)}$};
+                \fill[GrisTexto] (-2.406,-2.004) circle (1.8pt) node[left, inner sep=3pt] {$x^{(2)}$};
+                \fill[VerdeNeon] (-1.807,-1.360) circle (1.8pt) node[right, inner sep=3pt, text=GrisTexto] {$x^{(3)}$};
+                \draw[GrisTexto, thick] (-2.404,-0.958) circle (2pt) node[left, inner sep=3pt] {GD};
+                \node[CelesteBrillante, anchor=north east] at (-2.12,-2.25) {$\beta v^{(2)}$};
+                \node[NaranjaBase, anchor=west] at (-1.78,-1.95) {$-\alpha g^{(2)}$};
+                \node[VerdeNeon, anchor=south east, inner sep=1pt] at (-2.13,-1.62) {$v^{(3)}$};
+            \end{tikzpicture}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \begin{block}{Iteración 2}
+                \footnotesize
+                $v^{(3)}=\textcolor{CelesteBrillante}{\beta v^{(2)}}\textcolor{NaranjaBase}{-\alpha g^{(2)}}$
+            \end{block}
+            \small
+            \begin{itemize}
+                \item \textcolor{CelesteBrillante}{Inercia}: sigue el paso anterior
+                \item \textcolor{NaranjaBase}{Gradiente}: frena la oscilación
+                \item \textcolor{VerdeNeon}{Resultado}: avanza \textbf{por} el valle
+            \end{itemize}
+            \vspace{0.3em}
+            {\scriptsize GD (punteado) solo rebota de un lado al otro.\par}
+        \end{column}
+    \end{columns}
+    \reflibro{Ec.~(5.20)--(5.21).}
+\end{frame}
+
+\begin{frame}{Momentum: Explicación Gráfica (3/3)}
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.15cm, y=1.15cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-3.9,-2.6) rectangle (0.6,0.5);
+                    \momValle
+                    \draw[CelesteBrillante, thick] plot coordinates {(-3.600,-1.200) (-2.406,-2.004) (-2.404,-0.958) (-1.710,-1.289) (-1.619,-0.724) (-1.204,-0.843) (-1.097,-0.530) (-0.842,-0.559) (-0.747,-0.381) (-0.587,-0.374) (-0.510,-0.270) (-0.407,-0.252)};
+                    \draw[NaranjaBase, very thick] plot coordinates {(-3.600,-1.200) (-2.406,-2.004) (-1.807,-1.360) (-1.410,-0.444) (-0.726,-0.335) (-0.205,-0.321) (-0.044,-0.027) (0.043,0.126) (0.147,0.065) (0.161,0.046) (0.109,0.082) (0.078,0.064)};
+                    \foreach \p in {(-2.406,-2.004), (-1.807,-1.360), (-1.410,-0.444), (-0.726,-0.335), (-0.205,-0.321), (-0.044,-0.027)}
+                        \fill[NaranjaBase] \p circle (1.5pt);
+                    \foreach \p in {(-2.404,-0.958), (-1.710,-1.289), (-1.619,-0.724), (-1.204,-0.843), (-1.097,-0.530)}
+                        \fill[CelesteBrillante] \p circle (1.3pt);
+                \end{scope}
+                \draw[gray!50] (-3.9,-2.6) rectangle (0.6,0.5);
+                \fill[white] (-3.6,-1.2) circle (1.6pt) node[above, inner sep=2pt, text=GrisTexto] {$x^{(1)}$};
+                \fill[white] (0,0) circle (1.5pt) node[above left, inner sep=1pt] {$x^*$};
+                \draw[NaranjaBase, very thick] (-3.8,-2.95) -- (-3.4,-2.95) node[right, text=GrisTexto] {Momentum};
+                \draw[CelesteBrillante, thick] (-1.3,-2.95) -- (-0.9,-2.95) node[right, text=GrisTexto] {GD};
+            \end{tikzpicture}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \begin{block}{Iteraciones 3, 4, \dots}
+                \footnotesize
+                La velocidad a lo largo del valle se \textbf{acumula}
+            \end{block}
+            \centering
+            {\scriptsize Avance a lo largo del valle por iteración\par}
+            \vspace{0.2em}
+            \begin{tikzpicture}[x=0.55cm, y=2.0cm, font=\tiny]
+                \draw[gray!60] (0.4,0) -- (7.6,0);
+                \foreach \k/\m/\g in {1/0.632/0.632, 2/0.841/0.525, 3/0.802/0.435, 4/0.646/0.361, 5/0.459/0.300, 6/0.287/0.249, 7/0.152/0.207}{
+                    \fill[NaranjaBase] ({\k-0.32},0) rectangle ({\k},\m);
+                    \fill[CelesteBrillante] ({\k},0) rectangle ({\k+0.32},\g);
+                    \node[below] at (\k,0) {$\k$};
+                }
+                \node[below] at (4,-0.13) {iteración $k$};
+            \end{tikzpicture}
+
+            \raggedright
+            \vspace{0.3em}
+            {\small $f(x^{(7)})=0.001$ \ (GD: $0.78$)\par}
+        \end{column}
+    \end{columns}
+    \reflibro{Fig.~5.5 (mismo efecto en Rosenbrock); Ec.~(5.20)--(5.21).}
+\end{frame}
+
+% ---------------------------------------------------------------
+% 2. Pseudocódigo
+% ---------------------------------------------------------------
 \begin{frame}{Momentum: Pseudocódigo}
+    \scriptsize
     \begin{algorithmic}[1]
-        \State \textbf{Input:} {[Tasa de aprendizaje \(\alpha\), coeficiente de momento \(\beta\), punto inicial \(x\)]}
-        \State Inicializar vector de velocidad \(v \leftarrow 0\)
-        \While{[Condición de parada]}
-            \State Actualizar velocidad con inercia y gradiente
-            \State Actualizar posición usando la velocidad
-        \EndWhile
-        \State \textbf{Return} {[Punto óptimo]}
+        \Require $\nabla f$, $x^{(1)}$, $\alpha>0$, $\beta\in[0,1)$, tolerancia $\epsilon$, $k_{\max}$
+        \State $v \gets 0$
+        \For{$k = 1, \dots, k_{\max}$}
+            \State $g \gets \nabla f(x)$
+            \State \textbf{if} $\lVert g \rVert < \epsilon$ \textbf{then break}
+            \State $v \gets \beta\, v - \alpha\, g$ \Comment{(5.20)}
+            \State $x \gets x + v$ \Comment{(5.21)}
+        \EndFor
+        \State \Return $x$
     \end{algorithmic}
-\end{frame}
 
-\begin{frame}{Momentum: Ejemplo Paso a Paso}
-    \begin{exampleblock}{Planteamiento del problema}
-        [Define función de prueba 2D con distinta curvatura por eje y parámetros \(\alpha\), \(\beta\)].
-    \end{exampleblock}
+    \vspace{1em}
+    \small
     \begin{itemize}
-        \item \textbf{Paso 1:} {[Calcular gradiente y velocidad inicial en \(t=1\)].}
-        \item \textbf{Paso 2:} {[Calcular velocidad acumulada y nueva posición en \(t=2\)].}
-        \item \textbf{Paso 3:} {[Observación de la trayectoria resultante].}
+        \item $\beta=0$ $\Rightarrow$ descenso de gradiente
+        \item Típico: $\beta\approx0.9$
     \end{itemize}
+    \reflibro{Algoritmo~5.3, Ec.~(5.20)--(5.21), Ejercicio~5.10.}
 \end{frame}
 
+% ---------------------------------------------------------------
+% 3. Ejemplo paso a paso
+% ---------------------------------------------------------------
+\begin{frame}{Momentum: Ejemplo Paso a Paso (1/3)}
+    \begin{exampleblock}{Planteamiento}
+        \footnotesize
+        $f(x)=\tfrac12x_1^2+5x_2^2$, \quad $\nabla f=(x_1,\ 10x_2)$, \quad
+        $x^{(1)}=(-4,\,1)$, \quad $\alpha=0.17$, \ $\beta=0.5$
+    \end{exampleblock}
+
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \begin{block}{Inicialización}
+                \footnotesize
+                $v=(0,\ 0)$
+            \end{block}
+            \begin{block}{Iteración $k=1$}
+                \footnotesize
+                $g^{(1)}=(-4,\ 10)$\\[3pt]
+                $v^{(2)}=-0.17\,g^{(1)}=(0.68,\ -1.70)$\\[3pt]
+                $x^{(2)}=(-3.32,\ -0.70)$
+            \end{block}
+            {\small Primer paso $=$ paso de GD\par}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.05cm, y=1.05cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-4.4,-1.3) rectangle (0.6,1.35);
+                    \momElipses
+                    \draw[NaranjaBase, very thick, -stealth] (-4,1) -- (-3.34,-0.65);
+                \end{scope}
+                \draw[gray!50] (-4.4,-1.3) rectangle (0.6,1.35);
+                \fill[GrisTexto] (-4,1) circle (1.8pt) node[right, inner sep=3pt] {$x^{(1)}$};
+                \fill[GrisTexto] (-3.32,-0.70) circle (1.8pt) node[right, inner sep=3pt] {$x^{(2)}$};
+                \fill[white] (0,0) circle (1.6pt) node[above, inner sep=2pt] {$x^*$};
+                \node[NaranjaBase, anchor=east] at (-3.72,0.05) {$v^{(2)}$};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Momentum: Ejemplo Paso a Paso (2/3)}
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \begin{block}{Iteración $k=2$}
+                \footnotesize
+                $g^{(2)}=(-3.32,\ -7.00)$\\[3pt]
+                $\textcolor{CelesteBrillante}{\beta v^{(2)}}=(0.34,\ -0.85)$\\[3pt]
+                $\textcolor{NaranjaBase}{-\alpha g^{(2)}}=(0.56,\ 1.19)$\\[3pt]
+                $\textcolor{VerdeNeon}{v^{(3)}}=(0.90,\ 0.34)$\\[3pt]
+                $x^{(3)}=(-2.42,\ -0.36)$
+            \end{block}
+            \small
+            \begin{itemize}
+                \item $x_1$: velocidad \textbf{crece}
+                \item $x_2$: oscilación \textbf{se cancela}
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.45cm, y=1.45cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-4.25,-1.75) rectangle (-1.9,1.15);
+                    \momElipses
+                    \draw[GrisTexto!60, thick, -stealth] (-4,1) -- (-3.34,-0.65);
+                    % paso de GD desde x(2)
+                    \draw[GrisTexto!70, thick, dashed, -stealth] (-3.32,-0.70) -- (-2.77,0.46);
+                    % momentum: inercia + gradiente
+                    \draw[CelesteBrillante, very thick, -stealth] (-3.32,-0.70) -- (-2.99,-1.53);
+                    \draw[NaranjaBase, very thick, -stealth] (-2.98,-1.55) -- (-2.43,-0.39);
+                    \draw[VerdeNeon, ultra thick, -stealth] (-3.32,-0.70) -- (-2.45,-0.37);
+                \end{scope}
+                \draw[gray!50] (-4.25,-1.75) rectangle (-1.9,1.15);
+                \fill[GrisTexto] (-4,1) circle (1.6pt) node[right, inner sep=3pt] {$x^{(1)}$};
+                \fill[GrisTexto] (-3.32,-0.70) circle (1.6pt) node[left, inner sep=2pt] {$x^{(2)}$};
+                \fill[VerdeNeon] (-2.4156,-0.36) circle (1.8pt) node[right, inner sep=2pt, text=GrisTexto] {$x^{(3)}$};
+                \draw[GrisTexto, thick] (-2.7556,0.49) circle (2pt);
+                \node[anchor=west, text=GrisTexto] at (-2.68,0.52) {GD};
+                \node[anchor=east, text=CelesteBrillante] at (-3.2,-1.25) {$\beta v^{(2)}$};
+                \node[anchor=west, text=NaranjaBase] at (-2.66,-1.05) {$-\alpha g^{(2)}$};
+                \node[anchor=south, text=VerdeNeon] at (-2.75,-0.42) {$v^{(3)}$};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Momentum: Ejemplo Paso a Paso (3/3)}
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \begin{block}{Iteración $k=3$}
+                \footnotesize
+                $g^{(3)}=(-2.42,\ -3.60)$\\[3pt]
+                $v^{(4)}=(0.86,\ 0.78)$\\[3pt]
+                $x^{(4)}=(-1.55,\ 0.42)$
+            \end{block}
+            \begin{exampleblock}{Resultado ($\epsilon=10^{-6}$)}
+                \footnotesize
+                Momentum: $k=49$ \quad GD: $k=83$
+            \end{exampleblock}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+
+            \centering
+            \begin{tikzpicture}[x=0.95cm, y=0.95cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-4.4,-1.15) rectangle (0.5,1.3);
+                    \momElipses
+                    \draw[CelesteBrillante, thick] plot coordinates {(-4.000,1.000) (-3.320,-0.700) (-2.756,0.490) (-2.287,-0.343) (-1.898,0.240) (-1.576,-0.168) (-1.308,0.118) (-1.085,-0.082) (-0.901,0.058) (-0.748,-0.040) (-0.621,0.028) (-0.515,-0.020) (-0.428,0.014) (-0.355,-0.010) (-0.295,0.007) (-0.244,-0.005) (-0.203,0.003) (-0.168,-0.002) (-0.140,0.002) (-0.116,-0.001) (-0.096,0.001)};
+                    \draw[NaranjaBase, very thick] plot coordinates {(-4.000,1.000) (-3.320,-0.700) (-2.416,-0.360) (-1.553,0.422) (-0.857,0.096) (-0.364,-0.230) (-0.055,-0.002) (0.108,0.115) (0.172,-0.022) (0.174,-0.053) (0.146,0.022) (0.107,0.022) (0.069,-0.015) (0.039,-0.008) (0.017,0.009) (0.003,0.002) (-0.004,-0.005) (-0.007,-0.000) (-0.008,0.003) (-0.006,-0.000) (-0.005,-0.001)};
+                    \foreach \p in {(-3.320,-0.700), (-2.416,-0.360), (-1.553,0.422), (-0.857,0.096), (-0.364,-0.230), (-0.055,-0.002)}
+                        \fill[NaranjaBase] \p circle (1.4pt);
+                    \foreach \p in {(-2.756,0.490), (-2.287,-0.343), (-1.898,0.240), (-1.576,-0.168), (-1.308,0.118)}
+                        \fill[CelesteBrillante] \p circle (1.2pt);
+                \end{scope}
+                \draw[gray!50] (-4.4,-1.15) rectangle (0.5,1.3);
+                \fill[white] (-4,1) circle (1.6pt) node[right, inner sep=3pt, text=GrisTexto] {$x^{(1)}$};
+                \fill[white] (0,0) circle (1.4pt);
+                \draw[NaranjaBase, very thick] (-4.3,-1.45) -- (-3.9,-1.45) node[right, text=GrisTexto] {Momentum};
+                \draw[CelesteBrillante, thick] (-1.6,-1.45) -- (-1.2,-1.45) node[right, text=GrisTexto] {GD};
+            \end{tikzpicture}
+
+            {\tiny Primeras 20 iteraciones de cada método.\par}
+        \end{column}
+    \end{columns}
+
+    \vspace{0.3em}
+    \centering
+    {\scriptsize
+    \begin{tabular}{l c c c c c c c}
+        \toprule
+        $k$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\
+        \midrule
+        $f(x^{(k)})$ Momentum & 13 & 7.961 & \textbf{3.566} & \textbf{2.096} & \textbf{0.413} & \textbf{0.331} & \textbf{0.002} \\
+        $f(x^{(k)})$ GD ($\beta=0$) & 13 & 7.961 & 4.997 & 3.204 & 2.090 & 1.383 & 0.924 \\
+        \bottomrule
+    \end{tabular}\par}
+\end{frame}
+
+% ---------------------------------------------------------------
+% 4. Código
+% ---------------------------------------------------------------
 \begin{frame}[fragile]{Momentum: Código}
 \begin{lstlisting}[language=Python]
-def momentum_descent(grad_f, x0, alpha=0.01, beta=0.9, max_iter=100):
-    # TODO: Inicializar v = 0
-    # for t in range(max_iter):
-    #     v = beta * v + alpha * grad_f(x)
-    #     x = x - v
-    pass
+import numpy as np
+
+def momentum(grad, x, alpha=0.01, beta=0.9, k_max=1000, eps=1e-6):
+    v = np.zeros_like(x)                  # velocidad inicial v = 0
+    for k in range(1, k_max + 1):
+        g = grad(x)
+        if np.linalg.norm(g) < eps:       # criterio de parada
+            break
+        v = beta*v - alpha*g              # (5.20) inercia + gradiente
+        x = x + v                         # (5.21) avanzar con la velocidad
+    return x, k
+
+# Ejemplo: f(x) = 0.5*x1^2 + 5*x2^2   ->   grad f = (x1, 10*x2)
+grad = lambda x: np.array([x[0], 10*x[1]])
+x0 = np.array([-4.0, 1.0])
+momentum(grad, x0, alpha=0.17, beta=0.5, k_max=3)  # x(4) = [-1.5527, 0.422]
+momentum(grad, x0, alpha=0.17, beta=0.5)           # -> [0, 0] en k = 49
+momentum(grad, x0, alpha=0.17, beta=0.0)           # GD: k = 83
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}{Momentum: Análisis de Convergencia}
-    \begin{alertblock}{Tasa de Convergencia}
-        [Comparativa de velocidad de convergencia frente al descenso de gradiente clásico].
-    \end{alertblock}
-    \begin{itemize}
-        \item {[Efecto del hiperparámetro de momento en el amortiguamiento].}
-        \item {[Comportamiento frente a mínimos locales y zonas planas].}
-    \end{itemize}
+% ---------------------------------------------------------------
+% 5. Análisis de convergencia
+% ---------------------------------------------------------------
+\begin{frame}{Momentum: Análisis de Convergencia (1/2)}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \centering
+            \begin{tikzpicture}[x=0.085cm, y=0.26cm, font=\tiny]
+                \draw[gray!60] (0,-12) -- (50,-12);
+                \draw[gray!60] (0,-12) -- (0,2);
+                \foreach \yy/\lb in {0/{10^{0}}, -4/{10^{-4}}, -8/{10^{-8}}, -12/{10^{-12}}}{
+                    \draw[gray!60] (-0.8,\yy) -- (0,\yy);
+                    \draw[gray!25] (0,\yy) -- (50,\yy);
+                    \node[left] at (-0.8,\yy) {$\lb$};
+                }
+                \foreach \xx in {0,10,...,50}
+                    \draw[gray!60] (\xx,-12) -- (\xx,-12.4) node[below] {$\xx$};
+                \node[below] at (25,-13.3) {iteración $k$};
+                \node[rotate=90] at (-11,-5) {$f(x^{(k)})-f^*$};
+                \draw[CelesteBrillante, thick] plot coordinates {(0,1.11) (1,0.90) (2,0.70) (3,0.51) (4,0.32) (5,0.14) (6,-0.03) (7,-0.21) (8,-0.37) (9,-0.54) (10,-0.71) (11,-0.87) (12,-1.03) (13,-1.20) (14,-1.36) (15,-1.52) (16,-1.69) (17,-1.85) (18,-2.01) (19,-2.17) (20,-2.33) (21,-2.50) (22,-2.66) (23,-2.82) (24,-2.98) (25,-3.14) (26,-3.30) (27,-3.47) (28,-3.63) (29,-3.79) (30,-3.95) (31,-4.11) (32,-4.28) (33,-4.44) (34,-4.60) (35,-4.76) (36,-4.92) (37,-5.09) (38,-5.25) (39,-5.41) (40,-5.57) (41,-5.73) (42,-5.89) (43,-6.06) (44,-6.22) (45,-6.38) (46,-6.54) (47,-6.70) (48,-6.87) (49,-7.03) (50,-7.19)};
+                \draw[RojoAlerta, thick] plot coordinates {(0,1.11) (1,0.90) (2,0.89) (3,0.06) (4,0.74) (5,0.26) (6,0.89) (7,0.58) (8,0.83) (9,0.27) (10,0.48) (11,-0.28) (12,0.34) (13,0.31) (14,0.43) (15,0.43) (16,0.19) (17,0.18) (18,-0.70) (19,0.06) (20,-0.36) (21,0.22) (22,-0.10) (23,0.13) (24,-0.46) (25,-0.22) (26,-0.92) (27,-0.33) (28,-0.34) (29,-0.25) (30,-0.26) (31,-0.53) (32,-0.52) (33,-1.46) (34,-0.60) (35,-0.99) (36,-0.46) (37,-0.79) (38,-0.57) (39,-1.20) (40,-0.93) (41,-1.56) (42,-1.00) (43,-1.00) (44,-0.93) (45,-0.95) (46,-1.25) (47,-1.22) (48,-2.20) (49,-1.27) (50,-1.63)};
+                \draw[NaranjaBase, very thick] plot coordinates {(0,1.11) (1,0.90) (2,0.55) (3,0.32) (4,-0.38) (5,-0.48) (6,-2.81) (7,-1.14) (8,-1.76) (9,-1.53) (10,-1.89) (11,-2.09) (12,-2.45) (13,-2.97) (14,-3.24) (15,-4.55) (16,-3.86) (17,-4.57) (18,-4.21) (19,-4.66) (20,-4.74) (21,-5.23) (22,-5.56) (23,-6.07) (24,-6.75) (25,-6.65) (26,-7.21) (27,-6.93) (28,-7.40) (29,-7.42) (30,-8.00) (31,-8.19) (32,-8.94) (33,-9.19) (34,-9.53) (35,-9.76) (36,-9.69) (37,-10.08) (38,-10.13) (39,-10.73) (40,-10.85) (41,-11.81) (42,-11.75) (43,-12.00) (44,-12.00) (45,-12.00) (46,-12.00) (47,-12.00) (48,-12.00) (49,-12.00) (50,-12.00)};
+                \node[anchor=west, text=CelesteBrillante] at (30,-3.1) {$\beta=0$ (GD)};
+                \node[anchor=west, text=RojoAlerta] at (36,1.0) {$\beta=0.9$};
+                \node[anchor=west, text=NaranjaBase] at (21,-9.6) {$\beta=0.5$};
+            \end{tikzpicture}
+
+            {\tiny Ejemplo anterior, variando solo $\beta$.\par}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \begin{alertblock}{Convergencia lineal: error $\sim\rho^k$}
+                \footnotesize
+                $\beta$ moderado acelera; excesivo oscila.
+            \end{alertblock}
+            \centering
+            \small
+            \begin{tabular}{l c c}
+                \toprule
+                $\beta$ & $\rho$ & iteraciones \\
+                \midrule
+                $0$ (GD) & $0.83$ & $83$ \\
+                $0.5$ & $0.71$ & $\mathbf{49}$ \\
+                $0.9$ & $0.95$ & $289$ \\
+                \bottomrule
+            \end{tabular}
+        \end{column}
+    \end{columns}
+    \reflibro{Ec.~(5.20)--(5.21); experimento propio con el ejemplo del paso a paso.}
+\end{frame}
+
+\begin{frame}{Momentum: Análisis de Convergencia (2/2)}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \centering
+            {\scriptsize\textbf{Región de convergencia en una cuadrática}\par}
+            \vspace{0.2em}
+            \begin{tikzpicture}[x=1.15cm, y=3.0cm, font=\tiny]
+                % Región estable: 0 <= beta < 1, 0 < alpha*lambda < 2(1+beta)
+                \fill[VerdeNeon!35!black] (0,0) -- (2,0) -- (4,1) -- (0,1) -- cycle;
+                % Subregión con raíces complejas (convergencia oscilatoria)
+                \fill[VerdeNeon!16!black]
+                    plot[domain=0:1, samples=40, variable=\t] ({(1-sqrt(\t))^2}, \t)
+                    -- plot[domain=1:0, samples=40, variable=\t] ({(1+sqrt(\t))^2}, \t) -- cycle;
+                \draw[NaranjaBase!80, domain=0:1, samples=40, variable=\t] plot ({(1-sqrt(\t))^2}, \t);
+                \draw[NaranjaBase!80, domain=0:1, samples=40, variable=\t] plot ({(1+sqrt(\t))^2}, \t);
+                \draw[VerdeNeon, thick] (2,0) -- (4,1);
+                \draw[gray!60] (0,0) -- (4.2,0);
+                \draw[gray!60] (0,0) -- (0,1.08);
+                \draw[gray!40, dashed] (0,1) -- (4,1);
+                \foreach \xx in {0,1,2,3,4}
+                    \draw[gray!60] (\xx,0) -- (\xx,-0.03) node[below] {$\xx$};
+                \foreach \yy in {0,0.5,1}
+                    \draw[gray!60] (0,\yy) -- (-0.08,\yy) node[left] {$\yy$};
+                \node[below] at (2.1,-0.12) {$\alpha\lambda$ \ ($\lambda$: autovalor de la Hessiana)};
+                \node at (-0.42,0.75) {$\beta$};
+                \node[RojoAlerta] at (3.45,0.34) {diverge};
+                \node[RojoAlerta] at (3.45,0.25) {$\alpha\lambda>2(1+\beta)$};
+                \node[NaranjaBase] at (1.55,0.8) {converge oscilando};
+                \node[NaranjaBase] at (1.55,0.72) {$|r|=\sqrt{\beta}$};
+                % Leyenda
+                \fill[VerdeNeon!35!black] (0,-0.36) rectangle (0.2,-0.30);
+                \node[anchor=west] at (0.22,-0.33) {converge monótono};
+                \fill[VerdeNeon!16!black] (2.1,-0.36) rectangle (2.3,-0.30);
+                \draw[NaranjaBase!80] (2.1,-0.36) rectangle (2.3,-0.30);
+                \node[anchor=west] at (2.32,-0.33) {converge oscilando};
+                % puntos del ejemplo
+                \fill[white] (1.7,0.5) circle (1.5pt);
+                \fill[white] (0.17,0.5) circle (1.5pt);
+                \node[anchor=north, text=white] at (0.95,0.5) {ejemplo};
+                \fill[RojoAlerta] (2,0) circle (1.8pt);
+                \fill[VerdeNeon] (2,0.5) circle (1.6pt);
+                \node[anchor=south west, text=RojoAlerta, inner sep=1pt] at (2.05,0.02) {GD, $\alpha=0.2$};
+                \node[anchor=north, text=VerdeNeon, inner sep=2pt] at (2.05,0.49) {Mom., $\alpha=0.2$};
+            \end{tikzpicture}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \small
+            \begin{itemize}
+                \item Converge si $\alpha\lambda<2(1+\beta)$\\
+                      (GD: $\alpha\lambda<2$) $\Rightarrow$ \textbf{pasos más grandes}
+                \item Razón óptima:\\[2pt]
+                      $\frac{\sqrt{\kappa}-1}{\sqrt{\kappa}+1}$ vs.\ $\frac{\kappa-1}{\kappa+1}$ (GD)\\[2pt]
+                      $\kappa=10$: $0.52$ vs.\ $0.82$
+                \item[$-$] Sensible a $\alpha,\beta$; sobrepasa el fondo (Nesterov)
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \reflibro{Ejercicio~5.10, §5.4. Región y razón óptima: resultados clásicos (Polyak, 1964), no del libro.}
 \end{frame}
