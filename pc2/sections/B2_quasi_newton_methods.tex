@@ -1,61 +1,402 @@
 \subsection{Quasi-Newton Methods}
 
-\begin{frame}{Quasi-Newton Methods: Explicación Gráfica}
-    \begin{block}{Concepto principal}
-        [Explica la aproximación iterativa de la matriz inversa del Hessiano \(H^{-1}\) usando solo información de gradientes].
-    \end{block}
-    \begin{itemize}
-        \item {[Idea gráfica 1: Modelo cuadrático local que se ajusta iterativamente].}
-        \item {[Idea gráfica 2: Corrección secante matricial en varias dimensiones].}
-    \end{itemize}
+% Paleta de curvas de nivel
+\colorlet{niv1}{AmarilloAviso!85!black}
+\colorlet{niv2}{AmarilloAviso!50!VerdeNeon!75!black}
+\colorlet{niv3}{VerdeNeon!65!black}
+\colorlet{niv4}{VerdeNeon!40!CelesteBrillante!65!black}
+\colorlet{niv5}{CelesteBrillante!65!black}
+\colorlet{niv6}{CelesteBrillante!48!black}
+\colorlet{niv7}{CelesteBrillante!34!black}
+\providecommand{\reflibro}[1]{\par\vfill{\tiny\textcolor{GrisTexto!70}{\textit{Ref. libro:} #1}}}
+
+% Comandos para las curvas de nivel de Quasi-Newton con gradiente de color
+\newcommand{\qnValle}{%
+    \foreach \r/\cl in {0.5/niv1, 1.0/niv2, 1.5/niv3, 2.0/niv4, 2.5/niv5, 3.0/niv6}
+        \draw[\cl, thick, rotate around={35:(0,0)}] (0,0) ellipse ({\r*1.4} and {\r*0.4});%
+}
+
+\newcommand{\qnValleTrayectoria}{%
+    \foreach \r/\cl in {0.3/niv1, 0.7/niv2, 1.2/niv3, 1.8/niv4, 2.5/niv5, 3.3/niv6}
+        \draw[\cl, thick, rotate around={25:(0,0)}] (0,0) ellipse ({\r*1.6} and {\r*0.35});%
+}
+
+% --- FRAME 1: Introducción y Concepto ---
+\begin{frame}{Quasi-Newton: Explicación Gráfica (1/3)}
+    \begin{columns}[T]
+        \begin{column}{0.44\textwidth}
+            \centering
+            \vspace{0.2cm}
+            \begin{tikzpicture}[x=1.0cm, y=1.0cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-2.2,-2.2) rectangle (2.2,2.2);
+                    
+                    % Curvas de nivel con gradiente
+                    \qnValle
+                    
+                    % Óptimo
+                    \fill[white] (0,0) circle (1.5pt);
+                    \draw[GrisTexto] (0,0) circle (1.5pt) node[below right, inner sep=3pt] {$x^*$};
+                    
+                    % Punto de inicio
+                    \coordinate (X1) at (-1.5, 1.2);
+                    \fill[GrisTexto!70] (X1) circle (1.6pt) node[above left, inner sep=2pt] {$x^{(k)}$};
+                    
+                    % Vector Gradiente Puro
+                    \draw[CelesteBrillante, thick, dashed, -stealth] (X1) -- ++(0.7, 1.2) node[right, inner sep=2pt] {$-g^{(k)}$};
+                    
+                    % Vector Quasi-Newton
+                    \draw[NaranjaBase, very thick, -stealth] (X1) -- (-0.4, 0.3) node[midway, below right, inner sep=1pt] {paso QN};
+                    
+                \end{scope}
+                \draw[gray!50] (-2.2,-2.2) rectangle (2.2,2.2);
+            \end{tikzpicture}
+        \end{column}
+        
+        \begin{column}{0.54\textwidth}
+            \scriptsize
+            \begin{block}{De Newton a Quasi-Newton}
+                El método de Newton exige el Hessiano exacto, calculando el paso como $x^{(k+1)} = x^{(k)} - (H^{(k)})^{-1} g^{(k)}$. En altas dimensiones, calcular e invertir esta matriz es prohibitivo.
+            \end{block}
+            
+            \vspace{0.3cm}
+            \begin{itemize}
+                \setlength{\itemsep}{0.8em}
+                \item \textbf{Estrategia QN:} Los métodos Quasi-Newton aproximan la inversa del Hessiano iterativamente.
+                \item La regla de actualización se basa en una matriz $Q^{(k)}$ que aproxima dicha inversa en el punto $x^{(k)}$:
+                \[ x^{(k+1)} \leftarrow x^{(k)} - \alpha^{(k)} Q^{(k)} g^{(k)} \]
+            \end{itemize}
+        \end{column}
+    \end{columns}
 \end{frame}
 
-\begin{frame}{Quasi-Newton Methods: Pseudocódigo}
+% --- FRAME 2: Descomposición del Paso (con la llave) ---
+\begin{frame}{Quasi-Newton: Explicación Gráfica (2/3)}
+    
+    % --- FILA SUPERIOR: Ecuación y Gráfica ---
+    \begin{columns}[T]
+        \begin{column}{0.42\textwidth}
+            \begin{block}{Iteración $k$}
+                \footnotesize
+                \[ \Delta x^{(k)} = -\alpha^{(k)} Q^{(k)} g^{(k)} \]
+            \end{block}
+        \end{column}
+        
+        \begin{column}{0.56\textwidth}
+            \centering
+            \begin{tikzpicture}[x=0.95cm, y=0.95cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-2.2,-2.2) rectangle (2.2,2.2);
+                    
+                    % Curvas de nivel con gradiente
+                    \qnValle
+                    
+                    \coordinate (Xk) at (-1.5, 1.2);
+                    
+                    % Descomposición de vectores
+                    \draw[CelesteBrillante, very thick, -stealth] (Xk) -- (-0.8, 2.4) node[midway, above left, inner sep=2pt] {$-g^{(k)}$};
+                    \draw[VerdeNeon, very thick, dotted, -stealth] (-0.8, 2.4) -- (-0.4, 0.3) node[midway, right, inner sep=2pt] {corrección $Q^{(k)}$};
+                    \draw[NaranjaBase, ultra thick, -stealth] (Xk) -- (-0.4, 0.3);
+                    
+                    \fill[GrisTexto!70] (Xk) circle (1.6pt) node[left, inner sep=3pt] {$x^{(k)}$};
+                    \fill[NaranjaBase] (-0.4, 0.3) circle (1.8pt) node[right, inner sep=3pt, text=GrisTexto] {$x^{(k+1)}$};
+                \end{scope}
+                \draw[gray!50] (-2.2,-2.2) rectangle (2.2,2.2);
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    
+    \vspace{-0.2cm}
+    
+    % --- FILA INFERIOR: Textos explicativos alineados ---
+    \begin{columns}[T]
+        \begin{column}{0.4\textwidth}
+            \scriptsize
+            \begin{itemize}
+                \setlength{\itemsep}{0.5em}
+                \item \tikz[remember picture, overlay] \coordinate (item1top); \textcolor{CelesteBrillante}{$-g^{(k)}$ (Gradiente)}: Apunta a la máxima pendiente local, provocando rebote.
+                \item \textcolor{VerdeNeon}{$Q^{(k)}$ (Aprox. Hessiano)}: Multiplica al gradiente y al factor escalar $\alpha^{(k)}$ para aproximar el paso de Newton.\tikz[remember picture, overlay] \coordinate (item2bot);
+            \end{itemize}
+        \end{column}
+        
+        \begin{column}{0.6\textwidth}
+            \scriptsize
+            \vspace{0.6cm}
+            \begin{itemize}
+                \item \tikz[remember picture, overlay] \coordinate (item3); \textcolor{NaranjaBase}{Resultado}: El paso resultante se reorienta de forma eficiente hacia el óptimo.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    
+    % --- Llave conectando las columnas inferiores ---
+    \begin{tikzpicture}[remember picture, overlay]
+        \coordinate (brace_x) at ([xshift=-26pt]item3);
+        \draw[decorate, decoration={brace, amplitude=6pt}, thick, GrisTexto] 
+            ([yshift=2ex]brace_x |- item1top) -- ([yshift=-0.5ex]brace_x |- item2bot);
+    \end{tikzpicture}
+    
+\end{frame}
+
+% --- FRAME 3: Trayectorias y Convergencia ---
+\begin{frame}{Quasi-Newton: Explicación Gráfica (3/3)}
+    \begin{columns}[T]
+        \begin{column}{0.38\textwidth}
+            \centering
+            % Gráfico de Trayectorias
+            \begin{tikzpicture}[x=0.9cm, y=0.9cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-2.5,-2.2) rectangle (2.5,1.5);
+                    
+                    % Curvas de nivel con gradiente para la trayectoria
+                    \qnValleTrayectoria
+                    
+                    \fill[white] (0,0) circle (1.5pt);
+                    \draw[GrisTexto] (0,0) circle (1.5pt) node[right, inner sep=3pt] {$x^*$};
+                    
+                    % Trayectoria GD (Zig-Zag)
+                    \draw[CelesteBrillante, thick] (-2.2, 1.0) -- (-1.8, -0.6) -- (-1.0, 0.4) -- (-0.5, -0.3) -- (-0.1, 0.2) -- (0,0);
+                    \fill[CelesteBrillante] (-2.2, 1.0) circle (1.2pt) node[above right, text=GrisTexto] {$x^{(1)}$};
+                    \foreach \p in {(-1.8, -0.6), (-1.0, 0.4), (-0.5, -0.3), (-0.1, 0.2)} { \fill[CelesteBrillante] \p circle (1pt); }
+                    
+                    % Trayectoria Quasi-Newton
+                    \draw[NaranjaBase, very thick] (-2.2, 1.0) -- (-0.8, 0.2) -- (-0.1, 0.05) -- (0,0);
+                    \foreach \p in {(-0.8, 0.2), (-0.1, 0.05)} { \fill[NaranjaBase] \p circle (1.5pt); }
+                \end{scope}
+                \draw[gray!50] (-2.5,-2.2) rectangle (2.5,1.5);
+                
+                % Leyenda integrada
+                \node[text=NaranjaBase, right] at (-2.4, -2.5) {\textbf{---} Quasi-Newton};
+                \node[text=CelesteBrillante, right] at (0.2, -2.5) {\textbf{---} GD};
+            \end{tikzpicture}
+            
+            \vspace{0.2cm}
+            % Gráfico de Barras Corregido
+            \begin{tikzpicture}[font=\scriptsize]
+                \node[text=GrisTexto, font=\footnotesize] at (2.2, 1.8) {Distancia al mínimo ($||x_k - x^*||$)};
+                \draw[gray] (0,0) -- (4.5,0);
+                
+                % Iteraciones 1 a 6
+                \foreach \x/\qn/\gd in {1/1.5/1.5, 2/0.7/1.3, 3/0.15/1.1, 4/0.02/0.9, 5/0/0.75, 6/0/0.6} {
+                    \fill[CelesteBrillante] ({\x*0.65+0.15},0) rectangle ++(0.2,\gd);
+                    \fill[NaranjaBase] ({\x*0.65-0.1},0) rectangle ++(0.2,\qn);
+                    \node[below] at ({\x*0.65+0.12},0) {\x};
+                }
+                \node[below] at (2.2, -0.3) {iteración $k$};
+            \end{tikzpicture}
+        \end{column}
+
+        \scriptsize
+        \begin{column}{0.60\textwidth}
+            \begin{block}{Actualización BFGS}
+                Se definen los cambios $\gamma^{(k+1)} \equiv g^{(k+1)} - g^{(k)}$ y $\delta^{(k+1)} \equiv x^{(k+1)} - x^{(k)}$. La aproximación se enriquece iterativamente:
+                \vspace{-0.1cm}
+                \[ Q \leftarrow Q - \left(\frac{\delta\gamma^\top Q + Q\gamma\delta^\top}{\delta^\top\gamma}\right) + \left(1 + \frac{\gamma^\top Q\gamma}{\delta^\top\gamma}\right)\frac{\delta\delta^\top}{\delta^\top\gamma} \]
+            \end{block}
+            
+            \vspace{0.2cm}
+            \begin{itemize}
+                \setlength{\itemsep}{0.8em}
+                \item \textbf{Costo de Memoria:} Aunque acelera la convergencia drásticamente respecto al GD, la matriz densa $Q$ demanda grandes cantidades de memoria espacial.
+                \item \textbf{L-BFGS:} El método L-BFGS fue diseñado para aproximar a BFGS reduciendo este impacto. La matriz inversa completa se sustituye almacenando únicamente los últimos $m$ valores de $\delta$ y $\gamma$.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------
+% 2. Pseudocódigo
+% ---------------------------------------------------------------
+\begin{frame}{Quasi-Newton (BFGS): Pseudocódigo}
+    \scriptsize
     \begin{algorithmic}[1]
-        \State \textbf{Input:} {[Gradiente \(\nabla f\), matriz inicial \(B_0\) (o \(H_0^{-1}\)), punto \(x_0\)]}
-        \While{[Condición de parada]}
-            \State Calcular dirección de búsqueda: \(d \leftarrow -H \nabla f(x)\)
-            \State Realizar búsqueda de línea para obtener \(\alpha\)
-            \State Calcular diferencias de posiciones \(s\) y gradientes \(y\)
-            \State Actualizar matriz aproximada (ej. fórmula BFGS o DFP)
-            \State \(x \leftarrow x + \alpha d\)
-        \EndWhile
-        \State \textbf{Return} {[Punto óptimo]}
+        \Require $f$, $\nabla f$, $x^{(1)}$, tolerancia $\epsilon$, $k_{\max}$
+        \State $Q \gets I$ \Comment{Matriz identidad: aprox. inicial de la inversa de la Hessiana}
+        \For{$k = 1, \dots, k_{\max}$}
+            \State $g \gets \nabla f(x)$
+            \State \textbf{if} $\lVert g \rVert < \epsilon$ \textbf{then break}
+            \State $d \gets -Q g$ \Comment{Dirección de descenso casi-Newton (6.22)}
+            \State $x_{\text{new}} \gets \text{line\_search}(f, x, d)$ \Comment{Búsqueda de línea a lo largo de $d$}
+            \State $g_{\text{new}} \gets \nabla f(x_{\text{new}})$
+            \State $\delta \gets x_{\text{new}} - x$ \Comment{(6.24)}
+            \State $\gamma \gets g_{\text{new}} - g$ \Comment{(6.23)}
+            \State \textbf{if} $\delta^\top \gamma \approx 0$ \textbf{then break} \Comment{Prevenir división por cero}
+            \State $Q \gets Q - \frac{\delta\gamma^\top Q + Q\gamma\delta^\top}{\delta^\top\gamma} + \left(1 + \frac{\gamma^\top Q\gamma}{\delta^\top\gamma}\right)\frac{\delta\delta^\top}{\delta^\top\gamma}$ \Comment{Actualización BFGS (6.26)}
+            \State $x \gets x_{\text{new}}$
+        \EndFor
+        \State \Return $x$
     \end{algorithmic}
+
+    \vspace{1em}
+    \scriptsize
+    \begin{itemize}
+        \item Aproxima la inversa de la Hessiana ($H^{-1}$) usando solo información de gradientes pasados.
+        \item Mantiene $Q$ simétrica y definida positiva en cada paso.
+        \item Existen otras variantes como DFP (Ec. 6.25), pero BFGS es el estándar más robusto.
+    \end{itemize}
+    \reflibro{Algoritmo~6.6, Ec.~(6.22)--(6.26).}
 \end{frame}
 
-\begin{frame}{Quasi-Newton Methods: Ejemplo Paso a Paso}
-    \begin{exampleblock}{Planteamiento del problema}
-        [Define función cuadrática multivariable y matriz inicial \(H_0 = I\)].
+% ---------------------------------------------------------------
+% 3. Ejemplo paso a paso
+% ---------------------------------------------------------------
+\begin{frame}{Quasi-Newton (BFGS): Ejemplo Paso a Paso (1/3)}
+    \begin{exampleblock}{Planteamiento}
+        \scriptsize
+        $f(x)=\tfrac12x_1^2+5x_2^2$, \quad $\nabla f=(x_1,\ 10x_2)$, \quad
+        $x^{(1)}=(-4,\,1)$, \quad $\alpha=0.15$
     \end{exampleblock}
-    \begin{itemize}
-        \item \textbf{Paso 1:} {[Cálculo del primer paso en dirección del gradiente].}
-        \item \textbf{Paso 2:} {[Cálculo de los vectores \(s_k, y_k\) y actualización de la matriz].}
-        \item \textbf{Paso 3:} {[Determinación de la nueva dirección deformada por la curvatura].}
-    \end{itemize}
+
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \begin{block}{Inicialización}
+                \scriptsize
+                $Q^{(1)}=I=\begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$
+            \end{block}
+            \begin{block}{Iteración $k=1$}
+                \scriptsize
+                $g^{(1)}=(-4,\ 10)$\\[2pt]
+                $d^{(1)}=-Q^{(1)}g^{(1)}=(4,\ -10)$\\[2pt]
+                $x^{(2)}=x^{(1)} + 0.15\, d^{(1)} = (-3.40,\ -0.50)$\\[2pt]
+                $\mathbf{f(x^{(2)})=7.030}$
+            \end{block}
+            {\scriptsize \textbf{Nota:} Al ser $Q^{(1)}=I$, el primer paso es idéntico a usar Descenso de Gradiente (GD).\par}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.05cm, y=1.05cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-4.4,-1.3) rectangle (0.6,1.35);
+                    \momElipses
+                    \draw[NaranjaBase, very thick, -stealth] (-4,1) -- (-3.40,-0.50);
+                \end{scope}
+                \draw[gray!50] (-4.4,-1.3) rectangle (0.6,1.35);
+                \fill[GrisTexto] (-4,1) circle (1.8pt) node[right, inner sep=3pt] {$x^{(1)}$};
+                \fill[GrisTexto] (-3.40,-0.50) circle (1.8pt) node[right, inner sep=3pt] {$x^{(2)}$};
+                \fill[white] (0,0) circle (1.6pt) node[above, inner sep=2pt] {$x^*$};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
 \end{frame}
 
-\begin{frame}[fragile]{Quasi-Newton Methods: Código}
+\begin{frame}{Quasi-Newton (BFGS): Ejemplo Paso a Paso (2/3)}
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \begin{block}{Iteración $k=2$}
+                \scriptsize
+                $g^{(2)}=(-3.40,\ -5.00)$\\[2pt]
+                $\delta^{(2)}=x^{(2)}-x^{(1)}=(0.60,\ -1.50)$\\[2pt]
+                $\gamma^{(2)}=g^{(2)}-g^{(1)}=(0.60,\ -15.00)$\\[2pt]
+                Actualizamos $Q^{(2)}$ usando la Ec. (6.26)\\[2pt]
+                $d^{(2)}=-Q^{(2)}g^{(2)} \approx (3.90,\ 0.52)$\\[2pt]
+                $x^{(3)}=x^{(2)}+0.15\, d^{(2)} = (-2.81,\ -0.42)$\\[2pt]
+                $\mathbf{f(x^{(3)})=4.851}$
+            \end{block}
+            \small
+            \begin{itemize}
+                \item $Q$ se moldea capturando la curvatura.
+                \item La dirección de descenso se desvía del gradiente negativo y apunta de forma más directa hacia el mínimo.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.45cm, y=1.45cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-4.25,-1.75) rectangle (-1.9,1.15);
+                    \momElipses
+                    \draw[GrisTexto!60, thick, -stealth] (-4,1) -- (-3.40,-0.50);
+                    \draw[NaranjaBase, very thick, -stealth] (-3.40,-0.50) -- (-2.81,-0.42);
+                \end{scope}
+                \draw[gray!50] (-4.25,-1.75) rectangle (-1.9,1.15);
+                \fill[GrisTexto] (-4,1) circle (1.6pt) node[right, inner sep=3pt] {$x^{(1)}$};
+                \fill[GrisTexto] (-3.40,-0.50) circle (1.6pt) node[left, inner sep=2pt] {$x^{(2)}$};
+                \fill[VerdeNeon] (-2.81,-0.42) circle (1.8pt) node[right, inner sep=2pt, text=GrisTexto] {$x^{(3)}$};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Quasi-Newton (BFGS): Ejemplo Paso a Paso (3/3)}
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \begin{block}{Iteración $k=3$}
+                \scriptsize
+                $g^{(3)}=(-2.81,\ -4.22)$\\[3pt]
+                Actualizamos $Q^{(3)}$ \dots\\[3pt]
+                $x^{(4)}=(-2.39,\ -0.36)$\\[3pt]
+                $\mathbf{f(x^{(4)})=3.505}$
+            \end{block}
+            \begin{exampleblock}{Resultado final ($k_{\max}=60$)}
+                \scriptsize
+                $x^{(61)} = (-0.0002,\ 0.0000)$\\[3pt]
+                $f(x^{(61)}) = 0.0000$
+            \end{exampleblock}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+
+            \centering
+            \begin{tikzpicture}[x=0.95cm, y=0.95cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-4.4,-1.15) rectangle (0.5,1.3);
+                    \momElipses
+                    \draw[NaranjaBase, very thick] plot coordinates {(-4.00,1.00) (-3.40,-0.50) (-2.81,-0.42) (-2.39,-0.36) (-2.03,-0.30) (-1.73,-0.26) (-1.47,-0.22)};
+                    \foreach \p in {(-3.40,-0.50), (-2.81,-0.42), (-2.39,-0.36), (-2.03,-0.30), (-1.73,-0.26), (-1.47,-0.22)}
+                        \fill[NaranjaBase] \p circle (1.4pt);
+                \end{scope}
+                \draw[gray!50] (-4.4,-1.15) rectangle (0.5,1.3);
+                \fill[white] (-4,1) circle (1.6pt) node[right, inner sep=3pt, text=GrisTexto] {$x^{(1)}$};
+                \fill[white] (0,0) circle (1.4pt);
+                \draw[NaranjaBase, very thick] (-4.3,-1.45) -- (-3.9,-1.45) node[right, text=GrisTexto] {BFGS};
+            \end{tikzpicture}
+
+            {\tiny Primeras 7 iteraciones de BFGS.\par}
+        \end{column}
+    \end{columns}
+
+    \vspace{0.3em}
+    \centering
+    {\scriptsize
+    \begin{tabular}{l c c c c c c c}
+        \toprule
+        $k$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 \\
+        \midrule
+        $f(x^{(k+1)})$ BFGS & 13.00 & 7.030 & 4.851 & 3.505 & 2.532 & 1.830 & 1.322 \\
+        \bottomrule
+    \end{tabular}\par}
+\end{frame}
+
+% ---------------------------------------------------------------
+% 4. Código
+% ---------------------------------------------------------------
+\begin{frame}[fragile]{Quasi-Newton (BFGS): Código}
 \begin{lstlisting}[language=Python]
-def bfgs_method(f, grad_f, x0, max_iter=50, tol=1e-5):
-    # TODO: Inicializar H como la matriz identidad
-    # while iter < max_iter:
-    #     d = -H @ grad_f(x)
-    #     alpha = line_search(...)
-    #     x_next = x + alpha * d
-    #     s = x_next - x
-    #     y = grad_f(x_next) - grad_f(x)
-    #     H = update_bfgs(H, s, y)
-    pass
-\end{lstlisting}
-\end{frame}
+import numpy as np
 
-\begin{frame}{Quasi-Newton Methods: Análisis de Convergencia}
-    \begin{alertblock}{Tasa de Convergencia}
-        [Indicar convergencia superlineal y preservación de definida positiva].
-    \end{alertblock}
-    \begin{itemize}
-        \item {[Comparación de costo por iteración \(O(n^2)\) vs Newton \(O(n^3)\)].}
-        \item {[Ventajas de BFGS y L-BFGS para problemas a gran escala].}
-    \end{itemize}
+def bfgs(f, grad, x, alpha=0.1, k_max=100, eps_tol=1e-6):
+    m = len(x)
+    Q = np.eye(m)  # Inicializacion de Q^{(1)} = I
+    for k in range(1, k_max + 1):
+        g = grad(x)
+        if np.linalg.norm(g) < eps_tol:
+            break         
+        d = -Q @ g                        # (6.22) Direccion
+        x_new = x + alpha * d             # Paso (reemplaza line_search)
+        g_new = grad(x_new)
+        delta = x_new - x                 # (6.24)
+        gamma = g_new - g                 # (6.23)
+        denom = np.dot(delta, gamma)
+        if denom == 0:
+            break    
+        # Actualizacion BFGS (6.26)
+        term1 = (np.outer(delta, gamma) @ Q + Q @ np.outer(gamma, delta)) / denom
+        term2 = (1 + np.dot(gamma, Q @ gamma) / denom) * (np.outer(delta, delta) / denom)
+        Q = Q - term1 + term2
+        x = x_new
+    return x, k
+
+# Ejemplo: f(x) = 0.5*x1^2 + 5*x2^2   ->   grad f = (x1, 10*x2)
+f = lambda x: 0.5*x[0]**2 + 5*x[1]**2
+grad = lambda x: np.array([x[0], 10*x[1]])
+x0 = np.array([-4.0, 1.0])
+bfgs(f, grad, x0, alpha=0.1, k_max=100)
+\end{lstlisting}
 \end{frame}
