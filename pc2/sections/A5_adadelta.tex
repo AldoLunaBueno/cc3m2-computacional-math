@@ -1,60 +1,228 @@
 \subsection{Adadelta}
 
+% =========================================================
+% 1. EXPLICACIÓN GRÁFICA
+% =========================================================
 \begin{frame}{Adadelta: Explicación Gráfica}
-    \begin{block}{Concepto principal}
-        [Explica la eliminación de la tasa de aprendizaje explícita usando la curvatura empírica y coherencia de unidades].
-    \end{block}
-    \begin{itemize}
-        \item {[Idea gráfica 1: Relación entre la escala de actualización \(\Delta x\) y el gradiente \(g\)].}
-        \item {[Idea gráfica 2: Robustez ante cambios de escala de la función].}
-    \end{itemize}
+
+\footnotesize
+
+\begin{center}
+
+\begin{tikzpicture}[scale=0.82]
+
+    \node[
+        draw=CelesteBrillante,
+        rounded corners,
+        text=GrisTexto,
+        minimum width=2.6cm,
+        minimum height=0.7cm
+    ] at (0,1.7) (g) {Gradiente $g_k$};
+
+    \node[
+        draw=NaranjaBase,
+        rounded corners,
+        text=GrisTexto,
+        align=center,
+        minimum width=3.2cm,
+        minimum height=0.85cm
+    ] at (-3.1,0) (s) {Promedio de\\$g^2$: $s_k$};
+
+    \node[
+        draw=VerdeNeon,
+        rounded corners,
+        text=GrisTexto,
+        align=center,
+        minimum width=3.2cm,
+        minimum height=0.85cm
+    ] at (3.1,0) (u) {Promedio de\\$(\Delta x)^2$: $u_k$};
+
+    \node[
+        draw=GrisTexto,
+        rounded corners,
+        text=GrisTexto,
+        minimum width=3.0cm,
+        minimum height=0.75cm
+    ] at (0,-1.7) (dx) {Actualización $\Delta x_k$};
+
+    \draw[->, thick, GrisTexto] (g) -- (s);
+    \draw[->, thick, GrisTexto] (g) -- (dx);
+    \draw[->, thick, GrisTexto] (s) -- (dx);
+    \draw[->, thick, GrisTexto] (u) -- (dx);
+
+    \draw[->, thick, GrisTexto]
+        (dx.east) -- (4.6,-1.7) -- (4.6,0) -- (u.east);
+
+\end{tikzpicture}
+
+\end{center}
+
+\vspace{0.1cm}
+
+\[
+\Delta x_k
+=
+-\frac{\sqrt{u_{k-1}}+\epsilon}
+{\sqrt{s_k}+\epsilon}\,g_k
+\]
+
+\begin{center}
+\textbf{Gradientes} $\rightarrow s$
+\qquad
+\textbf{actualizaciones} $\rightarrow u$
+
+\vspace{0.1cm}
+
+\textcolor{VerdeNeon}{
+\textbf{Adadelta usa ambas memorias y no necesita $\alpha$.}
+}
+\end{center}
+
 \end{frame}
 
+
+% =========================================================
+% 2. PSEUDOCÓDIGO
+% =========================================================
 \begin{frame}{Adadelta: Pseudocódigo}
-    \begin{algorithmic}[1]
-        \State \textbf{Input:} {[Factor de decaimiento \(\rho\), constante \(\epsilon\), punto \(x\)]}
-        \State Inicializar acumuladores: \(E[g^2] \leftarrow 0\), \(E[\Delta x^2] \leftarrow 0\)
-        \While{[Condición de parada]}
-            \State Calcular gradiente \(g\)
-            \State Actualizar \(E[g^2]\) con promedio exponencial
-            \State Calcular paso \(\Delta x\) en función de \(\text{RMS}[\Delta x]\) y \(\text{RMS}[g]\)
-            \State Actualizar \(E[\Delta x^2]\) y posición \(x \leftarrow x + \Delta x\)
-        \EndWhile
-        \State \textbf{Return} {[Punto óptimo]}
-    \end{algorithmic}
+
+\footnotesize
+
+\begin{algorithmic}[1]
+
+\Require $x,\gamma_s,\gamma_x,\epsilon$
+
+\State $s\gets0$
+\State $u\gets0$
+
+\While{no se cumpla la condición de parada}
+
+    \State $g\gets\nabla f(x)$
+
+    \State
+    $s\gets
+    \gamma_s s+(1-\gamma_s)(g\odot g)$
+
+    \State
+    $\Delta x\gets
+    -\dfrac{\sqrt{u}+\epsilon}
+    {\sqrt{s}+\epsilon}\odot g$
+
+    \State
+    $u\gets
+    \gamma_xu+
+    (1-\gamma_x)(\Delta x\odot\Delta x)$
+
+    \State $x\gets x+\Delta x$
+
+\EndWhile
+
+\State \Return $x$
+
+\end{algorithmic}
+
+\vspace{0.25cm}
+
+\begin{block}{Diferencia clave}
+RMSProp todavía usa $\alpha$.
+Adadelta usa $u$ para ajustar automáticamente
+el tamaño de la actualización.
+\end{block}
+
 \end{frame}
 
+
+% =========================================================
+% 3. EJEMPLO
+% =========================================================
 \begin{frame}{Adadelta: Ejemplo Paso a Paso}
-    \begin{exampleblock}{Planteamiento del problema}
-        [Define función unidimensional o bidimensional y valores de inicio].
-    \end{exampleblock}
-    \begin{itemize}
-        \item \textbf{Paso 1:} {[Cálculo inicial con \(E[\Delta x^2]_0 = 0\)].}
-        \item \textbf{Paso 2:} {[Actualización simultánea de ambos acumuladores cuadráticos].}
-        \item \textbf{Paso 3:} {[Comprobación del avance de la solución].}
-    \end{itemize}
+
+\small
+
+\[
+f(x)=\frac12x^2,
+\qquad
+f'(x)=x
+\]
+
+\[
+x_0=2,\quad
+\gamma_s=\gamma_x=0.9,\quad
+\epsilon=0.1,\quad
+s_0=u_0=0
+\]
+
+\vspace{0.15cm}
+
+\begin{center}
+\scriptsize
+\begin{tabular}{c|c|c|c|c|c}
+\toprule
+$k$ & $x_k$ & $g_k$ & $s_{k+1}$ &
+$\Delta x_k$ & $x_{k+1}$ \\
+\midrule
+0 & 2.0000 & 2.0000 & 0.4000 & -0.2731 & 1.7269 \\
+1 & 1.7269 & 1.7269 & 0.6582 & -0.3531 & 1.3738 \\
+2 & 1.3738 & 1.3738 & 0.7811 & -0.3330 & 1.0408 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.15cm}
+
+\footnotesize
+\textbf{Primera iteración:}
+
+\[
+s_1=0.9(0)+0.1(2^2)=0.4
+\]
+
+\[
+\Delta x_0=
+-\frac{0.1}{\sqrt{0.4}+0.1}(2)
+\approx-0.2731
+\]
+
+\[
+x_1=2+\Delta x_0=1.7269
+\]
+
 \end{frame}
 
+
+% =========================================================
+% 4. CÓDIGO
+% =========================================================
 \begin{frame}[fragile]{Adadelta: Código}
-\begin{lstlisting}[language=Python]
-def adadelta(grad_f, x0, rho=0.95, eps=1e-6, max_iter=100):
-    # TODO: Inicializar acumuladores eg2 y edx2
-    # for t in range(max_iter):
-    #     g = grad_f(x)
-    #     eg2 = rho * eg2 + (1 - rho) * (g ** 2)
-    #     dx = - (np.sqrt(edx2 + eps) / np.sqrt(eg2 + eps)) * g
-    #     edx2 = rho * edx2 + (1 - rho) * (dx ** 2)
-    #     x = x + dx
-    pass
-\end{lstlisting}
-\end{frame}
 
-\begin{frame}{Adadelta: Análisis de Convergencia}
-    \begin{alertblock}{Propiedades de Convergencia}
-        [Indicar ventajas de no requerir sintonización de un \(\alpha\) inicial].
-    \end{alertblock}
-    \begin{itemize}
-        \item {[Preservación de unidades físicas de las variables].}
-        \item {[Velocidad relativa de convergencia en etapas tardías].}
-    \end{itemize}
+\begin{lstlisting}[
+language=Python,
+basicstyle=\ttfamily\scriptsize,
+showstringspaces=false
+]
+def adadelta(grad, x, gs=.9,
+             gx=.9, eps=.1, n=10):
+    s = 0.0
+    u = 0.0
+
+    for _ in range(n):
+        g = grad(x)
+        s = gs*s + (1-gs)*g**2
+
+        dx = -((u**0.5 + eps) /
+               (s**0.5 + eps))*g
+
+        u = gx*u + (1-gx)*dx**2
+        x += dx
+
+    return x
+
+
+def grad(x):
+    return x
+
+
+print(adadelta(grad, 2.0))
+\end{lstlisting}
+
 \end{frame}

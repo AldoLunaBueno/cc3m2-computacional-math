@@ -1,57 +1,207 @@
 \subsection{RMSProp}
 
+% =========================================================
+% 1. EXPLICACIÓN GRÁFICA
+% =========================================================
 \begin{frame}{RMSProp: Explicación Gráfica}
-    \begin{block}{Concepto principal}
-        [Explica el uso de la media móvil exponencial de gradientes para corregir la limitación de Adagrad].
-    \end{block}
-    \begin{itemize}
-        \item {[Idea gráfica 1: Ventana móvil de memoria reciente en lugar de suma histórica infinita].}
-        \item {[Idea gráfica 2: Estabilización de trayectorias en valles alargados].}
-    \end{itemize}
+
+\footnotesize
+
+\begin{columns}[T,onlytextwidth]
+
+\column{0.52\textwidth}
+
+\begin{center}
+\begin{tikzpicture}[scale=0.58]
+
+    \draw[->, GrisTexto] (-2.6,0) -- (2.8,0) node[right] {$x$};
+    \draw[->, GrisTexto] (0,-2.0) -- (0,2.2) node[above] {$y$};
+
+    \draw[CelesteBrillante, thick] (0,0) ellipse (2.1 and 1.25);
+    \draw[CelesteBrillante, thick] (0,0) ellipse (1.55 and 0.92);
+    \draw[CelesteBrillante, thick] (0,0) ellipse (1.0 and 0.58);
+    \draw[CelesteBrillante, thick] (0,0) ellipse (0.45 and 0.26);
+
+    \fill[NaranjaBase] (2.0,1.35) circle (1.7pt);
+    \fill[NaranjaBase] (1.35,0.72) circle (1.7pt);
+    \fill[NaranjaBase] (0.88,0.36) circle (1.7pt);
+    \fill[NaranjaBase] (0.42,0.14) circle (1.7pt);
+    \fill[VerdeNeon] (0.10,0.03) circle (2pt);
+
+    \draw[NaranjaBase, thick, ->] (2.0,1.35) -- (1.35,0.72);
+    \draw[NaranjaBase, thick, ->] (1.35,0.72) -- (0.88,0.36);
+    \draw[NaranjaBase, thick, ->] (0.88,0.36) -- (0.42,0.14);
+    \draw[NaranjaBase, thick, ->] (0.42,0.14) -- (0.10,0.03);
+
+\end{tikzpicture}
+
+\textcolor{VerdeNeon}{Trayectoria hacia el mínimo}
+\end{center}
+
+\column{0.45\textwidth}
+
+\textbf{¿Qué está ocurriendo?}
+
+\begin{itemize}
+    \item RMSProp guarda un promedio reciente de $g^2$.
+    \item Gradiente grande $\Rightarrow$ paso menor.
+    \item Gradiente pequeño $\Rightarrow$ paso relativamente mayor.
+    \item Los gradientes antiguos pierden peso.
+\end{itemize}
+
+\[
+s_k=\gamma s_{k-1}+(1-\gamma)g_k^2
+\]
+
+\[
+x_{k+1}
+=
+x_k-
+\frac{\alpha g_k}{\sqrt{s_k}+\epsilon}
+\]
+
+\end{columns}
+
 \end{frame}
 
+% =========================================================
+% 2. PSEUDOCÓDIGO
+% =========================================================
 \begin{frame}{RMSProp: Pseudocódigo}
-    \begin{algorithmic}[1]
-        \State \textbf{Input:} {[Tasa \(\alpha\), factor de decaimiento \(\gamma\), \(\epsilon\), punto \(x\)]}
-        \State Inicializar promedio móvil \(v \leftarrow 0\)
-        \While{[Condición de parada]}
-            \State Calcular gradiente \(g\)
-            \State Actualizar promedio exponencial: \(v \leftarrow \gamma v + (1-\gamma) g \odot g\)
-            \State Actualizar parámetros: \(x \leftarrow x - \frac{\alpha}{\sqrt{v + \epsilon}} \odot g\)
-        \EndWhile
-        \State \textbf{Return} {[Punto óptimo]}
-    \end{algorithmic}
+
+\small
+
+\begin{algorithmic}[1]
+
+\Require $x,\alpha,\gamma,\epsilon$
+
+\State $s\gets0$
+
+\While{no se cumpla la condición de parada}
+
+    \State $g\gets\nabla f(x)$
+
+    \State
+    $s\gets
+    \gamma s+(1-\gamma)(g\odot g)$
+
+    \State
+    $x\gets
+    x-\dfrac{\alpha g}{\sqrt{s}+\epsilon}$
+
+\EndWhile
+
+\State \Return $x$
+
+\end{algorithmic}
+
+\vspace{0.35cm}
+
+\begin{block}{Interpretación}
+Un gradiente grande aumenta $s$ y reduce el paso.
+Un gradiente pequeño permite un movimiento relativamente mayor.
+\end{block}
+
+\begin{center}
+\footnotesize
+$\gamma=0.9$:
+90\% historial + 10\% gradiente actual.
+\end{center}
+
 \end{frame}
 
+
+% =========================================================
+% 3. EJEMPLO
+% =========================================================
 \begin{frame}{RMSProp: Ejemplo Paso a Paso}
-    \begin{exampleblock}{Planteamiento del problema}
-        [Define función objetivo, valor inicial y tasa de decaimiento \(\gamma\) (ej: $0.9$)].
-    \end{exampleblock}
-    \begin{itemize}
-        \item \textbf{Paso 1:} {[Evaluación de \(g\) y primer valor de \(v\)].}
-        \item \textbf{Paso 2:} {[Paso adaptativo normalizado y actualización de \(x\)].}
-        \item \textbf{Paso 3:} {[Evolución observada en los siguientes pasos].}
-    \end{itemize}
+
+\small
+
+\[
+f(x)=\frac12x^2,
+\qquad
+f'(x)=x
+\]
+
+\[
+x_0=2,\quad
+\alpha=0.1,\quad
+\gamma=0.9,\quad
+\epsilon=0.01,\quad
+s_0=0
+\]
+
+\vspace{0.15cm}
+
+\begin{center}
+\scriptsize
+\begin{tabular}{c|c|c|c|c}
+\toprule
+$k$ & $x_k$ & $g_k$ & $s_{k+1}$ & $x_{k+1}$ \\
+\midrule
+0 & 2.0000 & 2.0000 & 0.4000 & 1.6887 \\
+1 & 1.6887 & 1.6887 & 0.6452 & 1.4810 \\
+2 & 1.4810 & 1.4810 & 0.8000 & 1.3173 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.2cm}
+
+\footnotesize
+\textbf{Primera iteración:}
+
+\[
+g_0=2
+\qquad
+s_1=0.9(0)+0.1(2^2)=0.4
+\]
+
+\[
+x_1
+=
+2-\frac{0.1(2)}
+{\sqrt{0.4}+0.01}
+\approx1.6887
+\]
+
+\begin{center}
+\textcolor{VerdeNeon}{
+$2\rightarrow1.6887\rightarrow1.4810\rightarrow1.3173$
+}
+\end{center}
+
 \end{frame}
 
+
+% =========================================================
+% 4. CÓDIGO
+% =========================================================
 \begin{frame}[fragile]{RMSProp: Código}
-\begin{lstlisting}[language=Python]
-def rmsprop(grad_f, x0, alpha=0.01, gamma=0.9, eps=1e-8, max_iter=100):
-    # TODO: Inicializar vector v en ceros
-    # for t in range(max_iter):
-    #     g = grad_f(x)
-    #     v = gamma * v + (1 - gamma) * (g ** 2)
-    #     x = x - (alpha / (np.sqrt(v) + eps)) * g
-    pass
-\end{lstlisting}
-\end{frame}
 
-\begin{frame}{RMSProp: Análisis de Convergencia}
-    \begin{alertblock}{Propiedades de Convergencia}
-        [Discutir estabilidad en problemas no convexos y aprendizaje profundo].
-    \end{alertblock}
-    \begin{itemize}
-        \item {[Ventaja frente a la saturación de pasos de Adagrad].}
-        \item {[Sensibilidad respecto al parámetro de tasa base \(\alpha\)].}
-    \end{itemize}
+\begin{lstlisting}[
+language=Python,
+basicstyle=\ttfamily\scriptsize,
+showstringspaces=false
+]
+def rmsprop(grad, x, alpha=.1,
+            gamma=.9, eps=.01, n=10):
+    s = 0.0
+
+    for _ in range(n):
+        g = grad(x)
+        s = gamma*s + (1-gamma)*g**2
+        x -= alpha*g/(s**0.5 + eps)
+
+    return x
+
+
+def grad(x):
+    return x
+
+
+print(rmsprop(grad, 2.0))
+\end{lstlisting}
+
 \end{frame}
