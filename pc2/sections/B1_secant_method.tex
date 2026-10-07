@@ -1,56 +1,157 @@
 \subsection{Secant Method}
 
+% ---------------------------------------------------------------
+% 1. Explicación gráfica
+% ---------------------------------------------------------------
 \begin{frame}{Secant Method: Explicación Gráfica}
     \begin{block}{Concepto principal}
-        [Explica la aproximación de la segunda derivada mediante diferencias finitas de primeras derivadas].
+        \scriptsize
+        El método de Newton para optimización 1D usa la segunda derivada:
+        $\;x^{(k+1)} = x^{(k)} - f'(x^{(k)})/f''(x^{(k)})$.
+        \textbf{El secante evita calcular $f''$}: la aproxima con la pendiente entre los
+        \emph{dos últimos} iterados.
+        \[
+            f''(x^{(k)}) \;\approx\;
+            \frac{f'(x^{(k)}) - f'(x^{(k-1)})}{x^{(k)} - x^{(k-1)}}
+            \qquad\Longrightarrow\qquad
+            x^{(k+1)} = x^{(k)} - \frac{x^{(k)}-x^{(k-1)}}{f'(x^{(k)})-f'(x^{(k-1)})}\,f'(x^{(k)})
+        \]
     \end{block}
-    \begin{itemize}
-        \item {[Idea gráfica 1: Recta secante a la curva de la derivada interceptando el eje cero].}
-        \item {[Idea gráfica 2: Comparación geométrica frente al paso de Newton clásico].}
-    \end{itemize}
+
+    \vspace{-0.3em}
+    \begin{center}
+    \begin{tikzpicture}[x=1.05cm, y=0.7cm, font=\scriptsize]
+        \begin{scope}
+        \clip (-0.45,-1.15) rectangle (3.5,2.0);
+        \draw[GrisTexto, ->] (-0.4,0) -- (3.45,0);
+        % f'(x) = e^(x-2) - 1
+        \draw[CelesteBrillante, thick, domain=-0.4:3.3, samples=60, smooth]
+              plot (\x, {exp(\x-2) - 1});
+        % recta secante por (0,-0.8647) y (3,1.7183)
+        \draw[NaranjaBase, thick, dashed] (-0.4,-1.2089) -- (3.4,2.0626);
+        \end{scope}
+        \node[right, text=GrisTexto] at (3.45,0) {$x$};
+        \fill[RojoAlerta] (0,-0.8647) circle (1.8pt);
+        \node[below right, text=RojoAlerta] at (0.05,-0.88) {$x^{(k-1)}$};
+        \fill[RojoAlerta] (3,1.7183) circle (1.8pt);
+        \node[left, text=RojoAlerta] at (2.95,1.72) {$x^{(k)}$};
+        \fill[VerdeNeon] (1.0043,0) circle (2pt);
+        \node[above, text=VerdeNeon] at (1.0043,0.12) {$x^{(k+1)}$};
+        \node[right, text=CelesteBrillante] at (3.05,1.05) {$f'$};
+    \end{tikzpicture}
+    \end{center}
+
+    \vspace{-0.3em}
+    \scriptsize
+    Se traza la \textbf{recta secante} de $f'$ por los dos puntos y se toma su
+    \textbf{corte con el eje}, porque buscamos $f'(x)=0$. Cuanto más se acercan los
+    puntos, más se parece la secante a la \textbf{tangente} y el método a Newton.
 \end{frame}
 
+% ---------------------------------------------------------------
+% 2. Pseudocódigo
+% ---------------------------------------------------------------
 \begin{frame}{Secant Method: Pseudocódigo}
+    \scriptsize
     \begin{algorithmic}[1]
-        \State \textbf{Input:} {[Derivada \(f'\), puntos iniciales \(x^{(0)}\) y \(x^{(1)}\), tolerancia]}
-        \While{[Condición de parada]}
-            \State Evaluar derivadas en los dos puntos previos
-            \State Aproximar curvatura secante: \(\Delta x / \Delta f'\)
-            \State Calcular siguiente iteración \(x^{(k+1)}\)
-        \EndWhile
-        \State \textbf{Return} {[Punto estacionario]}
+        \Require $f'$, \textbf{dos} puntos iniciales $x^{(0)} \neq x^{(1)}$,
+                 tolerancia $\epsilon$
+        \State $g_0 \gets f'(x^{(0)})$
+        \For{$k = 1$ \textbf{to} $k_{\max}$}
+            \State $g_1 \gets f'(x^{(1)})$
+            \State $\Delta g \gets g_1 - g_0$
+            \If{$|\Delta g| < \texttt{tol}$}
+                \State \textbf{break}
+                       \Comment{secante horizontal: no hay corte}
+            \EndIf
+            \State $x^{(2)} \gets x^{(1)} - \dfrac{x^{(1)}-x^{(0)}}{\Delta g}\, g_1$
+                   \Comment{corte de la secante con el eje}
+            \State $(x^{(0)},\, g_0) \gets (x^{(1)},\, g_1)$
+                   \Comment{se desplaza la ventana de dos puntos}
+            \State $x^{(1)} \gets x^{(2)}$
+            \State \textbf{si} $|x^{(1)} - x^{(0)}| < \epsilon$ \textbf{entonces break}
+        \EndFor
+        \State \Return $x^{(1)}$
     \end{algorithmic}
+
+    \vspace{0.4em}
+    \begin{alertblock}{Cuidado}
+        \tiny
+        Igual que Newton, el secante busca un punto \textbf{estacionario}: puede
+        converger a un \emph{máximo} o a un punto de inflexión. Conviene verificar
+        $f''>0$ al final, o acotar el paso.
+    \end{alertblock}
 \end{frame}
 
+% ---------------------------------------------------------------
+% 3. Ejemplo paso a paso
+% ---------------------------------------------------------------
 \begin{frame}{Secant Method: Ejemplo Paso a Paso}
-    \begin{exampleblock}{Planteamiento del problema}
-        [Define función univariable no lineal \(f(x)\) y dos valores semilla \(x_0, x_1\)].
+    \begin{exampleblock}{Planteamiento}
+        \scriptsize
+        $f(x)=e^{x-2}-x \;\Rightarrow\; f'(x)=e^{x-2}-1$.
+        Puntos iniciales $x^{(0)}=0$ y $x^{(1)}=3$, con
+        $f'(0)=-0.8647$ y $f'(3)=1.7183$. Mínimo exacto: $x^{*}=2$.
     \end{exampleblock}
-    \begin{itemize}
-        \item \textbf{Paso 1:} {[Evaluación de \(f'(x_0)\) y \(f'(x_1)\)].}
-        \item \textbf{Paso 2:} {[Cálculo de la secante y determinación de \(x_2\)].}
-        \item \textbf{Paso 3:} {[Verificación del error respecto al óptimo].}
+
+    \vspace{-0.2em}
+    \begin{center}
+    \scriptsize
+    \begin{tabular}{c r r r r}
+        \toprule
+        $k$ & $x^{(k)}$ & $f'(x^{(k)})$ & $f(x^{(k)})$ & $|x^{(k)}-x^{*}|$ \\
+        \midrule
+        0 & $0.000000$ & $-0.864665$ & $\phantom{-}0.135335$ & $2.0$ \\
+        1 & $3.000000$ & $+1.718282$ & $-0.281718$ & $1.0$ \\
+        2 & $1.004277$ & $-0.630544$ & $-0.634821$ & $9.96\times10^{-1}$ \\
+        3 & $1.540030$ & $-0.368697$ & $-0.908727$ & $4.60\times10^{-1}$ \\
+        4 & $2.294406$ & $+0.342329$ & $-0.952077$ & $2.94\times10^{-1}$ \\
+        5 & $1.931206$ & $-0.066481$ & $-0.997687$ & $6.88\times10^{-2}$ \\
+        6 & $1.990270$ & $-0.009683$ & $-0.999953$ & $9.73\times10^{-3}$ \\
+        7 & $2.000339$ & $+0.000339$ & $-1.000000$ & $3.39\times10^{-4}$ \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \vspace{0.1em}
+    \begin{itemize}\scriptsize
+        \item \textbf{No es monótono:} $x^{(4)}=2.294$ se pasa y $x^{(5)}$ regresa;
+              el secante no encierra la raíz, a diferencia de bisección.
+        \item \textbf{Aceleración:} el error va de $10^{-1}$ a $10^{-2}$ y a $10^{-4}$;
+              convergencia \textbf{superlineal} de orden $q=\varphi\approx 1.618$.
+        \item \textbf{Costo:} 1 evaluación de $f'$ por iteración y \textbf{ninguna de
+              $f''$}, contra las 2 de Newton.
     \end{itemize}
 \end{frame}
 
+% ---------------------------------------------------------------
+% 4. Código
+% ---------------------------------------------------------------
 \begin{frame}[fragile]{Secant Method: Código}
 \begin{lstlisting}[language=Python]
-def secant_method(df, x0, x1, tol=1e-5, max_iter=50):
-    # TODO: Bucle de la secante
-    # for _ in range(max_iter):
-    #     d0, d1 = df(x0), df(x1)
-    #     x_next = x1 - d1 * (x1 - x0) / (d1 - d0)
-    #     x0, x1 = x1, x_next
-    pass
-\end{lstlisting}
-\end{frame}
+from math import exp
 
-\begin{frame}{Secant Method: Análisis de Convergencia}
-    \begin{alertblock}{Tasa de Convergencia}
-        [Colocar orden de convergencia superlineal (aprox. número áureo $1.618$)].
-    \end{alertblock}
-    \begin{itemize}
-        \item {[Comparativa frente a la convergencia cuadrática de Newton].}
-        \item {[Ahorro computacional al no requerir segundas derivadas analíticas].}
-    \end{itemize}
+def secant_method(df, x0, x1, eps=1e-6, kmax=100, tol=1e-14):
+    g0 = df(x0)
+    for _ in range(kmax):
+        g1 = df(x1)
+        dg = g1 - g0                 # pendiente de la secante
+        if abs(dg) < tol:            # secante casi horizontal
+            break
+        x2 = x1 - (x1 - x0) / dg * g1
+        x0, g0 = x1, g1              # se corre la ventana
+        x1 = x2
+        if abs(x1 - x0) < eps:
+            break
+    return x1
+
+df = lambda x: exp(x - 2) - 1        # f(x) = exp(x-2) - x
+# secant_method(df, 0.0, 3.0)  ->  2.0000000  (x* exacto = 2)
+\end{lstlisting}
+
+    \vspace{0.2em}
+    \tiny
+    \textit{Nota:} el método trabaja sobre $f'$, no sobre $f$. Si solo se dispone de $f$,
+    se reemplaza \texttt{df} por una diferencia finita centrada
+    $\big(f(x+h)-f(x-h)\big)/2h$, al costo de 2 evaluaciones por paso.
 \end{frame}
