@@ -180,52 +180,307 @@
     \reflibro{§5.8.}
 \end{frame}
 
+% ---------------------------------------------------------------
+% 2. Pseudocódigo
+% ---------------------------------------------------------------
 \begin{frame}{Adam: Pseudocódigo}
+    \scriptsize
     \begin{algorithmic}[1]
-        \State \textbf{Input:} {[Parámetros \(\alpha, \beta_1, \beta_2, \epsilon\), punto inicial \(x\)]}
-        \State Inicializar momentos \(m \leftarrow 0\), \(v \leftarrow 0\), paso \(t \leftarrow 0\)
-        \While{[Condición de parada]}
-            \State \(t \leftarrow t + 1\)
-            \State Actualizar momentos sesgados \(m\) y \(v\) con el gradiente \(g\)
-            \State Aplicar corrección de sesgo: \(\hat{m} \leftarrow m / (1-\beta_1^t)\), \(\hat{v} \leftarrow v / (1-\beta_2^t)\)
-            \State Actualizar parámetros: \(x \leftarrow x - \alpha \hat{m} / (\sqrt{\hat{v}} + \epsilon)\)
-        \EndWhile
-        \State \textbf{Return} {[Punto óptimo]}
+        \Require $\nabla f$, $x^{(1)}$, $\alpha > 0$, $\gamma_v \in [0,1)$, $\gamma_s \in [0,1)$, tolerancia $\epsilon_{\text{tol}}$, $\epsilon > 0$, $k_{\max}$
+        \State $v \gets 0$
+        \State $s \gets 0$
+        \For{$k = 1, \dots, k_{\max}$}
+            \State $g \gets \nabla f(x)$
+            \State \textbf{if} $\lVert g \rVert < \epsilon_{\text{tol}}$ \textbf{then break}
+            \State $v \gets \gamma_v\, v + (1 - \gamma_v)\, g$ \Comment{(5.30)}
+            \State $s \gets \gamma_s\, s + (1 - \gamma_s)\,(g \odot g)$ \Comment{(5.31)}
+            \State $\hat{v} \gets v / (1 - \gamma_v^k)$ \Comment{(5.32)}
+            \State $\hat{s} \gets s / (1 - \gamma_s^k)$ \Comment{(5.33)}
+            \State $x \gets x - \alpha\,\hat{v} \oslash (\epsilon + \sqrt{\hat{s}})$ \Comment{(5.34)}
+        \EndFor
+        \State \Return $x$
     \end{algorithmic}
-\end{frame}
 
-\begin{frame}{Adam: Ejemplo Paso a Paso}
-    \begin{exampleblock}{Planteamiento del problema}
-        [Define función cuadrática o de prueba junto con hiperparámetros estándar].
-    \end{exampleblock}
+    \vspace{1em}
+    \small
     \begin{itemize}
-        \item \textbf{Paso 1:} {[Cálculo de \(m_1, v_1\) y aplicación de corrección de sesgo].}
-        \item \textbf{Paso 2:} {[Cálculo de la primera actualización de \(x\)].}
-        \item \textbf{Paso 3:} {[Cálculos para la iteración \(t=2\)].}
+        \item Integra Inercia (Momentum) y escalado por coordenada (RMSProp).
+        \item Valores típicos sugeridos: $\gamma_v=0.9$, $\gamma_s=0.999$, $\epsilon=10^{-8}$.
     \end{itemize}
+    \reflibro{Algoritmo~5.9, Ec.~(5.30)--(5.34).}
 \end{frame}
 
+% ---------------------------------------------------------------
+% 3. Ejemplo paso a paso
+% ---------------------------------------------------------------
+\begin{frame}{Adam: Ejemplo Paso a Paso (1/3)}
+    \begin{exampleblock}{Planteamiento}
+        \scriptsize
+        $f(x)=\tfrac12x_1^2+5x_2^2$, \quad $\nabla f=(x_1,\ 10x_2)$, \quad
+        $x^{(1)}=(-4,\,1)$, \quad $\alpha=0.3$, \ $\gamma_v=0.9$, \ $\gamma_s=0.999$
+    \end{exampleblock}
+
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \begin{block}{Inicialización}
+                \scriptsize
+                $v=(0,\ 0), \quad s=(0,\ 0)$
+            \end{block}
+            \begin{block}{Iteración $k=1$}
+                \scriptsize
+                $g^{(1)}=(-4,\ 10)$\\[2pt]
+                $v^{(2)}=(1-\gamma_v)g^{(1)}=(-0.4,\ 1.0)$\\[2pt]
+                $s^{(2)}=(1-\gamma_s)(g^{(1)})^2=(0.016,\ 0.1)$\\[2pt]
+                $\hat{v}^{(2)}=v^{(2)}/(1-0.9)=(-4,\ 10)$\\[2pt]
+                $\hat{s}^{(2)}=s^{(2)}/(1-0.999)=(16,\ 100)$\\[2pt]
+                $x^{(2)}=x^{(1)} - 0.3 \frac{(-4,\ 10)}{\sqrt{(16,\ 100)}} = (-3.70,\ 0.70)$\\[2pt]
+                $\mathbf{f(x^{(2)})=9.295}$
+            \end{block}
+            {\scriptsize \textbf{Nota:} Por la corrección de sesgo, el primer paso es exactamente de magnitud $\alpha$ en cada eje.\par}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.05cm, y=1.05cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-4.4,-1.3) rectangle (0.6,1.35);
+                    \momElipses
+                    \draw[NaranjaBase, very thick, -stealth] (-4,1) -- (-3.70,0.70);
+                \end{scope}
+                \draw[gray!50] (-4.4,-1.3) rectangle (0.6,1.35);
+                \fill[GrisTexto] (-4,1) circle (1.8pt) node[right, inner sep=3pt] {$x^{(1)}$};
+                \fill[GrisTexto] (-3.70,0.70) circle (1.8pt) node[right, inner sep=3pt] {$x^{(2)}$};
+                \fill[white] (0,0) circle (1.6pt) node[above, inner sep=2pt] {$x^*$};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Adam: Ejemplo Paso a Paso (2/3)}
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \begin{block}{Iteración $k=2$}
+                \scriptsize
+                $g^{(2)}=(-3.70,\ 7.00)$\\[2pt]
+                $v^{(3)}=(-0.73,\ 1.60), \quad \hat{v}^{(3)}\approx(-3.84,\ 8.42)$\\[2pt]
+                $s^{(3)}\approx(0.03,\ 0.15), \quad \hat{s}^{(3)}\approx(14.85,\ 74.96)$\\[2pt]
+                $x^{(3)}=(-3.70,\ 0.70) - 0.3 \frac{(-3.84,\ 8.42)}{\sqrt{(14.85,\ 74.96)}}$\\[2pt]
+                $x^{(3)}=(-3.40,\ 0.41)$\\[2pt]
+                $\mathbf{f(x^{(3)})=6.612}$
+            \end{block}
+            \small
+            \begin{itemize}
+                \item El historial de gradientes empieza a dominar.
+                \item La magnitud del paso se ajusta dinámicamente, reduciendo oscilaciones verticales.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.45cm, y=1.45cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-4.25,-1.75) rectangle (-1.9,1.15);
+                    \momElipses
+                    \draw[GrisTexto!60, thick, -stealth] (-4,1) -- (-3.70,0.70);
+                    \draw[NaranjaBase, very thick, -stealth] (-3.70,0.70) -- (-3.40,0.41);
+                \end{scope}
+                \draw[gray!50] (-4.25,-1.75) rectangle (-1.9,1.15);
+                \fill[GrisTexto] (-4,1) circle (1.6pt) node[right, inner sep=3pt] {$x^{(1)}$};
+                \fill[GrisTexto] (-3.70,0.70) circle (1.6pt) node[left, inner sep=2pt] {$x^{(2)}$};
+                \fill[VerdeNeon] (-3.40,0.41) circle (1.8pt) node[right, inner sep=2pt, text=GrisTexto] {$x^{(3)}$};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Adam: Ejemplo Paso a Paso (3/3)}
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \begin{block}{Iteración $k=3$}
+                \scriptsize
+                $g^{(3)}=(-3.40,\ 4.07)$\\[3pt]
+                $x^{(4)}=(-3.10,\ 0.13)$\\[3pt]
+                $\mathbf{f(x^{(4)})=4.902}$
+            \end{block}
+            \begin{exampleblock}{Resultado final ($k_{\max}=60$)}
+                \scriptsize
+                $x^{(61)} = (-0.0158,\ 0.0135)$\\[3pt]
+                $f(x^{(61)}) = 0.0010$
+            \end{exampleblock}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+
+            \centering
+            \begin{tikzpicture}[x=0.95cm, y=0.95cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-4.4,-1.15) rectangle (0.5,1.3);
+                    \momElipses
+                    \draw[NaranjaBase, very thick] plot coordinates {(-4.00,1.00) (-3.70,0.70) (-3.40,0.41) (-3.10,0.13) (-2.81,-0.11) (-2.52,-0.30) (-2.23,-0.42)};
+                    \foreach \p in {(-3.70,0.70), (-3.40,0.41), (-3.10,0.13), (-2.81,-0.11), (-2.52,-0.30), (-2.23,-0.42)}
+                        \fill[NaranjaBase] \p circle (1.4pt);
+                \end{scope}
+                \draw[gray!50] (-4.4,-1.15) rectangle (0.5,1.3);
+                \fill[white] (-4,1) circle (1.6pt) node[right, inner sep=3pt, text=GrisTexto] {$x^{(1)}$};
+                \fill[white] (0,0) circle (1.4pt);
+                \draw[NaranjaBase, very thick] (-4.3,-1.45) -- (-3.9,-1.45) node[right, text=GrisTexto] {Adam};
+            \end{tikzpicture}
+
+            {\tiny Primeras 7 iteraciones de Adam.\par}
+        \end{column}
+    \end{columns}
+
+    \vspace{0.3em}
+    \centering
+    {\scriptsize
+    \begin{tabular}{l c c c c c c c}
+        \toprule
+        $k$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 \\
+        \midrule
+        $f(x^{(k+1)})$ Adam & 13.00 & 9.295 & 6.612 & 4.901 & 4.002 & 3.614 & 3.380 \\
+        \bottomrule
+    \end{tabular}\par}
+\end{frame}
+
+% ---------------------------------------------------------------
+% 4. Código
+% ---------------------------------------------------------------
 \begin{frame}[fragile]{Adam: Código}
 \begin{lstlisting}[language=Python]
-def adam(grad_f, x0, alpha=0.001, beta1=0.9, beta2=0.999, eps=1e-8, max_iter=100):
-    # TODO: Inicializar m, v y contador t
-    # for t in range(1, max_iter + 1):
-    #     g = grad_f(x)
-    #     m = beta1 * m + (1 - beta1) * g
-    #     v = beta2 * v + (1 - beta2) * (g ** 2)
-    #     m_hat = m / (1 - beta1**t)
-    #     v_hat = v / (1 - beta2**t)
-    #     x = x - alpha * m_hat / (np.sqrt(v_hat) + eps)
-    pass
+import numpy as np
+
+def adam(grad, x, alpha=0.001, gamma_v=0.9, gamma_s=0.999, 
+         eps=1e-8, k_max=1000, eps_tol=1e-6):
+    v = np.zeros_like(x)                  # inicializacion del primer momento
+    s = np.zeros_like(x)                  # inicializacion del segundo momento
+    
+    for k in range(1, k_max + 1):
+        g = grad(x)
+        if np.linalg.norm(g) < eps_tol:   # criterio de parada
+            break
+            
+        v = gamma_v * v + (1 - gamma_v) * g
+        s = gamma_s * s + (1 - gamma_s) * (g**2)
+        
+        v_hat = v / (1 - gamma_v**k)      # correccion de sesgo para v
+        s_hat = s / (1 - gamma_s**k)      # correccion de sesgo para s
+        
+        x = x - alpha * v_hat / (np.sqrt(s_hat) + eps) # (5.34)
+        
+    return x, k
+
+# Ejemplo: f(x) = 0.5*x1^2 + 5*x2^2   ->   grad f = (x1, 10*x2)
+grad = lambda x: np.array([x[0], 10*x[1]])
+x0 = np.array([-4.0, 1.0])
+adam(grad, x0, alpha=0.1, k_max=100)      # convergencia del ejemplo
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}{Adam: Análisis de Convergencia}
-    \begin{alertblock}{Propiedades de Convergencia}
-        [Resumir comportamiento general en problemas estocásticos y convexos].
-    \end{alertblock}
-    \begin{itemize}
-        \item {[Impacto de la corrección de sesgo en los primeros pasos].}
-        \item {[Discusión sobre casos donde puede no converger (variantes AMSGrad)].}
-    \end{itemize}
+% ---------------------------------------------------------------
+% 5. Análisis de convergencia
+% ---------------------------------------------------------------
+\begin{frame}{Adam: Análisis de Convergencia (1/2)}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \centering
+            \begin{tikzpicture}[x=0.07cm, y=0.26cm, font=\tiny]
+                % Ejes y fondo
+                \draw[gray!60] (0,-12) -- (60,-12);
+                \draw[gray!60] (0,-12) -- (0,2);
+                \foreach \yy/\lb in {0/{10^{0}}, -4/{10^{-4}}, -8/{10^{-8}}, -12/{10^{-12}}}{
+                    \draw[gray!60] (-0.8,\yy) -- (0,\yy);
+                    \draw[gray!25] (0,\yy) -- (60,\yy);
+                    \node[left] at (-0.8,\yy) {$\lb$};
+                }
+                \foreach \xx in {0,10,...,60}
+                    \draw[gray!60] (\xx,-12) -- (\xx,-12.4) node[below] {$\xx$};
+                \node[below] at (30,-13.3) {iteración $k$};
+                \node[rotate=90] at (-12,-5) {$f(x^{(k)})-f^*$};
+                
+                % Trazos simulados para Adam con diferentes alpha
+                % Alpha = 0.05 (Lento) - CelesteBrillante
+                \draw[CelesteBrillante, thick] plot[smooth] coordinates {(0,1.11) (10,0.9) (20,0.6) (30,0.2) (40,-0.2) (50,-0.6) (60,-1.0)};
+                
+                % Alpha = 1.0 (Inestable) - RojoAlerta
+                \draw[RojoAlerta, thick] plot[smooth] coordinates {(0,1.11) (5,0.0) (10,0.5) (15,-0.2) (20,0.8) (25,-0.5) (30,1.0) (35,-0.1) (40,1.5) (45,0.2) (50,1.8) (55,0.5) (60,2.0)};
+                
+                % Alpha = 0.3 (Óptimo para este caso) - NaranjaBase
+                \draw[NaranjaBase, very thick] plot[smooth] coordinates {(0,1.11) (5,0.5) (10,0.1) (15,0.15) (20,-0.32) (25,-0.10) (30,-0.48) (40,-1.44) (50,-1.38) (60,-3.00)};
+                
+                % Leyenda
+                \node[anchor=west, text=CelesteBrillante] at (35,0.6) {$\alpha=0.05$ (lento)};
+                \node[anchor=west, text=RojoAlerta] at (42,2.5) {$\alpha=1.0$};
+                \node[anchor=west, text=NaranjaBase] at (33,-2.2) {$\alpha=0.3$};
+            \end{tikzpicture}
+
+            {\tiny Comportamiento de Adam variando la tasa de aprendizaje $\alpha$.\par}
+        \end{column}
+        \scriptsize
+        \begin{column}{0.48\textwidth}
+            \begin{alertblock}{Sensibilidad a hiperparámetros}
+                \footnotesize
+                Adam adapta pasos por coordenada, pero la \textbf{tasa base $\alpha$} sigue dictando la estabilidad global.
+            \end{alertblock}
+            \centering
+            \small
+            \vspace{0.5em}
+            \scriptsize
+            \begin{tabular}{l c}
+                \toprule
+                Tasa $\alpha$ & Comportamiento \\
+                \midrule
+                Demasiado baja & Lento (subóptimo) \\
+                Bien ajustada & \textbf{Rápido y estable} \\
+                Demasiado alta & Diverge / Oscila \\
+                \bottomrule
+            \end{tabular}
+            \vspace{1em}
+            \begin{itemize}
+                \footnotesize
+                \item[$-$] En la práctica empírica, ajustar $\alpha$ suele bastar mientras $\gamma_v, \gamma_s$ se mantienen en sus valores por defecto.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \vfill{\scriptsize{Experimento basado en el ejemplo del paso a paso.}}
+\end{frame}
+
+\begin{frame}{Adam: Análisis de Convergencia (2/2)}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \centering
+            {\scriptsize\textbf{El problema del tamaño de paso efectivo}\par}
+            \vspace{1em}
+            \begin{tikzpicture}[x=1.3cm, y=1.5cm, font=\scriptsize]
+                % Ejes
+                \draw[-stealth, GrisTexto] (0,0) -- (3.5,0) node[right] {$k$};
+                \draw[-stealth, GrisTexto] (0,0) -- (0,2.2) node[above, align=center] {Paso efectivo\\$\alpha / \sqrt{\hat{s}^{(k)}}$};
+                
+                % Curva Adam (No monótona)
+                \draw[NaranjaBase, thick] plot[smooth] coordinates {(0.2,1.8) (0.8,0.7) (1.5,1.2) (2.2,0.4) (2.8,0.9) (3.2,0.3)};
+                
+                % Curva AMSGrad (Monótona decreciente)
+                \draw[VerdeNeon, very thick, dashed] plot[smooth] coordinates {(0.2,1.8) (0.8,0.7) (1.5,0.7) (2.2,0.4) (2.8,0.4) (3.2,0.3)};
+                
+                % Anotaciones
+                \node[text=NaranjaBase, anchor=west] at (1.5,1.4) {Adam};
+                \node[text=VerdeNeon, anchor=west] at (0.9,0.25) {AMSGrad};
+                
+                % Puntos destacados
+                \fill[NaranjaBase] (1.5,1.2) circle (1.5pt);
+                \fill[NaranjaBase] (2.8,0.9) circle (1.5pt);
+                \draw[gray!60, dotted] (1.5,0.7) -- (1.5,1.2);
+                \draw[gray!60, dotted] (2.8,0.4) -- (2.8,0.9);
+            \end{tikzpicture}
+            
+            \vspace{0.5em}
+            {\tiny El denominador $\sqrt{\hat{s}}$ fluctúa, permitiendo picos en el tamaño de paso.\par}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \scriptsize
+            \begin{itemize}
+                \item \textbf{Garantías teóricas:} Adam posee un límite de arrepentimiento (regret) de $\mathcal{O}(\sqrt{T})$ en problemas convexos bajo ciertas condiciones.
+                \item \textbf{Fallas en convexidad:} Se ha demostrado que Adam \textbf{puede no converger} en problemas simples donde un gradiente grande y esporádico es olvidado rápidamente por el decaimiento $\gamma_s$.
+                \item \textbf{Solución (AMSGrad):} Retiene el máximo histórico del segundo momento para forzar un paso monótono decreciente:
+                \[ \hat{s}^{(k)} = \max(\hat{s}^{(k-1)}, s^{(k)}) \]
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \reflibro{Reddi et al. (2018) "On the Convergence of Adam and Beyond" (referencia extendida).}
 \end{frame}
