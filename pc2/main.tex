@@ -5,6 +5,7 @@
 
 \usepackage{graphicx}
 \usepackage{algorithm}
+\usepackage{algpseudocode}
 
 \usepackage{xcolor}
 \usepackage{tikz}
@@ -18,21 +19,25 @@
 \usepackage{styles/warsaw-mod}
 \usepackage{styles/warsaw-dark}
 
-% Configuración de colores para el código
+% --- PAQUETE AGREGADO AQUÍ ---
 \usepackage{listings}
+
+% Configuración de colores y formato para el código
 \lstset{
 language=Python,
-basicstyle=\ttfamily\tiny,
+basicstyle=\ttfamily\fontsize{5}{6}\selectfont,
 keywordstyle=\color{blue},
 stringstyle=\color{green!50!black},
 commentstyle=\color{gray},
 showstringspaces=false,
 frame=single,
 extendedchars=true,
+columns=fullflexible,
+keepspaces=true,
+basewidth={0.4em,0.35em},
 literate={á}{{'a}}1 {é}{{'e}}1 {í}{{'i}}1 {ó}{{'o}}1 {ú}{{'u}}1 {Á}{{'A}}1 {É}{{'E}}1 {Í}{{'I}}1 {Ó}{{'O}}1 {Ú}{{'U}}1 {ñ}{{~n}}1 {Ñ}{{~N}}1
 }
 
-\usepackage{algpseudocode}
 \usepackage{etoolbox}
 % Reducir el cuerpo del texto del pseudocódigo a \tiny
 \AtBeginEnvironment{algorithmic}{\scriptsize}
@@ -40,7 +45,6 @@ literate={á}{{'a}}1 {é}{{'e}}1 {í}{{'i}}1 {ó}{{'o}}1 {ú}{{'u}}1 {Á}{{'A}}1
 \algrenewcommand{\alglinenumber}[1]{\tiny #1:}
 
 \setbeamertemplate{navigation symbols}{}
-
 
 % Mostrar numeración de diapositivas tipo "16 / 70" en la esquina inferior derecha
 \setbeamertemplate{footline}{
