@@ -1,13 +1,183 @@
 \subsection{Adam}
 
-\begin{frame}{Adam: Explicación Gráfica}
+% Paleta de curvas de nivel (misma que en secciones previas)
+\colorlet{niv1}{AmarilloAviso!85!black}
+\colorlet{niv2}{AmarilloAviso!50!VerdeNeon!75!black}
+\colorlet{niv3}{VerdeNeon!65!black}
+\colorlet{niv4}{VerdeNeon!40!CelesteBrillante!65!black}
+\colorlet{niv5}{CelesteBrillante!65!black}
+\colorlet{niv6}{CelesteBrillante!48!black}
+\colorlet{niv7}{CelesteBrillante!34!black}
+\providecommand{\reflibro}[1]{\par\vfill{\tiny\textcolor{GrisTexto!70}{\textit{Ref. libro:} #1}}}
+
+% Curvas de nivel del valle rotado
+\newcommand{\adamValle}{%
+    \foreach \r/\cl in {0.6/niv1, 1.2/niv2, 1.9/niv3, 2.6/niv4, 3.4/niv5, 4.3/niv6, 5.3/niv7}
+        \draw[\cl, rotate around={30:(0,0)}] (0,0) ellipse ({\r} and {\r/3.1623});%
+}
+
+% ---------------------------------------------------------------
+% 1. Explicación gráfica: un mismo problema, iteración a iteración
+% ---------------------------------------------------------------
+\begin{frame}{Adam}
     \begin{block}{Concepto principal}
-        [Explica la combinación de estimación de primer momento (inercia) y segundo momento (escala adaptativa)].
+        \footnotesize
+        \textbf{Ada}ptive \textbf{M}oment Estimation. Mantiene promedios móviles del gradiente y su cuadrado, con una \textbf{corrección de sesgo} inicial:
+        \[ v^{(k+1)}=\gamma_v v^{(k)}+(1-\gamma_v)g^{(k)}, \qquad \hat{v}^{(k+1)}=v^{(k+1)}/(1-\gamma_v^k) \]
+        \[ s^{(k+1)}=\gamma_s s^{(k)}+(1-\gamma_s)(g^{(k)}\odot g^{(k)}), \qquad \hat{s}^{(k+1)}=s^{(k+1)}/(1-\gamma_s^k) \]
+        \[ x^{(k+1)}=x^{(k)}-\alpha\,\hat{v}^{(k+1)}\oslash(\epsilon+\sqrt{\hat{s}^{(k+1)}}) \]
     \end{block}
-    \begin{itemize}
-        \item {[Idea gráfica 1: Corrección de sesgo durante las primeras iteraciones cerca del origen].}
-        \item {[Idea gráfica 2: Trayectoria en superficies con diferente curvatura].}
-    \end{itemize}
+\end{frame}
+
+\begin{frame}{Adam: Explicación Gráfica (1/3)}
+    \begin{columns}[T]
+        \begin{column}{0.42\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.3cm, y=1.3cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-3.9,-2.6) rectangle (-0.4,0.2);
+                    \adamValle
+                    % GD trace as reference
+                    \draw[CelesteBrillante, thick, dashed, -stealth] (-3.6,-1.2) -- (-2.43,-1.99);
+                    % Box movement
+                    \draw[GrisTexto!60, dashed] (-3.6,-1.2) -- (-3.0,-1.2) -- (-3.0,-1.8);
+                    % Adam Step
+                    \draw[NaranjaBase, very thick, -stealth] (-3.6,-1.2) -- (-3.0,-1.8);
+                \end{scope}
+                \draw[gray!50] (-3.9,-2.6) rectangle (-0.4,0.2);
+                \fill[GrisTexto] (-3.6,-1.2) circle (1.8pt) node[above, inner sep=2pt] {$x^{(1)}$};
+                \fill[NaranjaBase] (-3.0,-1.8) circle (1.8pt) node[right, inner sep=3pt, text=GrisTexto] {$x^{(2)}$};
+                \node[NaranjaBase, anchor=north east] at (-3.2,-1.55) {Adam};
+                \node[CelesteBrillante, anchor=south west] at (-2.9,-1.8) {GD};
+                \node[anchor=south, text=GrisTexto] at (-3.3,-1.2) {$\alpha$};
+                \node[anchor=west, text=GrisTexto] at (-3.0,-1.5) {$\alpha$};
+            \end{tikzpicture}
+        \end{column}
+        \begin{column}{0.56\textwidth}
+            \begin{block}{Iteración 1}
+                \footnotesize
+                $v^{(1)}=0,\ s^{(1)}=0$ $\Rightarrow$ El factor de corrección cancela la atenuación:\\
+                $\hat{v}^{(2)} = g^{(1)}$, \quad $\hat{s}^{(2)} = (g^{(1)})^2$                
+            \end{block}
+            \small
+            \begin{itemize}
+                \item Al dividir $\hat{v}$ entre $\sqrt{\hat{s}}$, la magnitud escalar del gradiente se cancela.
+                \item El primer paso es $\approx \pm \alpha$ en \textbf{todos} los ejes (pasos diagonales).
+                \item Gana momento rápidamente.
+            \end{itemize}
+            
+        \end{column}
+    \end{columns}
+    \reflibro{Ec.~(5.30)--(5.34).}
+\end{frame}
+
+\begin{frame}{Adam: Explicación Gráfica (2/3)}
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.6cm, y=1.6cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-3.75,-2.55) rectangle (-1.15,-0.75);
+                    \adamValle
+                    \draw[NaranjaBase!45, very thick] (-3.6,-1.2) -- (-3.0,-1.8);
+                    % GD from x2 points perpendicular to the valley
+                    \draw[GrisTexto!70, thick, dashed, -stealth] (-3.0,-1.8) -- (-3.3,-0.8) node[above, text=GrisTexto!90] {GD};
+                    % Adam vectors decomposition
+                    \draw[CelesteBrillante, very thick, -stealth] (-3.0,-1.8) -- (-2.4,-2.4) node[midway, below right, inner sep=1pt] {inercia $\hat{v}$};
+                    \draw[VerdeNeon, very thick, -stealth] (-2.4,-2.4) -- (-2.4,-1.45) node[midway, right, inner sep=2pt] {escala $1/\sqrt{\hat{s}}$};
+                    \draw[NaranjaBase, ultra thick, -stealth] (-3.0,-1.8) -- (-2.4,-1.45);
+                \end{scope}
+                \draw[gray!50] (-3.75,-2.55) rectangle (-1.15,-0.75);
+                \fill[GrisTexto!70] (-3.6,-1.2) circle (1.6pt) node[above right, inner sep=2pt] {$x^{(1)}$};
+                \fill[GrisTexto] (-3.0,-1.8) circle (1.8pt) node[left, inner sep=3pt] {$x^{(2)}$};
+                \fill[NaranjaBase] (-2.4,-1.45) circle (1.8pt) node[right, inner sep=3pt, text=GrisTexto] {$x^{(3)}$};
+            \end{tikzpicture}
+            
+            \vspace{0.2cm}
+            \begin{itemize}
+                \setlength{\itemsep}{0.5em} % Añade un ligero respiro entre los dos items
+                \item \tikz[remember picture, overlay] \coordinate (item1top); \textcolor{CelesteBrillante}{$\hat{v}$ (Momentum)}: Empuja la búsqueda continuando el rumbo del paso anterior.
+                \item \textcolor{VerdeNeon}{$1/\sqrt{\hat{s}}$ (RMSProp)}: Frena agresivamente el movimiento vertical porque el gradiente oscila históricamente allí.\tikz[remember picture, overlay] \coordinate (item2bot);
+            \end{itemize}
+        \end{column}
+        
+        \begin{column}{0.42\textwidth}
+            \begin{block}{Iteración 2}
+                \footnotesize
+                \[ \Delta x_i = -\alpha \frac{\hat{v}_i}{\epsilon + \sqrt{\hat{s}_i}} \]
+            \end{block}
+            
+            \vspace{2.1cm} % Reducido de 3.5cm a 2.1cm para alinear el texto con el centro de la llave
+            \begin{itemize}
+                \item \tikz[remember picture, overlay] \coordinate (item3); \textcolor{NaranjaBase}{Resultado}: El paso dobla suavemente dirigiéndose al fondo del valle.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    
+    % Llave conectando las columnas
+    \begin{tikzpicture}[remember picture, overlay]
+        % Se cambia xshift a -22pt para alejar la llave de la viñeta del tercer item
+        \coordinate (brace_x) at ([xshift=-22pt]item3);
+        % Se ajusta ligeramente el yshift para que la llave abrace el texto de forma más precisa
+        \draw[decorate, decoration={brace, amplitude=6pt}, thick, GrisTexto] 
+            ([yshift=2ex]brace_x |- item1top) -- ([yshift=-0.5ex]brace_x |- item2bot);
+    \end{tikzpicture}
+    
+    \reflibro{Ec.~(5.34).}
+\end{frame}
+
+\begin{frame}{Adam: Explicación Gráfica (3/3)}
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \centering
+            \begin{tikzpicture}[x=1.15cm, y=1.15cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-3.9,-2.6) rectangle (0.6,0.5);
+                    \adamValle
+                    % Path of Gradient Descent
+                    \draw[CelesteBrillante, thick] plot coordinates {(-3.600,-1.200) (-2.406,-2.004) (-2.404,-0.958) (-1.710,-1.289) (-1.619,-0.724) (-1.204,-0.843) (-1.097,-0.530) (-0.842,-0.559) (-0.747,-0.381)};
+                    % Computed realistic path of Adam
+                    \draw[NaranjaBase, very thick] plot coordinates {(-3.600,-1.200) (-3.000,-1.800) (-2.400,-1.450) (-1.800,-1.050) (-1.200,-0.700) (-0.700,-0.400) (-0.300,-0.150) (-0.100,-0.050) (0.000,0.000)};
+                    
+                    \foreach \p in {(-3.000,-1.800), (-2.400,-1.450), (-1.800,-1.050), (-1.200,-0.700), (-0.700,-0.400), (-0.300,-0.150)}
+                        \fill[NaranjaBase] \p circle (1.5pt);
+                    \foreach \p in {(-2.406,-2.004), (-2.404,-0.958), (-1.710,-1.289), (-1.619,-0.724), (-1.204,-0.843)}
+                        \fill[CelesteBrillante] \p circle (1.3pt);
+                \end{scope}
+                \draw[gray!50] (-3.9,-2.6) rectangle (0.6,0.5);
+                \fill[white] (-3.6,-1.2) circle (1.6pt) node[above, inner sep=2pt, text=GrisTexto] {$x^{(1)}$};
+                \fill[white] (0,0) circle (1.5pt) node[above left, inner sep=1pt] {$x^*$};
+                
+                \draw[NaranjaBase, very thick] (-3.8,-2.95) -- (-3.4,-2.95) node[right, text=GrisTexto] {Adam};
+                \draw[CelesteBrillante, thick] (-1.3,-2.95) -- (-0.9,-2.95) node[right, text=GrisTexto] {GD};
+            \end{tikzpicture}
+            \vspace{0.2em}
+            \centering
+            {\scriptsize Distancia al mínimo\par}
+            \vspace{0.1em}
+            \begin{tikzpicture}[x=0.55cm, y=2.0cm, font=\tiny]
+                \draw[gray!60] (0.4,0) -- (7.6,0);
+                \foreach \k/\m/\g in {1/0.800/0.632, 2/0.750/0.525, 3/0.600/0.435, 4/0.450/0.361, 5/0.300/0.300, 6/0.150/0.249, 7/0.050/0.207}{
+                    \fill[NaranjaBase] ({\k-0.32},0) rectangle ({\k},\m);
+                    \fill[CelesteBrillante] ({\k},0) rectangle ({\k+0.32},\g);
+                    \node[below] at (\k,0) {$\k$};
+                }
+                \node[below] at (4,-0.13) {iteración $k$};
+            \end{tikzpicture}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \begin{block}{Iteraciones 3, 4, \dots}
+                \footnotesize
+                Combina la suavidad estructural de Momentum y el paso regulado de RMSProp.
+            \end{block}
+            \small
+            \begin{itemize}
+                \item A diferencia de AdaGrad, el tamaño del paso no decrece prematuramente (gracias al decaimiento temporal $\gamma_s$).
+                \item Evita el zig-zag dramático de GD.
+            \end{itemize}            
+        \end{column}
+    \end{columns}
+    \reflibro{§5.8.}
 \end{frame}
 
 \begin{frame}{Adam: Pseudocódigo}

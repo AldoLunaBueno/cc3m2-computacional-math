@@ -1,13 +1,188 @@
 \subsection{Quasi-Newton Methods}
 
-\begin{frame}{Quasi-Newton Methods: Explicación Gráfica}
-    \begin{block}{Concepto principal}
-        [Explica la aproximación iterativa de la matriz inversa del Hessiano \(H^{-1}\) usando solo información de gradientes].
-    \end{block}
-    \begin{itemize}
-        \item {[Idea gráfica 1: Modelo cuadrático local que se ajusta iterativamente].}
-        \item {[Idea gráfica 2: Corrección secante matricial en varias dimensiones].}
-    \end{itemize}
+% --- FRAME 1: Introducción y Concepto ---
+\begin{frame}{Quasi-Newton: Explicación Gráfica (1/3)}
+    \begin{columns}[T]
+        \begin{column}{0.44\textwidth}
+            \centering
+            \vspace{0.2cm}
+            \begin{tikzpicture}[x=1.0cm, y=1.0cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-2.2,-2.2) rectangle (2.2,2.2);
+                    
+                    % Curvas de nivel simulando un valle mal condicionado
+                    \foreach \r in {0.5, 1.0, 1.5, 2.0, 2.5, 3.0} {
+                        \draw[cyan!20!gray!40, thick, rotate=35] (0,0) ellipse ({\r*1.4} and {\r*0.4});
+                    }
+                    
+                    % Óptimo
+                    \fill[white] (0,0) circle (1.5pt);
+                    \draw[GrisTexto] (0,0) circle (1.5pt) node[below right, inner sep=3pt] {$x^*$};
+                    
+                    % Punto de inicio
+                    \coordinate (X1) at (-1.5, 1.2);
+                    \fill[GrisTexto!70] (X1) circle (1.6pt) node[above left, inner sep=2pt] {$x^{(k)}$};
+                    
+                    % Vector Gradiente Puro
+                    \draw[CelesteBrillante, thick, dashed, -stealth] (X1) -- ++(0.7, 1.2) node[right, inner sep=2pt] {$-\nabla f$};
+                    
+                    % Vector Quasi-Newton
+                    \draw[NaranjaBase, very thick, -stealth] (X1) -- (-0.4, 0.3) node[midway, below right, inner sep=1pt] {paso QN};
+                    
+                \end{scope}
+                \draw[gray!50] (-2.2,-2.2) rectangle (2.2,2.2);
+            \end{tikzpicture}
+        \end{column}
+        
+        \begin{column}{0.54\textwidth}
+            \scriptsize
+            \begin{block}{La Limitación del Gradiente}
+                El gradiente puro es perpendicular a las curvas de nivel. En valles estrechos, esto obliga a dar pasos en direcciones subóptimas, ignorando el centro del valle.
+            \end{block}
+            
+            \vspace{0.3cm}
+            \begin{itemize}
+                \setlength{\itemsep}{0.8em}
+                \item \textbf{La Solución de Newton:} Usar la matriz Hessiana para capturar la curvatura del valle, pero calcular su inversa es computacionalmente prohibitivo.
+                \item \textbf{La Estrategia Quasi-Newton:} Aproximar la inversa del Hessiano iterativamente observando cómo cambia el gradiente paso a paso.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- FRAME 2: Descomposición del Paso (con la llave) ---
+\begin{frame}{Quasi-Newton: Explicación Gráfica (2/3)}
+    
+    % --- FILA SUPERIOR: Ecuación y Gráfica ---
+    \begin{columns}[T]
+        \begin{column}{0.42\textwidth}
+            \begin{block}{Iteración $k$}
+                \footnotesize
+                \[ \Delta x_k = -\alpha B_k^{-1} \nabla f(x_k) \]
+            \end{block}
+        \end{column}
+        
+        \begin{column}{0.56\textwidth}
+            \centering
+            % Se redujo levemente la escala (0.95) para asegurar que nada rebase el límite inferior
+            \begin{tikzpicture}[x=0.95cm, y=0.95cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-2.2,-2.2) rectangle (2.2,2.2);
+                    
+                    % Curvas de nivel
+                    \foreach \r in {0.5, 1.0, 1.5, 2.0, 2.5} {
+                        \draw[cyan!20!gray!40, thick, rotate=35] (0,0) ellipse ({\r*1.4} and {\r*0.4});
+                    }
+                    
+                    \coordinate (Xk) at (-1.5, 1.2);
+                    
+                    % Descomposición de vectores
+                    \draw[CelesteBrillante, very thick, -stealth] (Xk) -- (-0.8, 2.4) node[midway, above left, inner sep=2pt] {$-\nabla f$};
+                    \draw[VerdeNeon, very thick, dotted, -stealth] (-0.8, 2.4) -- (-0.4, 0.3) node[midway, right, inner sep=2pt] {corrección $B_k^{-1}$};
+                    \draw[NaranjaBase, ultra thick, -stealth] (Xk) -- (-0.4, 0.3);
+                    
+                    \fill[GrisTexto!70] (Xk) circle (1.6pt) node[left, inner sep=3pt] {$x^{(k)}$};
+                    \fill[NaranjaBase] (-0.4, 0.3) circle (1.8pt) node[right, inner sep=3pt, text=GrisTexto] {$x^{(k+1)}$};
+                \end{scope}
+                \draw[gray!50] (-2.2,-2.2) rectangle (2.2,2.2);
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    
+    \vspace{-0.2cm} % Ajuste para acercar los textos explicativos a los elementos superiores
+    
+    % --- FILA INFERIOR: Textos explicativos alineados ---
+    \begin{columns}[T]
+        \begin{column}{0.4\textwidth}
+            \scriptsize
+            \begin{itemize}
+                \setlength{\itemsep}{0.5em}
+                \item \tikz[remember picture, overlay] \coordinate (item1top); \textcolor{CelesteBrillante}{$-\nabla f(x_k)$ (Gradiente)}: Apunta a la máxima pendiente, rebotando hacia la pared del valle.
+                \item \textcolor{VerdeNeon}{$B_k^{-1}$ (Aprox. Hessiano)}: Transforma el espacio multiplicando el gradiente para corregir su orientación.\tikz[remember picture, overlay] \coordinate (item2bot);
+            \end{itemize}
+        \end{column}
+        
+        \begin{column}{0.6\textwidth}
+            \scriptsize
+            \vspace{0.6cm} % Ajusta este valor si necesitas que el texto suba o baje ligeramente respecto a la llave
+            \begin{itemize}
+                \item \tikz[remember picture, overlay] \coordinate (item3); \textcolor{NaranjaBase}{Resultado}: El paso se reorienta geométricamente, apuntando de forma directa al fondo del valle.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    
+    % --- Llave conectando las columnas inferiores ---
+    \begin{tikzpicture}[remember picture, overlay]
+        \coordinate (brace_x) at ([xshift=-26pt]item3);
+        \draw[decorate, decoration={brace, amplitude=6pt}, thick, GrisTexto] 
+            ([yshift=2ex]brace_x |- item1top) -- ([yshift=-0.5ex]brace_x |- item2bot);
+    \end{tikzpicture}
+    
+\end{frame}
+
+% --- FRAME 3: Trayectorias y Convergencia ---
+\begin{frame}{Quasi-Newton: Explicación Gráfica (3/3)}
+    \begin{columns}[T]
+        \begin{column}{0.44\textwidth}
+            \centering
+            % Gráfico de Trayectorias
+            \begin{tikzpicture}[x=1.0cm, y=1.0cm, font=\scriptsize]
+                \begin{scope}
+                    \clip (-2.5,-2.2) rectangle (2.5,1.5);
+                    \foreach \r in {0.3, 0.7, 1.2, 1.8, 2.5, 3.3} {
+                        \draw[cyan!20!gray!40, thick, rotate=25] (0,0) ellipse ({\r*1.6} and {\r*0.35});
+                    }
+                    
+                    \fill[white] (0,0) circle (1.5pt);
+                    \draw[GrisTexto] (0,0) circle (1.5pt) node[right, inner sep=3pt] {$x^*$};
+                    
+                    % Trayectoria GD (Zig-Zag)
+                    \draw[CelesteBrillante, thick] (-2.2, 1.0) -- (-1.8, -0.6) -- (-1.0, 0.4) -- (-0.5, -0.3) -- (-0.1, 0.2) -- (0,0);
+                    \fill[CelesteBrillante] (-2.2, 1.0) circle (1.2pt) node[above left, text=GrisTexto] {$x^{(1)}$};
+                    \foreach \p in {(-1.8, -0.6), (-1.0, 0.4), (-0.5, -0.3), (-0.1, 0.2)} { \fill[CelesteBrillante] \p circle (1pt); }
+                    
+                    % Trayectoria Quasi-Newton
+                    \draw[NaranjaBase, very thick] (-2.2, 1.0) -- (-0.8, 0.2) -- (-0.1, 0.05) -- (0,0);
+                    \foreach \p in {(-0.8, 0.2), (-0.1, 0.05)} { \fill[NaranjaBase] \p circle (1.5pt); }
+                \end{scope}
+                \draw[gray!50] (-2.5,-2.2) rectangle (2.5,1.5);
+                
+                % Leyenda integrada
+                \node[text=NaranjaBase, right] at (-2.4, -2.5) {\textbf{---} Quasi-Newton};
+                \node[text=CelesteBrillante, right] at (0.2, -2.5) {\textbf{---} GD};
+            \end{tikzpicture}
+            
+            \vspace{0.2cm}
+            % Gráfico de Barras Corregido
+            \begin{tikzpicture}[font=\scriptsize]
+                \node[text=GrisTexto, font=\footnotesize] at (2.2, 1.8) {Distancia al mínimo ($||x_k - x^*||$)};
+                \draw[gray] (0,0) -- (4.5,0);
+                
+                % Iteraciones 1 a 6
+                \foreach \x/\qn/\gd in {1/1.5/1.5, 2/0.7/1.3, 3/0.15/1.1, 4/0.02/0.9, 5/0/0.75, 6/0/0.6} {
+                    \fill[CelesteBrillante] ({\x*0.65+0.15},0) rectangle ++(0.2,\gd);
+                    \fill[NaranjaBase] ({\x*0.65-0.1},0) rectangle ++(0.2,\qn);
+                    \node[below] at ({\x*0.65+0.12},0) {\x};
+                }
+                \node[below] at (2.2, -0.3) {iteración $k$};
+            \end{tikzpicture}
+        \end{column}
+
+        \scriptsize
+        \begin{column}{0.54\textwidth}
+            \begin{block}{Algoritmos BFGS y L-BFGS}
+                Los algoritmos de la familia Quasi-Newton construyen iterativamente la topología del espacio sin segundas derivadas explícitas.
+            \end{block}
+            
+            \vspace{0.2cm}
+            \begin{itemize}
+                \setlength{\itemsep}{0.8em}
+                \item \textbf{Convergencia Superlineal:} Alcanza el mínimo en una fracción de las iteraciones que requiere el Gradiente Descendente, como se aprecia en la rápida caída del error en el diagrama de barras.
+                \item \textbf{Costo de Memoria:} La matriz densa de $B^{-1}$ exige $O(n^2)$ en memoria. 
+                \item \textbf{L-BFGS (Limited-memory):} Resuelve el problema de memoria guardando solo los últimos $m$ vectores espaciales en lugar de toda la matriz, ideal para Deep Learning.
+            \end{itemize}
+        \end{column}
+    \end{columns}
 \end{frame}
 
 \begin{frame}{Quasi-Newton Methods: Pseudocódigo}
