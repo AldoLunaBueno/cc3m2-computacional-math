@@ -208,19 +208,15 @@ def adadelta(grad, x, gs=.9,
     for _ in range(n):
         g = grad(x)
         s = gs*s + (1-gs)*g**2
-
         dx = -((u**0.5 + eps) /
                (s**0.5 + eps))*g
-
         u = gx*u + (1-gx)*dx**2
         x += dx
 
     return x
 
-
 def grad(x):
     return x
-
 
 print(adadelta(grad, 2.0))
 \end{lstlisting}
