@@ -1,58 +1,186 @@
 \subsection{Hypergradient Descent}
 
+% ---------------------------------------------------------------
+% 1. Explicación gráfica
+% ---------------------------------------------------------------
 \begin{frame}{Hypergradient Descent: Explicación Gráfica}
     \begin{block}{Concepto principal}
-        [Explica la idea de ajustar dinámicamente la propia tasa de aprendizaje usando el gradiente del paso previo].
+        \scriptsize
+        La tasa de aprendizaje $\alpha$ es el hiperparámetro crítico de todo método de
+        primer orden. La idea: tratarla como \emph{una variable más} y aplicarle
+        \textbf{descenso de gradiente a ella misma}.
+        \vspace{-0.3em}
+        \[
+            \frac{\partial f(\mathbf{x}^{(k)})}{\partial \alpha}
+            = \nabla f(\mathbf{x}^{(k)})^{\top}
+              \frac{\partial \mathbf{x}^{(k)}}{\partial \alpha}
+            = -\,\nabla f(\mathbf{x}^{(k)})^{\top} \nabla f(\mathbf{x}^{(k-1)})
+        \]
+        \vspace{-0.5em}
+
+        El \textbf{hipergradiente} es el producto punto de los \textbf{dos últimos
+        gradientes}: información que ya se tiene, gratis.
     \end{block}
-    \begin{itemize}
-        \item {[Idea gráfica 1: Producto punto entre gradientes consecutivos indicando alineación o cambio brusco].}
-        \item {[Idea gráfica 2: Auto-sintonización de \(\alpha\) en tiempo de ejecución].}
-    \end{itemize}
+
+    \vspace{-0.2em}
+    \begin{center}
+    \begin{tikzpicture}[x=0.42cm, y=0.33cm, font=\tiny]
+        % ---- panel izquierdo: gradientes alineados ----
+        \draw[CelesteBrillante, thick, domain=-2.4:2.4, samples=40, smooth]
+              plot (\x, {0.45*\x*\x});
+        \fill[RojoAlerta] (2.2,2.178) circle (1.4pt);
+        \fill[RojoAlerta] (1.4,0.882) circle (1.4pt);
+        \draw[NaranjaBase, ->, very thick] (2.2,3.4) -- (1.0,3.4);
+        \draw[NaranjaBase, ->, very thick] (1.4,4.4) -- (0.2,4.4);
+        \node[above, text=VerdeNeon] at (0.9,4.8) {$g^{(k)}\!\cdot g^{(k-1)} > 0$};
+        \node[below, text=GrisTexto, align=center] at (0,-0.4)
+             {mismo sentido: voy bien\\ \textcolor{VerdeNeon}{$\alpha$ \textbf{aumenta}}};
+        % ---- panel derecho: gradientes opuestos ----
+        \begin{scope}[xshift=5.4cm]
+        \draw[CelesteBrillante, thick, domain=-2.4:2.4, samples=40, smooth]
+              plot (\x, {0.45*\x*\x});
+        \fill[RojoAlerta] (2.2,2.178) circle (1.4pt);
+        \fill[RojoAlerta] (-1.8,1.458) circle (1.4pt);
+        \draw[NaranjaBase, ->, very thick] (2.2,3.4) -- (1.0,3.4);
+        \draw[NaranjaBase, ->, very thick] (-1.8,4.4) -- (-0.6,4.4);
+        \node[above, text=RojoAlerta] at (0.2,4.8) {$g^{(k)}\!\cdot g^{(k-1)} < 0$};
+        \node[below, text=GrisTexto, align=center] at (0,-0.4)
+             {me pasé, oscilo\\ \textcolor{RojoAlerta}{$\alpha$ \textbf{disminuye}}};
+        \end{scope}
+    \end{tikzpicture}
+    \end{center}
 \end{frame}
 
+% ---------------------------------------------------------------
+% 2. Pseudocódigo
+% ---------------------------------------------------------------
 \begin{frame}{Hypergradient Descent: Pseudocódigo}
+    \scriptsize
     \begin{algorithmic}[1]
-        \State \textbf{Input:} {[Tasa inicial \(\alpha_0\), hiper-tasa \(\mu\), posición \(x_0\)]}
-        \State Calcular gradiente inicial \(g_0\)
-        \While{[Condición de parada]}
-            \State Actualizar posición usando \(\alpha_{t-1}\) y \(g_{t-1}\)
-            \State Calcular nuevo gradiente \(g_t\)
-            \State Actualizar tasa de aprendizaje: \(\alpha_t \leftarrow \alpha_{t-1} + \mu \langle g_t, g_{t-1} \rangle\)
-        \EndWhile
-        \State \textbf{Return} {[Punto óptimo]}
+        \Require $f$, $\nabla f$, punto $\mathbf{x}$, tasa inicial $\alpha_0$,
+                 \textbf{hipertasa} $\mu$
+        \State $\alpha \gets \alpha_0$; \quad
+               $\mathbf{g}_{\text{prev}} \gets \mathbf{0}$
+               \Comment{en el paso 0 no hay gradiente anterior}
+        \For{$k = 0$ \textbf{to} $k_{\max}$}
+            \State $\mathbf{g} \gets \nabla f(\mathbf{x})$
+            \State $\alpha \gets \alpha + \mu\,
+                   \big(\mathbf{g}^{\top}\mathbf{g}_{\text{prev}}\big)$
+                   \Comment{descenso sobre $\alpha$: $\alpha - \mu\,\partial f/\partial\alpha$}
+            \State $\mathbf{g}_{\text{prev}} \gets \mathbf{g}$
+            \State $\mathbf{x} \gets \mathbf{x} - \alpha\,\mathbf{g}$
+                   \Comment{paso normal de descenso}
+        \EndFor
+        \State \Return $\mathbf{x}$
     \end{algorithmic}
+
+    \vspace{0.5em}
+    \begin{block}{Observaciones}
+        \tiny
+        \begin{itemize}
+            \item El signo $+$ en la línea 4 \emph{es} un descenso: como
+                  $\partial f/\partial\alpha = -\mathbf{g}^{\top}\mathbf{g}_{\text{prev}}$,
+                  restarlo equivale a sumar el producto punto.
+            \item Se cambia el problema de ajustar $\alpha$ por el de ajustar $\mu$,
+                  pero el método es \textbf{mucho menos sensible} a $\mu$ que a $\alpha$.
+            \item La misma idea se aplica sobre cualquier método de primer orden
+                  (momentum, Nesterov, Adam): basta derivar respecto a su $\alpha$.
+        \end{itemize}
+    \end{block}
 \end{frame}
 
+% ---------------------------------------------------------------
+% 3. Ejemplo paso a paso
+% ---------------------------------------------------------------
 \begin{frame}{Hypergradient Descent: Ejemplo Paso a Paso}
-    \begin{exampleblock}{Planteamiento del problema}
-        [Define función 1D o 2D, \(\alpha_0\) y \(\mu\)].
+    \begin{exampleblock}{Planteamiento}
+        \scriptsize
+        $f(x)=x^{2}$, \ $f'(x)=2x$, \ $x^{(0)}=1$, \ $\mu=0.01$.
+        Se prueban \textbf{dos tasas iniciales deliberadamente malas} para ver cómo el
+        método las corrige solo.
     \end{exampleblock}
-    \begin{itemize}
-        \item \textbf{Paso 1:} {[Cálculo de primer avance y nuevo gradiente].}
-        \item \textbf{Paso 2:} {[Evaluación del producto de gradientes y actualización de \(\alpha\)].}
-        \item \textbf{Paso 3:} {[Observar si la tasa se expande o se reduce].}
-    \end{itemize}
+
+    \vspace{-0.2em}
+    \begin{columns}[T]
+        \begin{column}{0.49\textwidth}
+            \begin{center}
+            \tiny
+            \textcolor{VerdeNeon}{\textbf{Caso A: $\alpha_0=0.10$ (muy chico)}}\\[0.2em]
+            \begin{tabular}{c r r r}
+                \toprule
+                $k$ & $x^{(k)}$ & $g\cdot g_{\text{prev}}$ & $\alpha$ \\
+                \midrule
+                0 & $+1.0000$ & $0.000$ & $0.1000$ \\
+                1 & $+0.8000$ & $3.200$ & $0.1320$ \\
+                2 & $+0.5888$ & $1.884$ & $0.1508$ \\
+                3 & $+0.4112$ & $0.968$ & $0.1605$ \\
+                4 & $+0.2792$ & $0.459$ & $0.1651$ \\
+                5 & $+0.1870$ & $0.209$ & $0.1672$ \\
+                \bottomrule
+            \end{tabular}
+            \end{center}
+            \vspace{0.2em}
+            \tiny
+            Los gradientes mantienen el signo $\Rightarrow$ producto $>0$
+            $\Rightarrow$ $\alpha$ sube de $0.10$ a $0.167$: el método
+            \textbf{acelera solo}.
+        \end{column}
+        \begin{column}{0.49\textwidth}
+            \begin{center}
+            \tiny
+            \textcolor{RojoAlerta}{\textbf{Caso B: $\alpha_0=0.90$ (muy grande)}}\\[0.2em]
+            \begin{tabular}{c r r r}
+                \toprule
+                $k$ & $x^{(k)}$ & $g\cdot g_{\text{prev}}$ & $\alpha$ \\
+                \midrule
+                0 & $+1.0000$ & $0.000$  & $0.9000$ \\
+                1 & $-0.8000$ & $-3.200$ & $0.8680$ \\
+                2 & $+0.5888$ & $-1.884$ & $0.8492$ \\
+                3 & $-0.4112$ & $-0.968$ & $0.8395$ \\
+                4 & $+0.2792$ & $-0.459$ & $0.8349$ \\
+                5 & $-0.1870$ & $-0.209$ & $0.8328$ \\
+                \bottomrule
+            \end{tabular}
+            \end{center}
+            \vspace{0.2em}
+            \tiny
+            $x$ \textbf{alterna de signo} (sobrepasa el mínimo en cada paso)
+            $\Rightarrow$ producto $<0$ $\Rightarrow$ $\alpha$ baja: el método
+            \textbf{frena solo}.
+        \end{column}
+    \end{columns}
+
+    \vspace{0.3em}
+    \scriptsize
+    En ambos casos $\alpha$ se mueve hacia la zona estable sin que nadie la ajuste
+    a mano. Para $f=x^{2}$ el paso ideal es $\alpha=0.5$.
 \end{frame}
 
+% ---------------------------------------------------------------
+% 4. Código
+% ---------------------------------------------------------------
 \begin{frame}[fragile]{Hypergradient Descent: Código}
 \begin{lstlisting}[language=Python]
-def hypergradient_descent(grad_f, x0, alpha0=0.01, mu=0.001, max_iter=100):
-    # TODO: Inicializar x, alpha y gradiente previo
-    # for t in range(max_iter):
-    #     g = grad_f(x)
-    #     alpha = alpha + mu * np.dot(g, g_prev)
-    #     x = x - alpha * g
-    #     g_prev = g
-    pass
-\end{lstlisting}
-\end{frame}
+import numpy as np
 
-\begin{frame}{Hypergradient Descent: Análisis de Convergencia}
-    \begin{alertblock}{Propiedades de Convergencia}
-        [Discutir estabilidad frente a la elección de la hiper-tasa \(\mu\)].
-    \end{alertblock}
-    \begin{itemize}
-        \item {[Ventajas en trayectorias con tramos de curvatura muy dispar].}
-        \item {[Riesgos de divergencia si \(\mu\) es excesivo].}
-    \end{itemize}
+def hypergradient_descent(f, grad, x, alpha=0.1, mu=1e-2,
+                          n=100, eps=1e-8):
+    x = np.atleast_1d(np.asarray(x, float))
+    g_prev = np.zeros_like(x)        # no hay gradiente anterior
+    for _ in range(n):
+        g = grad(x)
+        alpha = alpha + mu * (g @ g_prev)   # paso sobre alpha
+        if alpha < 0:                # salvaguarda practica
+            alpha = 1e-6
+        g_prev = g
+        x = x - alpha * g            # paso sobre x
+        if np.linalg.norm(g) < eps:
+            break
+    return x, alpha
+
+f    = lambda v: v @ v               # f(x) = x^2
+grad = lambda v: 2*v
+# hypergradient_descent(f, grad, [1.0], alpha=0.1)
+#   -> x ~ 0,  alpha subio de 0.10 a ~0.17
+\end{lstlisting}
 \end{frame}
