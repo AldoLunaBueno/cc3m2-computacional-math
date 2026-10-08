@@ -1,0 +1,26 @@
+\ProvidesPackage{styles/article-mod}[2026/10/07 Modificacion de cabecera y titulos para Article]
+
+\RequirePackage{fancyhdr}
+\RequirePackage{titlesec}
+
+% Títulos de las secciones con los colores del tema
+\titleformat{\section}
+  {\normalfont\Large\bfseries\sffamily\color{CelesteBrillante}}
+  {\thesection}{1em}{}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\sffamily\color{NaranjaBase}}
+  {\thesubsection}{1em}{}
+
+% Configuración de cabecera y pie de página estándar
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{FondoOscuro}\leaders\hrule height \headrulewidth\hfill}}
+
+% En la cabecera superior se mostrará la sección y subsección
+\fancyhead[L]{\color{GrisTexto}\nouppercase{\leftmark}}
+\fancyhead[R]{\color{GrisTexto}\nouppercase{\rightmark}}
+
+% Pie de página con numeración
+\fancyfoot[C]{\color{CelesteBrillante}\thepage}

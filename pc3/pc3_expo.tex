@@ -1,0 +1,77 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\decimalpoint
+
+% Configuración de márgenes amplios para evitar desbordamientos
+\usepackage[margin=2.5cm]{geometry}
+
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathreplacing}
+
+\usepackage{booktabs}
+\usepackage{bm}
+\usepackage{amsmath}
+
+% Nuevos paquetes de estilos nativos para article
+\usepackage{styles/article_mod}
+\usepackage{styles/article_dark}
+
+\usepackage{listings}
+
+% Configuración de colores y formato para el código
+\lstset{
+language=Python,
+basicstyle=\ttfamily\footnotesize\selectfont,
+keywordstyle=\color{CelesteBrillante},
+stringstyle=\color{VerdeNeon},
+commentstyle=\color{GrisTexto!80},
+showstringspaces=false,
+frame=single,
+rulecolor=\color{FondoOscuro},
+backgroundcolor=\color{FondoBloque},
+extendedchars=true,
+columns=fullflexible,
+keepspaces=true,
+basewidth={0.4em,0.35em},
+literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1 {ñ}{{\~n}}1 {Ñ}{{\~N}}1
+}
+
+% Ajuste del tamaño de fuente en algoritmos para article
+\usepackage{etoolbox}
+\AtBeginEnvironment{algorithmic}{\small}
+\algrenewcommand{\alglinenumber}[1]{\scriptsize #1:}
+
+% Cargar los metadatos del documento
+% \input{sections/00_metadata}
+
+\begin{document}
+
+% Portada
+\input{sections/00_presentation}
+
+% Índice de contenidos
+\tableofcontents
+\newpage
+
+
+\section{Primera sección}
+
+\input{sections/ejemplo}
+
+
+\section{Segunda sección}
+
+
+
+\newpage
+% Bibliografía
+\input{sections/00_bibliography}
+
+\end{document}

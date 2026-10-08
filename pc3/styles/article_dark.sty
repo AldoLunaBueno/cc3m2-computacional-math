@@ -1,0 +1,63 @@
+\ProvidesPackage{styles/article-dark}[2026/10/07 Definicion de colores y bloques oscuros para Article]
+
+\RequirePackage{pagecolor}
+\RequirePackage{tcolorbox}
+\tcbuselibrary{skins, breakable}
+\RequirePackage{hyperref}
+
+% 1. DEFINICIÓN DE COLORES PERSONALIZADOS
+\definecolor{FondoOscuro}{HTML}{2F2F2F} 
+\definecolor{FondoBloque}{HTML}{1C1C1C}
+\definecolor{NaranjaBase}{HTML}{FF8C00}
+\definecolor{CelesteBrillante}{HTML}{00BFFF}
+\definecolor{VerdeNeon}{HTML}{39FF14}
+\definecolor{RojoAlerta}{HTML}{FF3131}
+\definecolor{AmarilloAviso}{HTML}{FFD700}
+\definecolor{GrisTexto}{HTML}{D4D4D4}
+
+% 2. MODIFICACIÓN DEL LIENZO A MODO OSCURO
+\pagecolor{black}
+\color{GrisTexto}
+
+% Colores de enlaces
+\hypersetup{
+    colorlinks=true,
+    linkcolor=CelesteBrillante,
+    urlcolor=VerdeNeon,
+    citecolor=NaranjaBase
+}
+
+% 3. CAJAS DE TEXTO NATIVAS PARA ARTICLE
+\tcbset{
+    estilocaja/.style={
+        enhanced,
+        breakable, % Permite que la caja se divida si hay un salto de página
+        boxrule=0.5pt,
+        colback=FondoBloque,
+        coltext=GrisTexto,
+        arc=2mm,
+        fonttitle=\bfseries\sffamily,
+        toptitle=1.5mm,
+        bottomtitle=1.5mm
+    }
+}
+
+% Entornos recomendados para el nuevo contenido:
+% Uso: \begin{cajaconcepto}{Título de la caja} ... \end{cajaconcepto}
+\newenvironment{cajaconcepto}[1]{%
+    \vspace{1em}\begin{tcolorbox}[estilocaja, colframe=FondoOscuro, coltitle=NaranjaBase, title=#1]%
+}{%
+    \end{tcolorbox}\vspace{1em}%
+}
+
+\newenvironment{cajaalerta}[1]{%
+    \vspace{1em}\begin{tcolorbox}[estilocaja, colframe=FondoOscuro, coltitle=RojoAlerta, title=#1]%
+}{%
+    \end{tcolorbox}\vspace{1em}%
+}
+
+\newenvironment{cajaejemplo}[1]{%
+    \vspace{1em}\begin{tcolorbox}[estilocaja, colframe=FondoOscuro, coltitle=VerdeNeon, title={#1}]%
+}{%
+    \end{tcolorbox}\vspace{1em}%
+}
